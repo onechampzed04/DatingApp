@@ -1,0 +1,54 @@
+USE DatingApp
+GO
+
+CREATE TABLE Users (
+    UserID INT PRIMARY KEY IDENTITY(1,1),
+    Username VARCHAR(50) UNIQUE NOT NULL,
+    PasswordHash VARCHAR(255) NOT NULL,
+    FullName VARCHAR(100),
+    Gender VARCHAR(10) CHECK (Gender IN ('Male', 'Female', 'Other')),
+    Birthdate DATE,
+    Bio TEXT,
+    ProfileImageURL VARCHAR(255),
+    Latitude DECIMAL(9,6),
+    Longitude DECIMAL(9,6),
+    CreatedAt DATETIME DEFAULT GETDATE()
+);
+
+CREATE TABLE Photos (
+    PhotoID INT PRIMARY KEY IDENTITY(1,1),
+    UserID INT,
+    PhotoURL VARCHAR(255),
+    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
+);
+
+CREATE TABLE Swipes (
+    SwipeID INT PRIMARY KEY IDENTITY(1,1),
+    FromUserID INT,
+    ToUserID INT,
+    IsLike BIT, -- 1 = Like, 0 = Dislike
+    SwipeTime DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (FromUserID) REFERENCES Users(UserID),
+    FOREIGN KEY (ToUserID) REFERENCES Users(UserID)
+);
+
+CREATE TABLE Matches (
+    MatchID INT PRIMARY KEY IDENTITY(1,1),
+    User1ID INT,
+    User2ID INT,
+    MatchTime DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (User1ID) REFERENCES Users(UserID),
+    FOREIGN KEY (User2ID) REFERENCES Users(UserID),
+    CONSTRAINT UQ_Match UNIQUE (User1ID, User2ID)
+);
+
+CREATE TABLE Messages (
+    MessageID INT PRIMARY KEY IDENTITY(1,1),
+    MatchID INT,
+    SenderID INT,
+    MessageText TEXT,
+    SentTime DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (MatchID) REFERENCES Matches(MatchID),
+    FOREIGN KEY (SenderID) REFERENCES Users(UserID)
+);
+
