@@ -1,9 +1,9 @@
 import { View, Text } from 'react-native';
 
-export default function ExploreScreen() {
+export default function FiltersScreen() {
   return (
     <View>
-      <Text>🌍 Trang Explore</Text>
+      <Text>Filters screen</Text>
     </View>
   );
 }

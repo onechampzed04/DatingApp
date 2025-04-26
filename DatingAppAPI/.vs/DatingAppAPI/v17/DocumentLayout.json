@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\ash\\source\\repos\\DatingApp\\DatingAppAPI\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{5C9920D7-F6E7-49E6-A2D8-916A9ED6C9DB}|DatingAppAPI\\DatingAppAPI.csproj|c:\\users\\ash\\source\\repos\\datingapp\\datingappapi\\datingappapi\\models\\photo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5C9920D7-F6E7-49E6-A2D8-916A9ED6C9DB}|DatingAppAPI\\DatingAppAPI.csproj|solutionrelative:datingappapi\\models\\photo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{5C9920D7-F6E7-49E6-A2D8-916A9ED6C9DB}|DatingAppAPI\\DatingAppAPI.csproj|c:\\users\\ash\\source\\repos\\datingapp\\datingappapi\\datingappapi\\controllers\\photoscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5C9920D7-F6E7-49E6-A2D8-916A9ED6C9DB}|DatingAppAPI\\DatingAppAPI.csproj|solutionrelative:datingappapi\\controllers\\photoscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -49,10 +53,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{5C9920D7-F6E7-49E6-A2D8-916A9ED6C9DB}|DatingAppAPI\\DatingAppAPI.csproj|c:\\users\\ash\\source\\repos\\datingapp\\datingappapi\\datingappapi\\models\\swipe.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{5C9920D7-F6E7-49E6-A2D8-916A9ED6C9DB}|DatingAppAPI\\DatingAppAPI.csproj|solutionrelative:datingappapi\\models\\swipe.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5C9920D7-F6E7-49E6-A2D8-916A9ED6C9DB}|DatingAppAPI\\DatingAppAPI.csproj|c:\\users\\ash\\source\\repos\\datingapp\\datingappapi\\datingappapi\\models\\photo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{5C9920D7-F6E7-49E6-A2D8-916A9ED6C9DB}|DatingAppAPI\\DatingAppAPI.csproj|solutionrelative:datingappapi\\models\\photo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -62,11 +62,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 10,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "DatingAppDbContext.cs",
               "DocumentMoniker": "C:\\Users\\ash\\source\\repos\\DatingApp\\DatingAppAPI\\DatingAppAPI\\Data\\DatingAppDbContext.cs",
               "RelativeDocumentMoniker": "DatingAppAPI\\Data\\DatingAppDbContext.cs",
@@ -75,12 +75,11 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAbAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-04-17T13:32:39.373Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "UsersController.cs",
               "DocumentMoniker": "C:\\Users\\ash\\source\\repos\\DatingApp\\DatingAppAPI\\DatingAppAPI\\Controllers\\UsersController.cs",
               "RelativeDocumentMoniker": "DatingAppAPI\\Controllers\\UsersController.cs",
@@ -88,12 +87,11 @@
               "RelativeToolTip": "DatingAppAPI\\Controllers\\UsersController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-17T13:51:40.298Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-17T13:51:40.298Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "SwipesController.cs",
               "DocumentMoniker": "C:\\Users\\ash\\source\\repos\\DatingApp\\DatingAppAPI\\DatingAppAPI\\Controllers\\SwipesController.cs",
               "RelativeDocumentMoniker": "DatingAppAPI\\Controllers\\SwipesController.cs",
@@ -101,12 +99,11 @@
               "RelativeToolTip": "DatingAppAPI\\Controllers\\SwipesController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-17T13:50:30.975Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-17T13:50:30.975Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "PhotosController.cs",
               "DocumentMoniker": "C:\\Users\\ash\\source\\repos\\DatingApp\\DatingAppAPI\\DatingAppAPI\\Controllers\\PhotosController.cs",
               "RelativeDocumentMoniker": "DatingAppAPI\\Controllers\\PhotosController.cs",
@@ -119,7 +116,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "MessagesController.cs",
               "DocumentMoniker": "C:\\Users\\ash\\source\\repos\\DatingApp\\DatingAppAPI\\DatingAppAPI\\Controllers\\MessagesController.cs",
               "RelativeDocumentMoniker": "DatingAppAPI\\Controllers\\MessagesController.cs",
@@ -127,12 +124,11 @@
               "RelativeToolTip": "DatingAppAPI\\Controllers\\MessagesController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-17T13:48:13.388Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-17T13:48:13.388Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "MatchesController.cs",
               "DocumentMoniker": "C:\\Users\\ash\\source\\repos\\DatingApp\\DatingAppAPI\\DatingAppAPI\\Controllers\\MatchesController.cs",
               "RelativeDocumentMoniker": "DatingAppAPI\\Controllers\\MatchesController.cs",
@@ -140,12 +136,11 @@
               "RelativeToolTip": "DatingAppAPI\\Controllers\\MatchesController.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-17T13:47:39.944Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-17T13:47:39.944Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\ash\\source\\repos\\DatingApp\\DatingAppAPI\\DatingAppAPI\\Program.cs",
               "RelativeDocumentMoniker": "DatingAppAPI\\Program.cs",
@@ -153,12 +148,11 @@
               "RelativeToolTip": "DatingAppAPI\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAlAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-17T13:43:05.226Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-17T13:43:05.226Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "Message.cs",
               "DocumentMoniker": "C:\\Users\\ash\\source\\repos\\DatingApp\\DatingAppAPI\\DatingAppAPI\\Models\\Message.cs",
               "RelativeDocumentMoniker": "DatingAppAPI\\Models\\Message.cs",
@@ -170,7 +164,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 11,
               "Title": "Match.cs",
               "DocumentMoniker": "C:\\Users\\ash\\source\\repos\\DatingApp\\DatingAppAPI\\DatingAppAPI\\Models\\Match.cs",
               "RelativeDocumentMoniker": "DatingAppAPI\\Models\\Match.cs",
@@ -182,7 +176,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 12,
               "Title": "Swipe.cs",
               "DocumentMoniker": "C:\\Users\\ash\\source\\repos\\DatingApp\\DatingAppAPI\\DatingAppAPI\\Models\\Swipe.cs",
               "RelativeDocumentMoniker": "DatingAppAPI\\Models\\Swipe.cs",
@@ -194,19 +188,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 0,
               "Title": "Photo.cs",
               "DocumentMoniker": "C:\\Users\\ash\\source\\repos\\DatingApp\\DatingAppAPI\\DatingAppAPI\\Models\\Photo.cs",
               "RelativeDocumentMoniker": "DatingAppAPI\\Models\\Photo.cs",
               "ToolTip": "C:\\Users\\ash\\source\\repos\\DatingApp\\DatingAppAPI\\DatingAppAPI\\Models\\Photo.cs",
               "RelativeToolTip": "DatingAppAPI\\Models\\Photo.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-17T13:37:39.129Z"
+              "WhenOpened": "2025-04-17T13:37:39.129Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "User.cs",
               "DocumentMoniker": "C:\\Users\\ash\\source\\repos\\DatingApp\\DatingAppAPI\\DatingAppAPI\\Models\\User.cs",
               "RelativeDocumentMoniker": "DatingAppAPI\\Models\\User.cs",
@@ -214,12 +209,11 @@
               "RelativeToolTip": "DatingAppAPI\\Models\\User.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-17T13:37:15.504Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-17T13:37:15.504Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "DatingAppAPI.csproj",
               "DocumentMoniker": "C:\\Users\\ash\\source\\repos\\DatingApp\\DatingAppAPI\\DatingAppAPI\\DatingAppAPI.csproj",
               "RelativeDocumentMoniker": "DatingAppAPI\\DatingAppAPI.csproj",
@@ -227,8 +221,7 @@
               "RelativeToolTip": "DatingAppAPI\\DatingAppAPI.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAABJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-04-17T13:32:07.784Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-17T13:32:07.784Z"
             }
           ]
         }

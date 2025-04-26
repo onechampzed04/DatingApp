@@ -1,9 +1,9 @@
 import { View, Text } from 'react-native';
 
-export default function ExploreScreen() {
+export default function MatchesScreen() {
   return (
     <View>
-      <Text>🌍 Trang Explore</Text>
+      <Text>g Explore</Text>
     </View>
   );
 }
