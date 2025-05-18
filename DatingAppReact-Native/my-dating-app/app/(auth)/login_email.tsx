@@ -1,112 +1,252 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'expo-router';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { checkEmail, sendOtp } from '../../utils/api';
 
 export default function LoginWithEmail() {
-  const { login, register } = useAuth();
+  const { loginUser, register } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState('');
-  const [isNewAccount, setIsNewAccount] = useState(null);
+  const [step, setStep] = useState('email'); // 'email', 'login', 'register'
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [otp, setOtp] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
 
-  const knownEmails = ['a'];
-
-  const handleLogin = () => {
-    if (isNewAccount === null) {
-      // Lần đầu ấn Login -> check email
-      if (knownEmails.includes(email)) {
-        setIsNewAccount(false); // Tài khoản đã tồn tại
-      } else {
-        setIsNewAccount(true);  // Tài khoản mới
-      }
+  const handleCheckEmail = async () => {
+    if (!email) {
+      Alert.alert('Lỗi', 'Vui lòng nhập email');
       return;
     }
-
-    if (isNewAccount) {
-      if (password !== confirmPassword) {
-        alert('Passwords do not match');
-        return;
+    
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      Alert.alert('Lỗi', 'Vui lòng nhập đúng định dạng email');
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const response = await checkEmail(email);
+      if (response.data.exists) {
+        setStep('login');
+      } else {
+        setStep('register');
       }
-      register({ email, password, otp });
-    } else {
-      login({ email, password });
+    } catch (err) {
+      console.error('Error checking email:', err);
+      const errorMessage = (err as any)?.response?.data?.message || 'Không thể kiểm tra email';
+      Alert.alert('Lỗi', errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSendOtp = () => {
-    alert('OTP sent to ' + email);
+  const handleLogin = async () => {
+    if (!password) {
+      Alert.alert('Lỗi', 'Vui lòng nhập mật khẩu');
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      await loginUser({ email, password });
+      router.replace('/(tabs)/explore');
+    } catch (err) {
+      const message = (err as any)?.response?.data?.message || 'Đăng nhập thất bại';
+      Alert.alert('Lỗi', message);
+      
+      if (message.includes('Email not verified')) {
+        await sendOtp(email);
+        router.push({ pathname: '/(auth)/otp', params: { email } });
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Login with Email</Text>
+  const handleRegister = async () => {
+    if (!username) {
+      Alert.alert('Lỗi', 'Vui lòng nhập tên người dùng');
+      return;
+    }
+  
+    if (password.length < 0) {
+      Alert.alert('Lỗi', 'Mật khẩu phải có ít nhất 6 ký tự');
+      return;
+    }
+  
+    if (password !== confirmPassword) {
+      Alert.alert('Lỗi', 'Mật khẩu không khớp');
+      return;
+    }
+  
+    setLoading(true);
+    try {
+      await register({ username, email, password });
+      router.push({ pathname: '/(auth)/otp', params: { email } });
+    } catch (err) {
+      const errorMessage = (err as any)?.response?.data?.message || 'Đăng ký thất bại';
+      Alert.alert('Lỗi', errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
 
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        keyboardType="email-address"
-        value={email}
-        onChangeText={setEmail}
-      />
+  const handleSendOtp = async () => {
+    setOtpLoading(true);
+    try {
+      await sendOtp(email);
+      Alert.alert('Thành công', 'OTP đã được gửi đến email của bạn');
+    } catch (err) {
+      const errorMessage = (err as any)?.response?.data?.message || 'Không thể gửi OTP';
+      Alert.alert('Lỗi', errorMessage);
+    } finally {
+      setOtpLoading(false);
+    }
+  };
 
-      {isNewAccount === true && (
-        <>
-          <View style={styles.row}>
-            <TextInput
-              style={styles.inputOtp}
-              placeholder="Enter OTP"
-              value={otp}
-              onChangeText={setOtp}
-            />
-            <TouchableOpacity style={styles.sendOtpButton} onPress={handleSendOtp}>
-              <Text style={styles.sendOtpButtonText}>Send OTP</Text>
-            </TouchableOpacity>
-          </View>
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Confirm Password"
-            secureTextEntry
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-          />
-        </>
-      )}
+  const handleBack = () => {
+    setStep('email');
+    setPassword('');
+    setConfirmPassword('');
+    setUsername('');
+    setOtp('');
+  };
 
-      {isNewAccount === false && (
-        <>
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
-          />
-        </>
-      )}
+  if (step === 'email') {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Đăng nhập bằng email</Text>
+        
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+        />
+        
+        <TouchableOpacity 
+          style={styles.button} 
+          onPress={handleCheckEmail} 
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Tiếp tục</Text>
+          )}
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => router.push('/(auth)/login')}
+        >
+          <Text style={styles.backButtonText}>Quay lại</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
-      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-        <Text style={styles.loginButtonText}>
-          {isNewAccount === null ? 'Next' : (isNewAccount ? 'Register' : 'Login')}
-        </Text>
-      </TouchableOpacity>
-    </View>
-  );
+  if (step === 'login') {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Đăng nhập</Text>
+        
+        <Text style={styles.emailText}>{email}</Text>
+        
+        <TextInput
+          style={styles.input}
+          placeholder="Mật khẩu"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+        
+        <TouchableOpacity 
+          style={styles.button} 
+          onPress={handleLogin} 
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Đăng nhập</Text>
+          )}
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.forgotButton}>
+          <Text style={styles.forgotText}>Quên mật khẩu?</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={handleBack}
+        >
+          <Text style={styles.backButtonText}>Đổi email</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  if (step === 'register') {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Đăng ký tài khoản</Text>
+        
+        <Text style={styles.emailText}>{email}</Text>
+        
+        <TextInput
+          style={styles.input}
+          placeholder="Tên người dùng"
+          value={username}
+          onChangeText={setUsername}
+        />
+        
+        <TextInput
+          style={styles.input}
+          placeholder="Mật khẩu"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+        
+        <TextInput
+          style={styles.input}
+          placeholder="Nhập lại mật khẩu"
+          secureTextEntry
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+        />
+        
+        <TouchableOpacity 
+          style={styles.button} 
+          onPress={handleRegister} 
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Đăng ký</Text>
+          )}
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={handleBack}
+        >
+          <Text style={styles.backButtonText}>Đổi email</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  return null;
 }
 
 const styles = StyleSheet.create({
@@ -117,11 +257,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     textAlign: 'center',
     fontWeight: '600',
-    marginBottom: 24,
+    marginBottom: 32,
     color: '#f14c64',
+  },
+  emailText: {
+    fontSize: 16,
+    textAlign: 'center',
+    fontWeight: '500',
+    marginBottom: 24,
+    color: '#666',
+    backgroundColor: '#f5f5f5',
+    padding: 12,
+    borderRadius: 8,
   },
   input: {
     borderWidth: 1,
@@ -130,42 +280,60 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     height: 54,
     marginBottom: 16,
+    fontSize: 16,
   },
-  row: {
+  otpContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
   },
-  inputOtp: {
+  otpInput: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    height: 54,
-    marginRight: 8,
   },
   sendOtpButton: {
     backgroundColor: '#f14c64',
+    paddingVertical: 16,
     borderRadius: 16,
+    alignItems: 'center',
+    marginLeft: 8,
     height: 54,
     justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 16,
+    width: 100,
   },
   sendOtpButtonText: {
-    color: '#fff',
+    color: 'white',
     fontSize: 14,
+    fontWeight: '600',
   },
-  loginButton: {
+  button: {
     backgroundColor: '#f14c64',
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: 'center',
     marginTop: 8,
+    height: 54,
+    justifyContent: 'center',
   },
-  loginButtonText: {
+  buttonText: {
     color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  backButton: {
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  backButtonText: {
+    color: '#666',
+    fontSize: 16,
+  },
+  forgotButton: {
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  forgotText: {
+    color: '#f14c64',
     fontSize: 16,
   },
 });

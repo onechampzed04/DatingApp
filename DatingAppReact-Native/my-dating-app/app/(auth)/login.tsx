@@ -1,26 +1,16 @@
-import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'expo-router';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 
-export default function SignUp() {
-  const { login } = useAuth();
+export default function AuthOptions() {
   const router = useRouter();
 
   const handleEmailSignup = () => {
-    // Chuyển tới trang đăng ký bằng email
-    router.push('../(auth)/login_email');
+    router.push('/(auth)/login_email');
   };
 
   const handlePhoneSignup = () => {
-    // Chuyển tới trang đăng ký bằng số điện thoại
-    router.push('../(auth)/login_phone');
+    // TODO: Triển khai đăng nhập bằng số điện thoại sau
+    router.push('/(auth)/login_phone');
   };
 
   return (

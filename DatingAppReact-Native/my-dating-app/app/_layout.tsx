@@ -1,23 +1,28 @@
-import { useEffect } from 'react'; // 👈 thêm dòng này
+import { useEffect } from 'react';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 function ProtectedLayout() {
-  const { user } = useAuth();
+  const { token } = useAuth(); // Use token instead of user
   const router = useRouter();
   const segments = useSegments();
 
   useEffect(() => {
-    const inAuthGroup = segments[0] === "(auth)"; 
-    // Nếu URL đang ở nhóm (auth), ví dụ như /login /register
+    const inAuthGroup = segments[0] === '(auth)';
 
-    if (!user && !inAuthGroup) {
-      router.replace("/login"); // Nếu chưa login và không ở login page => đá về login
+    // If there's no token and the user is trying to access a protected route (not in auth group),
+    // redirect to login.
+    if (!token && !inAuthGroup) {
+      router.replace('/(auth)/login');
     }
-    if (user && inAuthGroup) {
-      router.replace("/(tabs)/explore"); // Nếu đã login mà còn ở login page => đá về home (index)
+    
+    // If there IS a token and the user is currently in an auth group page 
+    // (e.g. login, register), they should be redirected to the main app.
+    // The (auth)/_layout.tsx already handles this, but this is a safeguard.
+    if (token && inAuthGroup) {
+      router.replace('/(tabs)/explore');
     }
-  }, [user, segments]);
+  }, [token, segments, router]); // Depend on token
 
   return <Slot />;
 }

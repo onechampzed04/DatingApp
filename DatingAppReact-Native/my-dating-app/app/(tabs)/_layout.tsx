@@ -1,104 +1,81 @@
-import { Redirect, useRouter, usePathname, Slot } from 'expo-router';
+import { Redirect, Slot, usePathname } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
+import { useEffect, useState } from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons'; // Icon bộ Ionicons
-import { useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { getUserByEmail } from '../../utils/api'; // 🟡 Thêm hàm này trong api.ts nếu chưa có
+import { useRouter } from 'expo-router';
 
 export default function TabsLayout() {
   const { user } = useAuth();
+  const pathname = usePathname();
+  const [isVerified, setIsVerified] = useState<boolean | null>(null);
   const router = useRouter();
-  const pathname = usePathname(); // 👈 Lấy đường dẫn hiện tại
+  const tabs = ['explore', 'discover', 'matches', 'profile'] as const;
 
-  const [activeIcon, setActiveIcon] = useState<string | null>(null);
+  useEffect(() => {
+    const checkVerify = async () => {
+      if (user) {
+        try {
+          const fullUser = await getUserByEmail(user.email);
+          setIsVerified(fullUser?.isEmailVerified ?? false);
+        } catch (err) {
+          console.error('Lỗi kiểm tra email xác thực:', err);
+        }
+      }
+    };
+
+    checkVerify();
+  }, [user]);
 
   if (!user) {
     return <Redirect href="/(auth)/login" />;
   }
 
-  const isActive = (path: string) => pathname === path; // 👈 Kiểm tra chính xác trang active
+  if (isVerified === false && pathname !== '/(auth)/otp') {
+    return <Redirect href={{ pathname: '/(auth)/otp', params: { email: user.email } }} />;
+  }
 
+  if (isVerified === null) {
+    return null; // đang kiểm tra...
+  }
+
+  // ✅ Layout hiển thị khi đã login và xác thực
   return (
     <View style={styles.container}>
-      {/* Nội dung trang con */}
       <View style={styles.content}>
         <Slot />
       </View>
 
-      {/* Footer navigation */}
       <View style={styles.footer}>
+      {tabs.map((tab) => (
         <TouchableOpacity
-          onPress={() => {
-            router.replace('/(tabs)/explore');
-            setActiveIcon('/(tabs)/explore');
-          }}
-          onPressIn={() => setActiveIcon('/(tabs)/explore')}
-          onPressOut={() => setActiveIcon(null)}
+          key={tab}
+          onPress={() => router.replace(`/(tabs)/${tab}` as const)} // ✅ ép kiểu an toàn
         >
           <Ionicons
-            name="search-outline"
+            name={
+              tab === 'explore'
+                ? 'search-outline'
+                : tab === 'discover'
+                ? 'compass-outline'
+                : tab === 'matches'
+                ? 'heart-outline'
+                : 'person-outline'
+            }
             size={28}
-            color={isActive('/(tabs)/explore') || activeIcon === '/(tabs)/explore' ? '#EA405A' : 'black'}
+            color={pathname.includes(tab) ? '#EA405A' : 'black'}
           />
         </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => {
-            router.replace('/(tabs)/discover');
-            setActiveIcon('/(tabs)/discover');
-          }}
-          onPressIn={() => setActiveIcon('/(tabs)/discover')}
-          onPressOut={() => setActiveIcon(null)}
-        >
-          <Ionicons
-            name="compass-outline"
-            size={28}
-            color={isActive('/(tabs)/discover') || activeIcon === '/(tabs)/discover' ? '#EA405A' : 'black'}
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => {
-            router.replace('/(tabs)/matches');
-            setActiveIcon('/(tabs)/matches');
-          }}
-          onPressIn={() => setActiveIcon('/(tabs)/matches')}
-          onPressOut={() => setActiveIcon(null)}
-        >
-          <Ionicons
-            name="heart-outline"
-            size={28}
-            color={isActive('/(tabs)/matches') || activeIcon === '/(tabs)/matches' ? '#EA405A' : 'black'}
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => {
-            router.replace('/(tabs)/profile');
-            setActiveIcon('/(tabs)/profile');
-          }}
-          onPressIn={() => setActiveIcon('/(tabs)/profile')}
-          onPressOut={() => setActiveIcon(null)}
-        >
-          <Ionicons
-            name="person-outline"
-            size={28}
-            color={isActive('/(tabs)/profile') || activeIcon === '/(tabs)/profile' ? '#EA405A' : 'black'}
-          />
-        </TouchableOpacity>
+      ))}
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    paddingTop: 50,
-    paddingHorizontal: 20,
-  },
+  container: { flex: 1 },
+  content: { flex: 1, paddingTop: 50, paddingHorizontal: 20 },
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
