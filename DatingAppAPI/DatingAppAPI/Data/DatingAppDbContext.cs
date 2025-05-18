@@ -1,4 +1,5 @@
-﻿using DatingAppAPI.Models;
+﻿using DatingAppAPI.DTO;
+using DatingAppAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DatingAppAPI.Data
@@ -12,6 +13,10 @@ namespace DatingAppAPI.Data
         public DbSet<Swipe> Swipes { get; set; }
         public DbSet<Match> Matches { get; set; }
         public DbSet<Message> Messages { get; set; }
+        public DbSet<EmailOTP> EmailOtps { get; set; }
+        public DbSet<Interest> Interests { get; set; }
+        public DbSet<UserInterest> UserInterests { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -44,6 +49,20 @@ namespace DatingAppAPI.Data
                 .WithMany(u => u.Matches2)
                 .HasForeignKey(m => m.User2ID)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            //interest
+            modelBuilder.Entity<UserInterest>()
+                .HasKey(ui => new { ui.UserId, ui.InterestId });
+
+            modelBuilder.Entity<UserInterest>()
+                .HasOne(ui => ui.User)
+                .WithMany(u => u.UserInterests)
+                .HasForeignKey(ui => ui.UserId);
+
+            modelBuilder.Entity<UserInterest>()
+                .HasOne(ui => ui.Interest)
+                .WithMany(i => i.UserInterests)
+                .HasForeignKey(ui => ui.InterestId);
         }
     }
 }

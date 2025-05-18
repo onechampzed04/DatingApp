@@ -1,0 +1,14 @@
+﻿using DatingAppAPI.Models;
+
+namespace DatingAppAPI.Services
+{
+    public interface IAuthService
+    {
+        Task<AuthResponseDto> RegisterAsync(RegisterDto registerDto);
+        Task<AuthResponseDto> LoginAsync(LoginDto loginDto);
+        Task SendOtpAsync(string email);
+        Task<bool> VerifyOtpAsync(OtpDto otpDto);
+        Task<User> CheckEmailAsync(string email);
+        Task SendOtpToEmailAsync(string email);
+    }
+}
