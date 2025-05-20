@@ -60,12 +60,51 @@ namespace DatingAppAPI.Controllers
         [HttpPost("verify-otp")]
         public async Task<IActionResult> VerifyOtp([FromBody] OtpDto otpDto)
         {
-            var result = await _authService.VerifyOtpAsync(otpDto);
-            if (result)
+            try
             {
-                return Ok(new { message = "OTP verified successfully." });
+                var result = await _authService.VerifyOtpAsync(otpDto);
+                if (result)
+                {
+                    var user = await _authService.GetUserByEmailAsync(otpDto.Email);
+                    if (user == null)
+                    {
+                        Console.WriteLine($"User not found for email {otpDto.Email} after OTP verification.");
+                        return BadRequest(new { message = "User not found." });
+                    }
+
+                    try
+                    {
+                        var token = _authService.GenerateJwtToken(user);
+                        Console.WriteLine($"OTP verified successfully for email {otpDto.Email}. Returning user and token.");
+                        return Ok(new
+                        {
+                            message = "OTP verified successfully.",
+                            data = new
+                            {
+                                user = new
+                                {
+                                    userId = user.UserID,
+                                    username = user.Username,
+                                    email = user.Email
+                                },
+                                token
+                            }
+                        });
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        Console.WriteLine($"Failed to generate token for email {otpDto.Email}: {ex.Message}");
+                        return StatusCode(500, new { message = "OTP verified but token generation failed. Please try again." });
+                    }
+                }
+                Console.WriteLine($"Invalid or expired OTP for email {otpDto.Email}.");
+                return BadRequest(new { message = "Invalid or expired OTP." });
             }
-            return BadRequest(new { message = "Invalid or expired OTP." });
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error verifying OTP for email {otpDto.Email}: {ex.Message}");
+                return StatusCode(500, new { message = "An error occurred while verifying OTP." });
+            }
         }
 
         [HttpPost("check-email")]

@@ -122,22 +122,38 @@ namespace DatingAppAPI.Services
 
         public async Task<bool> VerifyOtpAsync(OtpDto otpDto)
         {
-            var otp = await _context.EmailOtps
-                .FirstOrDefaultAsync(o => o.Email == otpDto.Email && o.OtpCode == otpDto.OtpCode && !o.IsUsed && o.ExpirationTime > DateTime.UtcNow);
-            if (otp == null)
+            try
             {
+                var now = DateTime.UtcNow;
+                var otp = await _context.EmailOtps
+                    .FirstOrDefaultAsync(o => o.Email == otpDto.Email 
+                                            && o.OtpCode == otpDto.OtpCode 
+                                            && !o.IsUsed 
+                                            && o.ExpirationTime > now);
+                if (otp == null)
+                {
+                    Console.WriteLine($"OTP verification failed for email {otpDto.Email}. OTP: {otpDto.OtpCode}. Current time: {now}, Expiry check: {otp?.ExpirationTime}");
+                    return false;
+                }
+
+                otp.IsUsed = true;
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == otpDto.Email);
+                if (user == null)
+                {
+                    Console.WriteLine($"User not found for email {otpDto.Email} during OTP verification.");
+                    return false;
+                }
+
+                user.IsEmailVerified = true;
+                await _context.SaveChangesAsync();
+                Console.WriteLine($"OTP verified successfully for email {otpDto.Email}. UserID: {user.UserID}, IsEmailVerified: {user.IsEmailVerified}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error verifying OTP for email {otpDto.Email}: {ex.Message}");
                 return false;
             }
-
-            otp.IsUsed = true;
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == otpDto.Email);
-            if (user != null)
-            {
-                user.IsEmailVerified = true;
-            }
-
-            await _context.SaveChangesAsync();
-            return true;
         }
 
         public async Task<User> CheckEmailAsync(string email)
@@ -145,27 +161,67 @@ namespace DatingAppAPI.Services
             return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
         }
 
-        private string GenerateJwtToken(User user)
+        public string GenerateJwtToken(User user)
         {
             var jwtSettings = _configuration.GetSection("JwtSettings");
+            var jwtKey = jwtSettings["Secret"];
+            var jwtIssuer = jwtSettings["Issuer"];
+            var jwtAudience = jwtSettings["Audience"];
+            var expiryMinutes = int.Parse(jwtSettings["ExpiryMinutes"] ?? "60");
+
+            Console.WriteLine($"JWT Config - Secret: {jwtKey}, Issuer: {jwtIssuer}, Audience: {jwtAudience}, ExpiryMinutes: {expiryMinutes}");
+
+            if (string.IsNullOrEmpty(jwtKey))
+            {
+                throw new InvalidOperationException("JWT Secret is not configured in JwtSettings.");
+            }
+
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserID.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                new Claim(JwtRegisteredClaimNames.Name, user.Username),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Secret"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
-                issuer: jwtSettings["Issuer"],
-                audience: jwtSettings["Audience"],
+                issuer: jwtIssuer,
+                audience: jwtAudience,
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(int.Parse(jwtSettings["ExpiryMinutes"])),
+                expires: DateTime.Now.AddMinutes(expiryMinutes),
                 signingCredentials: creds);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
+        public async Task<string> GenerateTokenAsync(User user)
+        {
+            var claims = new[]
+            {
+            new Claim(ClaimTypes.NameIdentifier, user.UserID.ToString()),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Name, user.Username)
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.Now.AddDays(30),
+                signingCredentials: creds);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+        public async Task<User> GetUserByEmailAsync(string email)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
+
     }
 }
