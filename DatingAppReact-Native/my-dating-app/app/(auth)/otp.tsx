@@ -12,13 +12,13 @@ import {
   Keyboard,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { verifyOtp, sendOtp } from '../../utils/api'; // Removed VerifyOtpResponse
-// Removed AuthContext and useAuth imports as setAuthenticatedSession won't be called here
+import { verifyOtp, sendOtp, getUserByEmail } from '../../utils/api';
+import { useAuth } from '../context/AuthContext'; // Thêm useAuth
 
 export default function OtpScreen() {
   const router = useRouter();
-  // Removed: const { setAuthenticatedSession } = useAuth(); 
   const { email } = useLocalSearchParams<{ email: string }>();
+  const { setAuthenticatedSession } = useAuth(); // Thêm setAuthenticatedSession
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const inputs = useRef<Array<TextInput | null>>([]);
   const [loading, setLoading] = useState(false);
@@ -32,7 +32,8 @@ export default function OtpScreen() {
       timer = setInterval(() => {
         setCountdown((prev) => prev - 1);
       }, 1000);
-    } else if (countdown === 0) {
+    }
+    if (countdown === 0) {
       setResendDisabled(false);
       setCountdown(60);
     }
@@ -80,33 +81,66 @@ export default function OtpScreen() {
   };
 
   const handleVerify = async () => {
-    const fullOtp = otp.join('');
-    if (fullOtp.length !== 6) {
-      Alert.alert('Error', 'Please enter the 6-digit OTP code');
-      return;
-    }
-    
-    setLoading(true);
-    try {
-      // Assuming verifyOtp now just confirms verification without returning token/user
-      await verifyOtp(email as string, fullOtp); 
-      
-      // If verifyOtp is successful, it means the email is verified on the backend.
-      // No session is established here. User will proceed to habits, then likely login.
+  const fullOtp = otp.join('');
+  if (fullOtp.length !== 6) {
+    Alert.alert('Error', 'Please enter the 6-digit OTP code');
+    return;
+  }
+  
+  setLoading(true);
+  try {
+    console.log('Sending verifyOtp request:', { email, fullOtp });
+    const response = await verifyOtp(email as string, fullOtp);
+    console.log('verifyOtp response:', response);
+
+    if (response.message === 'OTP verified successfully.' && response.data?.user && response.data?.token) {
+      await setAuthenticatedSession(
+        {
+          userId: response.data.user.userId,
+          username: response.data.user.username,
+          email: response.data.user.email,
+        },
+        response.data.token
+      );
       Alert.alert(
         'Success', 
         'Email verification successful.',
-        [{ text: 'OK', onPress: () => router.replace('/(auth)/habit') }]
+        [{ text: 'OK', onPress: () => router.replace('/(tabs)/habit') }]
       );
-    } catch (err: any) {
-      // The error "Verification successful, but failed to retrieve session data..."
-      // was due to the frontend expecting data that the backend wasn't sending.
-      // Now, any error here is a genuine OTP verification failure from the backend.
-      Alert.alert('Error', err.response?.data?.message || 'Invalid OTP code.');
-    } finally {
-      setLoading(false);
+    } else {
+      throw new Error(response.message || 'Invalid OTP response');
     }
-  };
+  } catch (err: any) {
+    console.error('OTP verification error:', err.response?.data, err.message);
+    try {
+      const userData = await getUserByEmail(email as string);
+      console.log('User data after OTP verification:', userData);
+      if (userData?.isEmailVerified) {
+        // OTP đã được xác thực, nhưng không có token
+        await setAuthenticatedSession(
+          {
+            userId: userData.userID,
+            username: userData.username,
+            email: userData.email,
+          },
+          ''
+        );
+        Alert.alert(
+          'Success', 
+          'Email verification successful, but token generation failed. Please log in again.',
+          [{ text: 'OK', onPress: () => router.replace('/(auth)/login') }]
+        );
+      } else {
+        Alert.alert('Error', err.response?.data?.message || 'Failed to verify OTP. Please try again.');
+      }
+    } catch (userErr) {
+      console.error('Error checking user status:', userErr);
+      Alert.alert('Error', err.response?.data?.message || 'Failed to verify OTP. Please try again.');
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleResendOtp = async () => {
     if (resendDisabled) return;
@@ -188,6 +222,7 @@ export default function OtpScreen() {
   );
 }
 
+// Giữ nguyên styles như cũ
 const styles = StyleSheet.create({
   container: {
     flex: 1,

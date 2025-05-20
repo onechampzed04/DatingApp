@@ -133,6 +133,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(null);
       setToken(null);
       await AsyncStorage.multiRemove(['user', 'token']);
+      router.replace('/(auth)/login'); // Ensure redirect on logout
     } catch (error) {
       console.error('Logout error:', error);
     }

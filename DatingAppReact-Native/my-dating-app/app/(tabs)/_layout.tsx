@@ -13,6 +13,10 @@ export default function TabsLayout() {
   const router = useRouter();
   const tabs = ['explore', 'discover', 'matches', 'profile'] as const;
 
+  if (pathname === '/(tabs)/habit') {
+    return <Redirect href="/(tabs)/habit" />;
+  }
+
   useEffect(() => {
     const checkVerify = async () => {
       if (user) {
@@ -28,11 +32,15 @@ export default function TabsLayout() {
     checkVerify();
   }, [user]);
 
+  console.log('TabsLayout - user:', user, 'isVerified:', isVerified); // Thêm log để debug
+
   if (!user) {
+    console.log('No user, redirecting to login');
     return <Redirect href="/(auth)/login" />;
   }
 
   if (isVerified === false && pathname !== '/(auth)/otp') {
+    console.log('User not verified, redirecting to OTP');
     return <Redirect href={{ pathname: '/(auth)/otp', params: { email: user.email } }} />;
   }
 
@@ -40,7 +48,6 @@ export default function TabsLayout() {
     return null; // đang kiểm tra...
   }
 
-  // ✅ Layout hiển thị khi đã login và xác thực
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -48,26 +55,26 @@ export default function TabsLayout() {
       </View>
 
       <View style={styles.footer}>
-      {tabs.map((tab) => (
-        <TouchableOpacity
-          key={tab}
-          onPress={() => router.replace(`/(tabs)/${tab}` as const)} // ✅ ép kiểu an toàn
-        >
-          <Ionicons
-            name={
-              tab === 'explore'
-                ? 'search-outline'
-                : tab === 'discover'
-                ? 'compass-outline'
-                : tab === 'matches'
-                ? 'heart-outline'
-                : 'person-outline'
-            }
-            size={28}
-            color={pathname.includes(tab) ? '#EA405A' : 'black'}
-          />
-        </TouchableOpacity>
-      ))}
+        {tabs.map((tab) => (
+          <TouchableOpacity
+            key={tab}
+            onPress={() => router.replace(`/(tabs)/${tab}` as const)}
+          >
+            <Ionicons
+              name={
+                tab === 'explore'
+                  ? 'search-outline'
+                  : tab === 'discover'
+                  ? 'compass-outline'
+                  : tab === 'matches'
+                  ? 'heart-outline'
+                  : 'person-outline'
+              }
+              size={28}
+              color={pathname.includes(tab) ? '#EA405A' : 'black'}
+            />
+          </TouchableOpacity>
+        ))}
       </View>
     </View>
   );

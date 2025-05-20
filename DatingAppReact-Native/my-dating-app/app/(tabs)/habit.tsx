@@ -15,7 +15,7 @@ import { getAllInterests, saveUserInterests, Interest, UserInterestData } from '
 
 export default function HabitScreen() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, logout } = useAuth(); // Destructure logout
   const [interests, setInterests] = useState<Interest[]>([]);
   const [selectedInterestIds, setSelectedInterestIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
@@ -68,13 +68,21 @@ export default function HabitScreen() {
     try {
       await saveUserInterests(dataToSave);
       Alert.alert(
-        'Success', 
+        'Success',
         'Your interests have been saved!',
-        [{ text: 'OK', onPress: () => router.replace('/(tabs)/explore') }] // Navigate to main app area (index of tabs)
+        [{ text: 'OK', onPress: () => router.replace('/(tabs)/explore') }]
       );
     } catch (error: any) {
       console.error('Failed to save interests:', error);
-      Alert.alert('Error', error.response?.data?.message || 'Failed to save interests. Please try again.');
+      if (error.response?.status === 401) { // Unauthorized or token expired
+        Alert.alert(
+          'Session Expired',
+          'Your session has expired. Please log in again.',
+          [{ text: 'OK', onPress: () => logout() }] // Call logout on OK
+        );
+      } else {
+        Alert.alert('Error', error.response?.data?.message || 'Failed to save interests. Please try again.');
+      }
     } finally {
       setSaving(false);
     }

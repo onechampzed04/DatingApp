@@ -77,7 +77,17 @@ export const sendOtp = async (email: string) => {
 
 // Reverted: verifyOtp likely just returns a simple success/error message structure,
 // not a full token and user object. The error screenshot suggests this.
-export const verifyOtp = async (email: string, otpCode: string): Promise<{ message: string, data?: any }> => { // Looser typing for now
+export const verifyOtp = async (email: string, otpCode: string): Promise<{
+  message: string;
+  data?: {
+    user: {
+      userId: number;
+      username: string;
+      email: string;
+    };
+    token: string;
+  };
+}> => {
   const response = await auth_api.post('/verify-otp', { email, otpCode });
   return response.data;
 };

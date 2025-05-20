@@ -72,17 +72,17 @@ export default function LoginWithEmail() {
       Alert.alert('Lỗi', 'Vui lòng nhập tên người dùng');
       return;
     }
-  
-    if (password.length < 0) {
+
+    if (password.length < 6) { // Sửa lỗi: password.length < 0 là sai
       Alert.alert('Lỗi', 'Mật khẩu phải có ít nhất 6 ký tự');
       return;
     }
-  
+
     if (password !== confirmPassword) {
       Alert.alert('Lỗi', 'Mật khẩu không khớp');
       return;
     }
-  
+
     setLoading(true);
     try {
       await register({ username, email, password });
