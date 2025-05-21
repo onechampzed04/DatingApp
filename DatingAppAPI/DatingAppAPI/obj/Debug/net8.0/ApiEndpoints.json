@@ -851,7 +851,7 @@
         "IsRequired": true
       },
       {
-        "Name": "user",
+        "Name": "userFromRequest",
         "Type": "DatingAppAPI.Models.User",
         "IsRequired": true
       }

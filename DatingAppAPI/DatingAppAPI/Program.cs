@@ -7,6 +7,10 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Limits.MaxRequestBodySize = 10 * 1024 * 1024; // Ví dụ: 10 MB
+});
 // Thêm DbContext
 builder.Services.AddDbContext<DatingAppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -53,6 +57,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+// Ví dụ cho Kestrel
 
 app.UseCors("AllowAll");
 app.UseAuthentication();

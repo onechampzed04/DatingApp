@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\ash\\source\\repos\\DatingApp\\DatingAppAPI\\DatingAppAPI\\DatingAppAPI.csproj": {}
+    "C:\\Users\\ash\\source\\repos\\DatingApp_2\\DatingApp\\DatingAppAPI\\DatingAppAPI\\DatingAppAPI.csproj": {}
   },
   "projects": {
-    "C:\\Users\\ash\\source\\repos\\DatingApp\\DatingAppAPI\\DatingAppAPI\\DatingAppAPI.csproj": {
+    "C:\\Users\\ash\\source\\repos\\DatingApp_2\\DatingApp\\DatingAppAPI\\DatingAppAPI\\DatingAppAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\ash\\source\\repos\\DatingApp\\DatingAppAPI\\DatingAppAPI\\DatingAppAPI.csproj",
+        "projectUniqueName": "C:\\Users\\ash\\source\\repos\\DatingApp_2\\DatingApp\\DatingAppAPI\\DatingAppAPI\\DatingAppAPI.csproj",
         "projectName": "DatingAppAPI",
-        "projectPath": "C:\\Users\\ash\\source\\repos\\DatingApp\\DatingAppAPI\\DatingAppAPI\\DatingAppAPI.csproj",
+        "projectPath": "C:\\Users\\ash\\source\\repos\\DatingApp_2\\DatingApp\\DatingAppAPI\\DatingAppAPI\\DatingAppAPI.csproj",
         "packagesPath": "C:\\Users\\ash\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\ash\\source\\repos\\DatingApp\\DatingAppAPI\\DatingAppAPI\\obj\\",
+        "outputPath": "C:\\Users\\ash\\source\\repos\\DatingApp_2\\DatingApp\\DatingAppAPI\\DatingAppAPI\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
