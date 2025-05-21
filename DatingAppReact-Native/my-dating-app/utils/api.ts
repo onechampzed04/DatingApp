@@ -138,6 +138,16 @@ export interface ApiUser { // Thêm export, vì nó được sử dụng trong s
   address?: string | null;
 }
 
+export const getUserInterests = async (userId: number): Promise<Interest[]> => {
+  try {
+    // Gọi đến userApi, không phải userInterestApi hay interestApi
+    const response = await userApi.get<Interest[]>(`/${userId}/interests`);
+    return response.data;
+  } catch (error: any) {
+    console.error(`Error fetching interests for user ID ${userId}:`, error.response?.data || error.message);
+    throw error;
+  }
+};
 // Kiểu dữ liệu để cập nhật hồ sơ người dùng. Các trường là tùy chọn.
 // Bỏ qua các trường không nên cập nhật trực tiếp theo cách này (ví dụ: ID, email, ngày tạo)
 export type UserProfileUpdateData = Partial<Omit<ApiUser,
