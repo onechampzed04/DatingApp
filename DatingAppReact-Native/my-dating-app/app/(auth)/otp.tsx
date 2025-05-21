@@ -105,7 +105,7 @@ export default function OtpScreen() {
       Alert.alert(
         'Success', 
         'Email verification successful.',
-        [{ text: 'OK', onPress: () => router.replace('/(tabs)/habit') }]
+        [{ text: 'OK', onPress: () => router.replace('/gender') }]
       );
     } else {
       throw new Error(response.message || 'Invalid OTP response');

@@ -13,10 +13,6 @@ export default function TabsLayout() {
   const router = useRouter();
   const tabs = ['explore', 'discover', 'matches', 'profile'] as const;
 
-  if (pathname === '/(tabs)/habit') {
-    return <Redirect href="/(tabs)/habit" />;
-  }
-
   useEffect(() => {
     const checkVerify = async () => {
       if (user) {
