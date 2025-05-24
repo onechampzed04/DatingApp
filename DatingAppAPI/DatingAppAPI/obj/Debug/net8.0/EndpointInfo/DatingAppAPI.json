@@ -967,7 +967,9 @@
             }
           }
         }
-      },
+      }
+    },
+    "/api/Swipes/createswipe": {
       "post": {
         "tags": [
           "Swipes"
@@ -976,41 +978,24 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Swipe"
+                "$ref": "#/components/schemas/SwipeCreateDTO"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/Swipe"
+                "$ref": "#/components/schemas/SwipeCreateDTO"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/Swipe"
+                "$ref": "#/components/schemas/SwipeCreateDTO"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/Swipe"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Swipe"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Swipe"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       }
@@ -1112,6 +1097,54 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Swipes/postswipe": {
+      "post": {
+        "tags": [
+          "Swipes"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Swipe"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Swipe"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Swipe"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/Swipe"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Swipe"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Swipe"
+                }
+              }
+            }
           }
         }
       }
@@ -1337,6 +1370,26 @@
         "tags": [
           "Users"
         ],
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1345,7 +1398,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/User"
+                    "$ref": "#/components/schemas/UserCardDTO"
                   }
                 }
               },
@@ -1353,7 +1406,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/User"
+                    "$ref": "#/components/schemas/UserCardDTO"
                   }
                 }
               },
@@ -1361,7 +1414,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/User"
+                    "$ref": "#/components/schemas/UserCardDTO"
                   }
                 }
               }
@@ -1898,6 +1951,23 @@
         },
         "additionalProperties": false
       },
+      "SwipeCreateDTO": {
+        "required": [
+          "isLike",
+          "toUserID"
+        ],
+        "type": "object",
+        "properties": {
+          "toUserID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isLike": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
       "User": {
         "type": "object",
         "properties": {
@@ -2033,6 +2103,29 @@
             "items": {
               "$ref": "#/components/schemas/UserInterest"
             },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserCardDTO": {
+        "type": "object",
+        "properties": {
+          "userID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fullName": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatar": {
+            "type": "string",
+            "nullable": true
+          },
+          "age": {
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           }
         },

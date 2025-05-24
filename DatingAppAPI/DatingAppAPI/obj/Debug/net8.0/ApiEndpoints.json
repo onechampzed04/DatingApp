@@ -553,32 +553,6 @@
   },
   {
     "ContainingType": "DatingAppAPI.Controllers.SwipesController",
-    "Method": "PostSwipe",
-    "RelativePath": "api/Swipes",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "swipe",
-        "Type": "DatingAppAPI.Models.Swipe",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": [
-      {
-        "Type": "DatingAppAPI.Models.Swipe",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
-  },
-  {
-    "ContainingType": "DatingAppAPI.Controllers.SwipesController",
     "Method": "GetSwipe",
     "RelativePath": "api/Swipes/{id}",
     "HttpMethod": "GET",
@@ -639,6 +613,48 @@
       }
     ],
     "ReturnTypes": []
+  },
+  {
+    "ContainingType": "DatingAppAPI.Controllers.SwipesController",
+    "Method": "CreateSwipe",
+    "RelativePath": "api/Swipes/createswipe",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "swipeDto",
+        "Type": "DatingAppAPI.DTO.SwipeCreateDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "DatingAppAPI.Controllers.SwipesController",
+    "Method": "PostSwipe",
+    "RelativePath": "api/Swipes/postswipe",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "swipe",
+        "Type": "DatingAppAPI.Models.Swipe",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "DatingAppAPI.Models.Swipe",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
   },
   {
     "ContainingType": "DatingAppAPI.Controllers.UserInterestsController",
@@ -767,15 +783,26 @@
   },
   {
     "ContainingType": "DatingAppAPI.Controllers.UsersController",
-    "Method": "GetUsers",
+    "Method": "GetUsersForSwiping",
     "RelativePath": "api/Users",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [],
+    "Parameters": [
+      {
+        "Name": "pageNumber",
+        "Type": "System.Int32",
+        "IsRequired": false
+      },
+      {
+        "Name": "pageSize",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
     "ReturnTypes": [
       {
-        "Type": "System.Collections.Generic.IEnumerable\u00601[[DatingAppAPI.Models.User, DatingAppAPI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[DatingAppAPI.DTO.UserCardDTO, DatingAppAPI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "text/plain",
           "application/json",

@@ -10,6 +10,8 @@ using DatingAppAPI.Data;
 using DatingAppAPI.Models;
 using DatingAppAPI.DTO; // Đảm bảo bạn có using này nếu dùng DTO khác, nhưng ở đây chúng ta dùng User model
 using System.Security.Claims;
+using DatingAppAPI.Helpers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DatingAppAPI.Controllers
 {
@@ -18,18 +20,74 @@ namespace DatingAppAPI.Controllers
     public class UsersController : ControllerBase
     {
         private readonly DatingAppDbContext _context;
+        private const int MaxPageSize = 50; // Giới hạn kích thước trang tối đa
+        private const int DefaultPageSize = 10; // Kích thước trang mặc định
 
         public UsersController(DatingAppDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/Users
+        // THAY THẾ HOÀN TOÀN HÀM GetUsers() CŨ BẰNG HÀM NÀY
+        // GET: api/Users  (Sẽ được sử dụng bởi getUsersForSwiping ở frontend)
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        [Authorize] // QUAN TRỌNG: Bảo vệ endpoint này để lấy được User ID từ token
+        public async Task<ActionResult<IEnumerable<UserCardDTO>>> GetUsersForSwiping(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = DefaultPageSize)
         {
-            // Cân nhắc thêm .AsNoTracking() nếu đây là dữ liệu chỉ đọc
-            return await _context.Users.AsNoTracking().ToListAsync();
+            if (pageSize > MaxPageSize) pageSize = MaxPageSize;
+            if (pageSize <= 0) pageSize = DefaultPageSize;
+            if (pageNumber <= 0) pageNumber = 1;
+
+            var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int? loggedInUserId = null;
+            if (currentUserIdClaim != null && int.TryParse(currentUserIdClaim, out int parsedUserId))
+            {
+                loggedInUserId = parsedUserId;
+                Console.WriteLine($"[DEBUG UsersController] Logged in User ID for filtering: {loggedInUserId}");
+            }
+            else
+            {
+                // Nếu không có User ID từ claim (dù đã [Authorize]), có thể có vấn đề với token hoặc cấu hình auth.
+                // Hoặc nếu bạn bỏ [Authorize], thì sẽ không lấy được ID người dùng hiện tại.
+                Console.WriteLine("[DEBUG UsersController] Could not get User ID from claims. API might not be properly authorized.");
+                // Trong trường hợp này, không thể lọc người dùng hiện tại một cách an toàn từ token.
+                // Nếu API không được bảo vệ, client phải gửi ID người dùng hiện tại để lọc.
+                // Tuy nhiên, với [Authorize], chúng ta nên có ID.
+                // Nếu không có, trả về lỗi hoặc danh sách không lọc (có thể gây ra lỗi swipe chính mình ở client nếu client cũng không lọc)
+                // For now, we will proceed without filtering if ID is not found, but this indicates an issue.
+            }
+
+            var usersQuery = _context.Users.AsNoTracking();
+
+            if (loggedInUserId.HasValue)
+            {
+                // Loại trừ người dùng đang đăng nhập
+                usersQuery = usersQuery.Where(u => u.UserID != loggedInUserId.Value);
+            }
+            // Thêm các điều kiện lọc khác nếu cần:
+            // Ví dụ: chỉ những người dùng đã xác thực email và tài khoản đang hoạt động
+            // usersQuery = usersQuery.Where(u => u.IsEmailVerified == true && u.AccountStatus == 1);
+            // Ví dụ: chỉ những người dùng có đủ thông tin cơ bản
+            // usersQuery = usersQuery.Where(u => u.FullName != null && u.Birthdate != null && u.Avatar != null);
+
+
+            var usersToReturn = await usersQuery
+                .OrderBy(u => u.UserID) // Cần OrderBy để Skip hoạt động chính xác
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(u => new UserCardDTO // Chuyển đổi sang DTO
+                {
+                    UserID = u.UserID,
+                    FullName = u.FullName,
+                    Avatar = u.Avatar,
+                    Age = AgeCalculator.CalculateAge(u.Birthdate) // Tính tuổi
+                })
+                .ToListAsync();
+
+            Console.WriteLine($"[DEBUG UsersController] Returning {usersToReturn.Count} users for page {pageNumber}.");
+            return Ok(usersToReturn);
         }
 
         // GET: api/Users/5
