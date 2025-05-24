@@ -1,44 +1,70 @@
-// api.ts
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// --- PHẦN ĐỊNH NGHĨA TỪ MÃ GỐC CỦA BẠN ---
-const API_URL = 'http://10.0.2.2:5281/api/auth';
+// Common base URL
+const API_BASE_URL = 'http://10.0.2.2:5281/api';
 
-const auth_api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+// --- Axios Instances ---
+const authApi = axios.create({
+  baseURL: `${API_BASE_URL}/auth`,
+  headers: { 'Content-Type': 'application/json' },
 });
-
-auth_api.interceptors.request.use(async (config) => {
+authApi.interceptors.request.use(async (config) => {
   const token = await AsyncStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
 const userApi = axios.create({
-  baseURL: 'http://10.0.2.2:5281/api/Users', // URL gốc của bạn cho userApi
+  baseURL: `${API_BASE_URL}/Users`,
 });
-
 userApi.interceptors.request.use(async (config) => {
   const token = await AsyncStorage.getItem('token');
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
+const swipeApi = axios.create({
+  baseURL: `${API_BASE_URL}/Swipes`,
+});
+swipeApi.interceptors.request.use(async (config) => {
+  const token = await AsyncStorage.getItem('token');
+  console.log('[DEBUG] swipeApi Interceptor - Token:', token);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+    console.log('[DEBUG] swipeApi Interceptor - Header Set:', config.headers.Authorization);
+  } else {
+    console.warn('[DEBUG] swipeApi Interceptor - No token found.');
   }
   return config;
 });
 
+const interestApi = axios.create({
+  baseURL: `${API_BASE_URL}/Interests`,
+});
+interestApi.interceptors.request.use(async (config) => {
+  const token = await AsyncStorage.getItem('token');
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
+const userInterestApi = axios.create({
+  baseURL: `${API_BASE_URL}/UserInterests`,
+});
+userInterestApi.interceptors.request.use(async (config) => {
+  const token = await AsyncStorage.getItem('token');
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
+// --- AUTH TYPES & FUNCTIONS ---
 interface AuthResponse {
   message: string;
   data: {
     username: string;
     email: string;
     token: string | null;
-    userId?: number; // Thêm: Giả sử login response CÓ THỂ chứa userId
+    userId?: number;
   };
 }
 
@@ -61,25 +87,23 @@ interface EmailCheckResponse {
 }
 
 export const register = async (data: RegisterData): Promise<AuthResponse> => {
-  const response = await auth_api.post('/register', data);
+  const response = await authApi.post('/register', data);
   return response.data;
 };
 
 export const login = async (data: LoginData): Promise<AuthResponse> => {
-  const response = await auth_api.post<AuthResponse>('/login', data); // Gõ response
+  const response = await authApi.post<AuthResponse>('/login', data);
   if (response.data.data.token) {
     await AsyncStorage.setItem('token', response.data.data.token);
   }
-  // Lưu userId nếu backend /login endpoint trả về nó
   if (response.data.data.userId) {
     await AsyncStorage.setItem('userId', response.data.data.userId.toString());
   }
   return response.data;
 };
 
-// Giữ nguyên cách triển khai gốc: gửi chuỗi email trực tiếp làm body
 export const sendOtp = async (email: string) => {
-  const response = await auth_api.post('/send-otp', email);
+  const response = await authApi.post('/send-otp', email);
   return response.data;
 };
 
@@ -94,8 +118,7 @@ export const verifyOtp = async (email: string, otpCode: string): Promise<{
     token: string;
   };
 }> => {
-  const response = await auth_api.post('/verify-otp', { email, otpCode });
-  // Lưu token và userId nếu xác minh thành công và có dữ liệu
+  const response = await authApi.post('/verify-otp', { email, otpCode });
   if (response.data.data && response.data.data.token && response.data.data.user && response.data.data.user.userId) {
     await AsyncStorage.setItem('token', response.data.data.token);
     await AsyncStorage.setItem('userId', response.data.data.user.userId.toString());
@@ -103,25 +126,19 @@ export const verifyOtp = async (email: string, otpCode: string): Promise<{
   return response.data;
 };
 
-// Giữ nguyên cách triển khai gốc: gửi chuỗi email trực tiếp làm body
 export const checkEmail = async (email: string): Promise<EmailCheckResponse> => {
-  const response = await auth_api.post('/check-email', email);
+  const response = await authApi.post('/check-email', email);
   return response.data;
 };
-// --- KẾT THÚC PHẦN ĐỊNH NGHĨA TỪ MÃ GỐC CỦA BẠN ---
 
-
-// --- BẮT ĐẦU: User Model VÀ CÁC HÀM API LIÊN QUAN (TỪ MÃ GỐC CỦA BẠN + BỔ SUNG MỚI) ---
-
-// Định nghĩa kiểu cho đối tượng User được trả về từ backend
-// (Đã có trong mã gốc của bạn)
-export interface ApiUser { // Thêm export, vì nó được sử dụng trong signature của hàm
+// --- USER TYPES ---
+export interface ApiUser {
   userID: number;
   username: string;
   passwordHash?: string;
   fullName?: string | null;
   gender?: string | null;
-  birthdate?: string | null; // Mong đợi định dạng chuỗi ISO ví dụ: "YYYY-MM-DD" hoặc "YYYY-MM-DDTHH:mm:ssZ"
+  birthdate?: string | null;
   bio?: string | null;
   avatar?: string | null;
   latitude?: number | null;
@@ -138,18 +155,20 @@ export interface ApiUser { // Thêm export, vì nó được sử dụng trong s
   address?: string | null;
 }
 
-export const getUserInterests = async (userId: number): Promise<Interest[]> => {
-  try {
-    // Gọi đến userApi, không phải userInterestApi hay interestApi
-    const response = await userApi.get<Interest[]>(`/${userId}/interests`);
-    return response.data;
-  } catch (error: any) {
-    console.error(`Error fetching interests for user ID ${userId}:`, error.response?.data || error.message);
-    throw error;
-  }
-};
-// Kiểu dữ liệu để cập nhật hồ sơ người dùng. Các trường là tùy chọn.
-// Bỏ qua các trường không nên cập nhật trực tiếp theo cách này (ví dụ: ID, email, ngày tạo)
+export interface ApiUserCard {
+  userID: number;
+  fullName: string | null;
+  avatar: string | null;
+  age: number | null;
+}
+
+export interface MatchedUserDetails {
+  userId: number;
+  fullName: string | null;
+  avatar: string | null;
+  age: number | null;
+}
+
 export type UserProfileUpdateData = Partial<Omit<ApiUser,
   'userID' |
   'username' |
@@ -157,24 +176,23 @@ export type UserProfileUpdateData = Partial<Omit<ApiUser,
   'createdAt' |
   'email' |
   'isEmailVerified' |
-  'lastLoginDate' // Thường do backend quản lý
+  'lastLoginDate'
 >>;
 
-// getUserByEmail (từ mã gốc của bạn)
+// --- USER FUNCTIONS ---
 export const getUserByEmail = async (email: string): Promise<ApiUser | null> => {
   try {
     const response = await userApi.get<ApiUser>('/by-email', { params: { email } });
     return response.data;
   } catch (error: any) {
     if (error.response && error.response.status === 404) {
-      return null; // Không tìm thấy người dùng
+      return null;
     }
     console.error('Lỗi khi lấy người dùng bằng email:', error);
     throw error;
   }
 };
 
-// MỚI: Lấy User bằng ID
 export const getUserById = async (userId: number): Promise<ApiUser | null> => {
   try {
     const response = await userApi.get<ApiUser>(`/${userId}`);
@@ -189,71 +207,78 @@ export const getUserById = async (userId: number): Promise<ApiUser | null> => {
   }
 };
 
-// MỚI: Cập nhật Hồ sơ Người dùng
-export const updateUserProfile = async (userId: number, updates: UserProfileUpdateData): Promise<ApiUser | null> => {
+export const getUsersForSwiping = async (params: { pageNumber: number; pageSize: number }): Promise<ApiUserCard[]> => {
   try {
-    const currentUser = await getUserById(userId); // Lấy thông tin user hiện tại
-    if (!currentUser) {
-      // ... (xử lý lỗi user không tìm thấy)
-      throw new Error(`User with ID ${userId} not found.`);
-    }
-
-    // Merge updates vào currentUser. Backend của bạn (Cách 2) sẽ chỉ
-    // cập nhật các trường được gán giá trị mới.
-    const updatedUserData: ApiUser = {
-      ...currentUser,
-      ...updates, // updates ở đây sẽ là { avatar: "data:image/jpeg;base64,..." }
-      userID: currentUser.userID,
-    };
-    
-    const response = await userApi.put<ApiUser>(`/${userId}`, updatedUserData); 
-    
-    if (response.status === 204) { 
-        return { ...updatedUserData }; // Trả về dữ liệu đã được cập nhật (phía client)
-    }
-    return response.data; 
+    const response = await userApi.get<ApiUserCard[]>('/', { params });
+    console.log(`[API] getUsersForSwiping (page ${params.pageNumber}) response:`, response.data);
+    return response.data;
   } catch (error: any) {
-    // ... (xử lý lỗi)
+    console.error(`[API] Error fetching users for swiping (page ${params.pageNumber}):`, error.response?.data || error.message);
+    if (error.isAxiosError) console.error("[API DEBUG] Axios error config for getUsersForSwiping:", error.config);
     throw error;
   }
 };
-// --- KẾT THÚC: User Model VÀ CÁC HÀM API LIÊN QUAN ---
 
+export const updateUserProfile = async (userId: number, updates: UserProfileUpdateData): Promise<ApiUser | null> => {
+  try {
+    const currentUser = await getUserById(userId);
+    if (!currentUser) {
+      throw new Error(`User with ID ${userId} not found.`);
+    }
+    const updatedUserData: ApiUser = {
+      ...currentUser,
+      ...updates,
+      userID: currentUser.userID,
+    };
+    const response = await userApi.put<ApiUser>(`/${userId}`, updatedUserData);
+    if (response.status === 204) {
+      return { ...updatedUserData };
+    }
+    return response.data;
+  } catch (error: any) {
+    throw error;
+  }
+};
 
-// --- BẮT ĐẦU: MÃ LIÊN QUAN ĐẾN INTEREST (TỪ MÃ GỐC CỦA BẠN) ---
-export interface Interest { // Thêm export
+// --- SWIPE TYPES ---
+export interface SwipeCreateDTO {
+  toUserID: number;
+  isLike: boolean;
+}
+
+export interface SwipeMatchResponse {
+  message: string;
+  isMatch: boolean;
+  matchedWithUser?: MatchedUserDetails;
+}
+
+// --- SWIPE FUNCTIONS ---
+export const createSwipe = async (data: SwipeCreateDTO): Promise<SwipeMatchResponse> => {
+  try {
+    console.log('[API] Calling createSwipe with data:', data);
+    const response = await swipeApi.post<SwipeMatchResponse>('/createswipe', data);
+    console.log('[API] createSwipe response:', response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error('[API] Error creating swipe:', error.response?.status, error.response?.data || error.message);
+    if (error.isAxiosError) {
+      console.error("[API DEBUG] Axios error config for createSwipe:", error.config);
+      if (error.response) console.error("[API DEBUG] Axios error response for createSwipe:", error.response);
+    }
+    throw error;
+  }
+};
+
+// --- INTEREST TYPES & FUNCTIONS ---
+export interface Interest {
   interestId: number;
   interestName: string;
 }
 
-export interface UserInterestData { // Thêm export
+export interface UserInterestData {
   userId: number;
   interestIds: number[];
 }
-
-const interestApi = axios.create({
-  baseURL: 'http://10.0.2.2:5281/api/Interests', // Gốc của bạn
-});
-
-interestApi.interceptors.request.use(async (config) => {
-  const token = await AsyncStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-const userInterestApi = axios.create({
-  baseURL: 'http://10.0.2.2:5281/api/UserInterests', // Gốc của bạn
-});
-
-userInterestApi.interceptors.request.use(async (config) => {
-  const token = await AsyncStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
 
 export const getAllInterests = async (): Promise<Interest[]> => {
   try {
@@ -261,6 +286,16 @@ export const getAllInterests = async (): Promise<Interest[]> => {
     return response.data;
   } catch (error) {
     console.error('Lỗi khi lấy tất cả sở thích:', error);
+    throw error;
+  }
+};
+
+export const getUserInterests = async (userId: number): Promise<Interest[]> => {
+  try {
+    const response = await userApi.get<Interest[]>(`/${userId}/interests`);
+    return response.data;
+  } catch (error: any) {
+    console.error(`Error fetching interests for user ID ${userId}:`, error.response?.data || error.message);
     throw error;
   }
 };
@@ -274,7 +309,6 @@ export const saveUserInterests = async (data: UserInterestData): Promise<any> =>
     throw error;
   }
 };
-// --- KẾT THÚC: MÃ LIÊN QUAN ĐẾN INTEREST ---
 
-export default auth_api; // Default export gốc của bạn
-// Lưu ý: Các hàm mới (getUserById, updateUserProfile) là named exports.
+// Export default
+export default authApi;

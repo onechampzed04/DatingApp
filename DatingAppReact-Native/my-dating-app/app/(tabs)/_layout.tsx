@@ -77,14 +77,15 @@ export default function TabsLayout() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  content: { flex: 1, paddingTop: 50, paddingHorizontal: 20 },
+  container: { flex: 1,  },
+  content: { flex: 1},
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingVertical: 12,
     borderTopWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#EA405A',
     backgroundColor: '#f8f8f8',
+    zIndex: 100,
   },
 });
