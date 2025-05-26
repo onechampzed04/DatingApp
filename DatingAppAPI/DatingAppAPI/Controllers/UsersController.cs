@@ -8,10 +8,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DatingAppAPI.Data;
 using DatingAppAPI.Models;
-using DatingAppAPI.DTO; // Đảm bảo bạn có using này nếu dùng DTO khác, nhưng ở đây chúng ta dùng User model
+using DatingAppAPI.DTO;
 using System.Security.Claims;
 using DatingAppAPI.Helpers;
 using Microsoft.AspNetCore.Authorization;
+using System.IO; // Required for file operations
 
 namespace DatingAppAPI.Controllers
 {
@@ -20,18 +21,19 @@ namespace DatingAppAPI.Controllers
     public class UsersController : ControllerBase
     {
         private readonly DatingAppDbContext _context;
-        private const int MaxPageSize = 50; // Giới hạn kích thước trang tối đa
-        private const int DefaultPageSize = 10; // Kích thước trang mặc định
+        private readonly IWebHostEnvironment _hostingEnvironment; // To get wwwroot path
+        private const int MaxPageSize = 50;
+        private const int DefaultPageSize = 10;
 
-        public UsersController(DatingAppDbContext context)
+        public UsersController(DatingAppDbContext context, IWebHostEnvironment hostingEnvironment)
         {
             _context = context;
+            _hostingEnvironment = hostingEnvironment; // Inject IWebHostEnvironment
         }
 
-        // THAY THẾ HOÀN TOÀN HÀM GetUsers() CŨ BẰNG HÀM NÀY
-        // GET: api/Users  (Sẽ được sử dụng bởi getUsersForSwiping ở frontend)
+        // GET: api/Users (GetUsersForSwiping)
         [HttpGet]
-        [Authorize] // QUAN TRỌNG: Bảo vệ endpoint này để lấy được User ID từ token
+        [Authorize]
         public async Task<ActionResult<IEnumerable<UserCardDTO>>> GetUsersForSwiping(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = DefaultPageSize)
@@ -45,71 +47,65 @@ namespace DatingAppAPI.Controllers
             if (currentUserIdClaim != null && int.TryParse(currentUserIdClaim, out int parsedUserId))
             {
                 loggedInUserId = parsedUserId;
-                Console.WriteLine($"[DEBUG UsersController] Logged in User ID for filtering: {loggedInUserId}");
             }
             else
             {
-                // Nếu không có User ID từ claim (dù đã [Authorize]), có thể có vấn đề với token hoặc cấu hình auth.
-                // Hoặc nếu bạn bỏ [Authorize], thì sẽ không lấy được ID người dùng hiện tại.
-                Console.WriteLine("[DEBUG UsersController] Could not get User ID from claims. API might not be properly authorized.");
-                // Trong trường hợp này, không thể lọc người dùng hiện tại một cách an toàn từ token.
-                // Nếu API không được bảo vệ, client phải gửi ID người dùng hiện tại để lọc.
-                // Tuy nhiên, với [Authorize], chúng ta nên có ID.
-                // Nếu không có, trả về lỗi hoặc danh sách không lọc (có thể gây ra lỗi swipe chính mình ở client nếu client cũng không lọc)
-                // For now, we will proceed without filtering if ID is not found, but this indicates an issue.
+                Console.WriteLine("[DEBUG GetUsersForSwiping] Could not get User ID from claims.");
+                return Unauthorized(new ProblemDetails { Title = "Unauthorized", Detail = "User ID claim not found or invalid." });
             }
 
-            var usersQuery = _context.Users.AsNoTracking();
+            // Lấy danh sách các UserID mà người dùng hiện tại đã swipe
+            var swipedUserIds = await _context.Swipes
+                .Where(s => s.FromUserID == loggedInUserId.Value)
+                .Select(s => s.ToUserID)
+                .Distinct() // Chỉ lấy các ID duy nhất
+                .ToListAsync(); // Lấy danh sách này về client (API server)
 
-            if (loggedInUserId.HasValue)
+            var usersQuery = _context.Users.AsNoTracking()
+                .Where(u => u.UserID != loggedInUserId.Value); // Loại trừ chính mình
+
+            // Loại trừ những người đã được swipe
+            if (swipedUserIds.Any())
             {
-                // Loại trừ người dùng đang đăng nhập
-                usersQuery = usersQuery.Where(u => u.UserID != loggedInUserId.Value);
+                usersQuery = usersQuery.Where(u => !swipedUserIds.Contains(u.UserID));
             }
-            // Thêm các điều kiện lọc khác nếu cần:
-            // Ví dụ: chỉ những người dùng đã xác thực email và tài khoản đang hoạt động
-            // usersQuery = usersQuery.Where(u => u.IsEmailVerified == true && u.AccountStatus == 1);
-            // Ví dụ: chỉ những người dùng có đủ thông tin cơ bản
-            // usersQuery = usersQuery.Where(u => u.FullName != null && u.Birthdate != null && u.Avatar != null);
 
+            // (Tùy chọn) Thêm các bộ lọc khác nếu cần (ví dụ: theo giới tính ưa thích, độ tuổi, khoảng cách)
+            // usersQuery = usersQuery.Where(u => u.Gender == preference.Gender && ...);
+
+            var totalPotentialUsers = await usersQuery.CountAsync(); // Đếm sau khi áp dụng tất cả các bộ lọc
+            Console.WriteLine($"[DEBUG GetUsersForSwiping] User {loggedInUserId.Value}: Total potential users to swipe (after excluding self and swiped): {totalPotentialUsers} for page {pageNumber}, pageSize {pageSize}");
 
             var usersToReturn = await usersQuery
-                .OrderBy(u => u.UserID) // Cần OrderBy để Skip hoạt động chính xác
+                .OrderBy(u => u.UserID) // Hoặc OrderBy ngẫu nhiên: .OrderBy(u => Guid.NewGuid())
+                                        // Tuy nhiên, OrderBy(u => u.UserID) ổn định hơn cho phân trang
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .Select(u => new UserCardDTO // Chuyển đổi sang DTO
+                .Select(u => new UserCardDTO
                 {
                     UserID = u.UserID,
                     FullName = u.FullName,
                     Avatar = u.Avatar,
-                    Age = AgeCalculator.CalculateAge(u.Birthdate) // Tính tuổi
+                    Age = AgeCalculator.CalculateAge(u.Birthdate)
                 })
                 .ToListAsync();
 
-            Console.WriteLine($"[DEBUG UsersController] Returning {usersToReturn.Count} users for page {pageNumber}.");
+            Console.WriteLine($"[DEBUG GetUsersForSwiping] Returning {usersToReturn.Count} users for page {pageNumber}.");
             return Ok(usersToReturn);
         }
 
-        // GET: api/Users/5
+        // GET: api/Users/5 - No change needed here for avatar URL logic
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
         {
-            // Cân nhắc tải các navigation properties nếu client cần (ví dụ: .Include(u => u.Photos))
-            // Và dùng .AsNoTracking() nếu dữ liệu chỉ đọc sau khi trả về
             var user = await _context.Users
-                                     // .Include(u => u.Photos) // Ví dụ
-                                     // .Include(u => u.UserInterests).ThenInclude(ui => ui.Interest) // Ví dụ
-                                     .AsNoTracking() // Quan trọng nếu không cập nhật ngay sau đó trong cùng scope
+                                     .AsNoTracking()
                                      .FirstOrDefaultAsync(u => u.UserID == id);
 
             if (user == null)
             {
                 return NotFound();
             }
-
-            // Khởi tạo các collection nếu chúng là null TRƯỚC KHI trả về cho client,
-            // nếu client mong đợi luôn có mảng rỗng thay vì null.
-            // Điều này giúp client dễ dàng làm việc với dữ liệu hơn.
             user.Photos ??= new List<Photo>();
             user.SwipesMade ??= new List<Swipe>();
             user.SwipesReceived ??= new List<Swipe>();
@@ -117,120 +113,187 @@ namespace DatingAppAPI.Controllers
             user.Matches2 ??= new List<Match>();
             user.Messages ??= new List<Message>();
             user.UserInterests ??= new List<UserInterest>();
-
-
-            return Ok(user); // Trả về Ok(user) thay vì chỉ user để có thể set AsNoTracking
+            return Ok(user);
         }
 
-        // PUT: api/Users/5
+        // PUT: api/Users/5 - MODIFIED TO HANDLE FILE UPLOAD
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, [FromBody] User userFromRequest)
+        [Authorize]
+        public async Task<IActionResult> PutUser(int id, [FromForm] UserUpdateDTO userUpdateDto, IFormFile? avatarFile)
         {
-            if (id != userFromRequest.UserID)
+            // Authorization: Ensure the logged-in user is the one being updated or is an admin
+            var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (currentUserIdClaim == null || !int.TryParse(currentUserIdClaim, out int loggedInUserId))
             {
-                // Thêm message cụ thể cho BadRequest
-                return BadRequest(new ProblemDetails { Title = "ID không khớp", Detail = "ID trong URL không khớp với UserID trong body của request." });
+                return Unauthorized(new ProblemDetails { Title = "Unauthorized", Detail = "User ID claim not found or invalid." });
             }
 
-            // Tải entity hiện tại từ database ĐỂ CẬP NHẬT (không dùng AsNoTracking ở đây)
-            var userEntityFromDb = await _context.Users.FirstOrDefaultAsync(u => u.UserID == id);
+            if (loggedInUserId != id /* && !User.IsInRole("Admin") */)
+            {
+                return Forbid("You are not authorized to update this user's profile.");
+            }
 
+            var userEntityFromDb = await _context.Users.FirstOrDefaultAsync(u => u.UserID == id);
             if (userEntityFromDb == null)
             {
                 return NotFound(new ProblemDetails { Title = "Không tìm thấy", Detail = $"Không tìm thấy người dùng với ID {id}." });
             }
 
-            // Cập nhật các thuộc tính của userEntityFromDb với giá trị từ userFromRequest
-            // Chỉ cập nhật những trường bạn cho phép client thay đổi qua endpoint này.
-            // Client gửi gì, trường đó sẽ được cập nhật, kể cả khi giá trị gửi là null (cho các kiểu nullable).
+            // Update properties from DTO
+            userEntityFromDb.FullName = userUpdateDto.FullName ?? userEntityFromDb.FullName;
+            userEntityFromDb.Gender = userUpdateDto.Gender ?? userEntityFromDb.Gender;
+            userEntityFromDb.Birthdate = userUpdateDto.Birthdate ?? userEntityFromDb.Birthdate;
+            userEntityFromDb.Bio = userUpdateDto.Bio ?? userEntityFromDb.Bio;
+            userEntityFromDb.PhoneNumber = userUpdateDto.PhoneNumber ?? userEntityFromDb.PhoneNumber;
+            userEntityFromDb.Address = userUpdateDto.Address ?? userEntityFromDb.Address;
+            userEntityFromDb.ProfileVisibility = userUpdateDto.ProfileVisibility ?? userEntityFromDb.ProfileVisibility;
+            userEntityFromDb.Latitude = userUpdateDto.Latitude;
+            userEntityFromDb.Longitude = userUpdateDto.Longitude;
 
-            // Ví dụ cập nhật các trường cơ bản cho profile:
-            userEntityFromDb.FullName = userFromRequest.FullName;
-            userEntityFromDb.Gender = userFromRequest.Gender;
-            userEntityFromDb.Birthdate = userFromRequest.Birthdate;
-            userEntityFromDb.Bio = userFromRequest.Bio;
-            userEntityFromDb.Avatar = userFromRequest.Avatar;
-            userEntityFromDb.PhoneNumber = userFromRequest.PhoneNumber;
-            userEntityFromDb.Address = userFromRequest.Address;
-            userEntityFromDb.ProfileVisibility = userFromRequest.ProfileVisibility;
+            //if (userUpdateDto.Latitude.HasValue)
+            //{
+            //    userEntityFromDb.Latitude = userUpdateDto.Latitude.Value;
+            //}
+            //else if (userUpdateDto.GetType().GetProperty(nameof(UserUpdateDTO.Latitude)) != null && updates.ContainsKey(nameof(UserUpdateDTO.Latitude).ToLower())) // Kiểm tra xem client có chủ ý gửi null không
+            //{
+            //    userEntityFromDb.Latitude = null;
+            //}
 
-            // Các trường nhạy cảm như Email, Username, PasswordHash, IsEmailVerified, AccountStatus
-            // KHÔNG NÊN được cập nhật một cách mù quáng qua một endpoint PUT chung chung như thế này.
-            // Chúng nên có quy trình hoặc endpoint riêng với logic nghiệp vụ phù hợp (ví dụ: xác minh email khi đổi email).
-            // userEntityFromDb.Email = userFromRequest.Email; // CẨN THẬN!
-            // userEntityFromDb.Username = userFromRequest.Username; // CẨN THẬN!
 
-            // Đối với các COLLECTION (Photos, UserInterests, Matches, etc.):
-            // Theo Cách 2, chúng ta sẽ KHÔNG cập nhật các collection này trực tiếp
-            // trong endpoint PUT chung này trừ khi có yêu cầu cụ thể.
-            // Lý do:
-            // 1. Client (trong kịch bản setup profile người dùng mới) có thể gửi các collection này là null
-            //    hoặc không gửi. Chúng ta không muốn gây lỗi validation.
-            // 2. Việc cập nhật collection (thêm, xóa, sửa item) thường phức tạp hơn
-            //    và nên có endpoint riêng (ví dụ: POST /api/users/{id}/photos, DELETE /api/users/{id}/interests/{interestId}).
-            // Bằng cách không gán lại userFromRequest.Photos cho userEntityFromDb.Photos,
-            // EF Core sẽ không coi đây là một sự thay đổi cho collection đó (trừ khi bạn load nó và thay đổi items bên trong).
-            // Các collection sẽ giữ nguyên giá trị của chúng trong database.
+            //if (userUpdateDto.Longitude.HasValue)
+            //{
+            //    userEntityFromDb.Longitude = userUpdateDto.Longitude.Value;
+            //}
+            //else if (userUpdateDto.GetType().GetProperty(nameof(UserUpdateDTO.Longitude)) != null && updates.ContainsKey(nameof(UserUpdateDTO.Longitude).ToLower()))
+            //{
+            //    userEntityFromDb.Longitude = null;
+            //}
 
-            // Sau khi đã gán các giá trị mới vào userEntityFromDb,
-            // EF Core sẽ tự động theo dõi các thay đổi này khi bạn gọi SaveChangesAsync.
-            // Không nhất thiết phải gọi _context.Entry(userEntityFromDb).State = EntityState.Modified;
-            // trừ khi có trường hợp đặc biệt mà EF Core không theo dõi được.
+            if (avatarFile != null && avatarFile.Length > 0)
+            {
+                var uploadsFolderPath = Path.Combine(_hostingEnvironment.WebRootPath, "images", "avatars");
+                if (!Directory.Exists(uploadsFolderPath))
+                {
+                    Directory.CreateDirectory(uploadsFolderPath);
+                }
+
+                var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(avatarFile.FileName);
+                var filePath = Path.Combine(uploadsFolderPath, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await avatarFile.CopyToAsync(stream);
+                }
+                userEntityFromDb.Avatar = $"/images/avatars/{uniqueFileName}";
+            }
 
             try
             {
                 await _context.SaveChangesAsync();
+                return Ok(new
+                {
+                    userId = userEntityFromDb.UserID,
+                    username = userEntityFromDb.Username,
+                    email = userEntityFromDb.Email,
+                    fullName = userEntityFromDb.FullName,
+                    gender = userEntityFromDb.Gender,
+                    birthdate = userEntityFromDb.Birthdate,
+                    bio = userEntityFromDb.Bio,
+                    avatar = userEntityFromDb.Avatar,
+                    isEmailVerified = userEntityFromDb.IsEmailVerified // Đảm bảo trả về trường này
+                });
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                // Ghi log lỗi chi tiết
                 Console.WriteLine($"DbUpdateConcurrencyException khi cập nhật User ID {id}: {ex.Message}");
                 if (!UserExists(id))
                 {
                     return NotFound(new ProblemDetails { Title = "Không tìm thấy (Concurrency)", Detail = $"Người dùng với ID {id} có thể đã bị xóa." });
                 }
-                else
-                {
-                    // Lỗi tương tranh không giải quyết được, trả về lỗi server
-                    return StatusCode(StatusCodes.Status409Conflict, new ProblemDetails { Title = "Lỗi tương tranh", Detail = "Không thể lưu thay đổi do xung đột dữ liệu. Vui lòng thử lại." });
-                }
+                return StatusCode(StatusCodes.Status409Conflict, new ProblemDetails { Title = "Lỗi tương tranh", Detail = "Không thể lưu thay đổi do xung đột dữ liệu. Vui lòng thử lại." });
             }
             catch (Exception ex)
             {
-                // Ghi log lỗi chung chi tiết
                 Console.WriteLine($"Lỗi không xác định khi cập nhật User ID {id}: {ex.ToString()}");
                 return StatusCode(StatusCodes.Status500InternalServerError, new ProblemDetails { Title = "Lỗi máy chủ", Detail = "Đã xảy ra lỗi không mong muốn khi xử lý yêu cầu của bạn." });
             }
-
-            return NoContent(); // HTTP 204 No Content là phản hồi chuẩn cho PUT thành công không trả về body
         }
 
-        // POST: api/Users
+        // POST: api/Users - MODIFIED TO HANDLE FILE UPLOAD
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser([FromBody] User user) // Nên sử dụng một DTO cho việc tạo User
+        [AllowAnonymous] // Or [Authorize] if registration requires being logged in (e.g. admin creating users)
+        public async Task<ActionResult<User>> PostUser([FromForm] UserCreateDTO userCreateDto, IFormFile? avatarFile)
         {
-            // Validate dữ liệu đầu vào ở đây nếu cần (ví dụ: username/email đã tồn tại chưa)
-            // Hash password trước khi lưu
-            // user.PasswordHash = YourPasswordHasher.Hash(user.PasswordHash); // PasswordHash nên là password thô từ client
-            // Nên dùng một UserCreateDTO ở đây thay vì User model trực tiếp
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-            // Khởi tạo các collection nếu chúng là null từ request để tránh lỗi khi SaveChangesAsync
-            // nếu DB không cho phép null cho các foreign key trỏ tới chúng (ít khả năng cho collection).
-            // Hoặc dựa vào việc khởi tạo trong model User.
-            user.Photos ??= new List<Photo>();
-            user.SwipesMade ??= new List<Swipe>();
-            user.SwipesReceived ??= new List<Swipe>();
-            user.Matches1 ??= new List<Match>();
-            user.Matches2 ??= new List<Match>();
-            user.Messages ??= new List<Message>();
-            user.UserInterests ??= new List<UserInterest>();
-            user.CreatedAt = DateTime.UtcNow; // Đảm bảo CreatedAt được đặt
+            // Check for existing username/email
+            if (await _context.Users.AnyAsync(u => u.Username == userCreateDto.Username))
+            {
+                ModelState.AddModelError("Username", "Username already exists.");
+                return BadRequest(new ValidationProblemDetails(ModelState));
+            }
+            if (!string.IsNullOrEmpty(userCreateDto.Email) && await _context.Users.AnyAsync(u => u.Email == userCreateDto.Email))
+            {
+                ModelState.AddModelError("Email", "Email already exists.");
+                return BadRequest(new ValidationProblemDetails(ModelState));
+            }
 
+            var user = new User
+            {
+                Username = userCreateDto.Username,
+                // HASH THE PASSWORD before storing it. Example using BCrypt.Net-Next:
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(userCreateDto.Password),
+                FullName = userCreateDto.FullName,
+                Gender = userCreateDto.Gender,
+                Birthdate = userCreateDto.Birthdate,
+                Bio = userCreateDto.Bio,
+                PhoneNumber = userCreateDto.PhoneNumber,
+                Email = userCreateDto.Email,
+                Address = userCreateDto.Address,
+                ProfileVisibility = userCreateDto.ProfileVisibility,
+                CreatedAt = DateTime.UtcNow,
+                IsEmailVerified = false, // Default for new users
+                AccountStatus = 1,       // Default to active, manage as needed
+                // Initialize collections
+                Photos = new List<Photo>(),
+                SwipesMade = new List<Swipe>(),
+                SwipesReceived = new List<Swipe>(),
+                Matches1 = new List<Match>(),
+                Matches2 = new List<Match>(),
+                Messages = new List<Message>(),
+                UserInterests = new List<UserInterest>()
+            };
+
+            if (avatarFile != null && avatarFile.Length > 0)
+            {
+                var uploadsFolderPath = Path.Combine(_hostingEnvironment.WebRootPath, "images", "avatars");
+                if (!Directory.Exists(uploadsFolderPath))
+                {
+                    Directory.CreateDirectory(uploadsFolderPath);
+                }
+
+                var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(avatarFile.FileName);
+                var filePath = Path.Combine(uploadsFolderPath, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await avatarFile.CopyToAsync(stream);
+                }
+                user.Avatar = $"/images/avatars/{uniqueFileName}"; // Store relative URL
+            }
 
             _context.Users.Add(user);
             try
             {
                 await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                Console.WriteLine($"Lỗi DbUpdateException khi tạo User: {ex.InnerException?.Message ?? ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, new ProblemDetails { Title = "Lỗi máy chủ", Detail = "Không thể tạo người dùng mới do lỗi cơ sở dữ liệu." });
             }
             catch (Exception ex)
             {
@@ -238,18 +301,51 @@ namespace DatingAppAPI.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new ProblemDetails { Title = "Lỗi máy chủ", Detail = "Không thể tạo người dùng mới." });
             }
 
-            // Trả về CreatedAtAction với User đã được tạo (đã có ID)
+            // Return a DTO that doesn't expose PasswordHash, etc.
+            // For now, returning the created user object (with ID).
+            // Consider mapping to a UserGetDTO or similar.
             return CreatedAtAction(nameof(GetUser), new { id = user.UserID }, user);
         }
 
-        // DELETE: api/Users/5
+        // DELETE: api/Users/5 - No change needed here regarding avatar
         [HttpDelete("{id}")]
+        [Authorize] // Typically only admins or the user themselves should delete
         public async Task<IActionResult> DeleteUser(int id)
         {
+            // Add authorization: check if current user is 'id' or an admin
+            var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (currentUserIdClaim == null || !int.TryParse(currentUserIdClaim, out int loggedInUserId))
+            {
+                return Unauthorized(new ProblemDetails { Title = "Unauthorized", Detail = "User ID claim not found or invalid." });
+            }
+            if (loggedInUserId != id /* && !User.IsInRole("Admin") */ )
+            {
+                return Forbid("You are not authorized to delete this user.");
+            }
+
+
             var user = await _context.Users.FindAsync(id);
             if (user == null)
             {
                 return NotFound(new ProblemDetails { Title = "Không tìm thấy", Detail = $"Không tìm thấy người dùng với ID {id} để xóa." });
+            }
+
+            // TODO: Delete user's avatar file from wwwroot/images/avatars if it exists
+            if (!string.IsNullOrEmpty(user.Avatar))
+            {
+                var avatarPath = Path.Combine(_hostingEnvironment.WebRootPath, user.Avatar.TrimStart('/'));
+                if (System.IO.File.Exists(avatarPath))
+                {
+                    try
+                    {
+                        System.IO.File.Delete(avatarPath);
+                    }
+                    catch (IOException ex)
+                    {
+                        Console.WriteLine($"Error deleting avatar file {avatarPath}: {ex.Message}");
+                        // Log error, but continue with user deletion
+                    }
+                }
             }
 
             _context.Users.Remove(user);
@@ -263,7 +359,6 @@ namespace DatingAppAPI.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new ProblemDetails { Title = "Lỗi máy chủ", Detail = "Không thể xóa người dùng." });
             }
 
-
             return NoContent();
         }
 
@@ -272,6 +367,7 @@ namespace DatingAppAPI.Controllers
             return _context.Users.Any(e => e.UserID == id);
         }
 
+        // GetUserByEmail - No changes needed here for avatar URL
         [HttpGet("by-email")]
         public async Task<ActionResult<User>> GetUserByEmail([FromQuery] string email)
         {
@@ -280,20 +376,17 @@ namespace DatingAppAPI.Controllers
             {
                 return NotFound(new ProblemDetails { Title = "Không tìm thấy", Detail = "Không tìm thấy người dùng với email cung cấp." });
             }
-            // Khởi tạo các collection trước khi trả về, tương tự GetUser(id)
             user.Photos ??= new List<Photo>();
             user.SwipesMade ??= new List<Swipe>();
-            // ... (các collection khác)
             user.UserInterests ??= new List<UserInterest>();
-
             return Ok(user);
         }
 
-        // GET: api/Users/{userId}/interests (Đã có)
+        // GetUserInterests - No changes needed
         [HttpGet("{userId}/interests")]
         public async Task<ActionResult<IEnumerable<InterestDTO>>> GetUserInterests(int userId)
         {
-            var user = await _context.Users.FindAsync(userId); // Hoặc FirstOrDefaultAsync
+            var user = await _context.Users.FindAsync(userId);
             if (user == null)
             {
                 return NotFound($"User with ID {userId} not found.");
@@ -307,33 +400,29 @@ namespace DatingAppAPI.Controllers
                                               InterestId = ui.Interest.InterestId,
                                               InterestName = ui.Interest.InterestName
                                           })
-                                          .AsNoTracking() // Dữ liệu chỉ đọc
+                                          .AsNoTracking()
                                           .ToListAsync();
-
             return Ok(interests);
         }
 
+        // UpdateUserInterests - No changes needed
         [HttpPost("{userId}/interests")]
+        [Authorize]
         public async Task<IActionResult> UpdateUserInterests(int userId, [FromBody] List<int> interestIds)
         {
-            // Lấy UserID của người dùng đang đăng nhập từ token
             var currentUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (currentUserIdClaim == null || !int.TryParse(currentUserIdClaim, out int currentUserId))
             {
                 return Unauthorized("User ID claim not found or invalid.");
             }
 
-            // Kiểm tra xem người dùng có đang cố cập nhật sở thích của chính mình không
-            // (Hoặc bạn có thể cho phép admin cập nhật cho người khác)
-            if (userId != currentUserId)
+            if (userId != currentUserId /* && !User.IsInRole("Admin") */)
             {
-                // Nếu bạn muốn chỉ cho phép người dùng tự cập nhật:
                 return Forbid("You can only update your own interests.");
-                // Nếu bạn muốn admin có thể cập nhật, bạn cần thêm logic kiểm tra role admin ở đây.
             }
 
             var user = await _context.Users
-                                     .Include(u => u.UserInterests) // Nạp các sở thích hiện tại
+                                     .Include(u => u.UserInterests)
                                      .FirstOrDefaultAsync(u => u.UserID == userId);
 
             if (user == null)
@@ -341,7 +430,6 @@ namespace DatingAppAPI.Controllers
                 return NotFound($"User with ID {userId} not found.");
             }
 
-            // Kiểm tra xem các InterestID gửi lên có hợp lệ không
             var validInterestIds = await _context.Interests
                                                  .Where(i => interestIds.Contains(i.InterestId))
                                                  .Select(i => i.InterestId)
@@ -353,10 +441,8 @@ namespace DatingAppAPI.Controllers
                 return BadRequest($"Invalid Interest IDs: {string.Join(", ", invalidIds)}");
             }
 
-            // Xóa các sở thích cũ của người dùng
             _context.UserInterests.RemoveRange(user.UserInterests);
 
-            // Thêm các sở thích mới
             var newUserInterests = validInterestIds.Select(interestId => new UserInterest
             {
                 UserId = userId,
@@ -369,12 +455,10 @@ namespace DatingAppAPI.Controllers
             {
                 await _context.SaveChangesAsync();
                 return Ok("User interests updated successfully.");
-                // Hoặc trả về danh sách sở thích mới
-                // return Ok(newUserInterests.Select(ui => new { ui.UserId, ui.InterestId }));
             }
             catch (DbUpdateException ex)
             {
-                // Log lỗi
+                Console.WriteLine($"Error updating user interests: {ex.Message}");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error updating user interests: " + ex.Message);
             }
         }

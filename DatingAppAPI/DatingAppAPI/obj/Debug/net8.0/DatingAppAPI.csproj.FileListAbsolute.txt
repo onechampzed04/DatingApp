@@ -590,3 +590,5 @@ C:\Users\ash\source\repos\DatingApp_2\DatingApp\DatingAppAPI\DatingAppAPI\obj\De
 C:\Users\ash\source\repos\DatingApp_2\DatingApp\DatingAppAPI\DatingAppAPI\obj\Debug\net8.0\DatingAppAPI.pdb
 C:\Users\ash\source\repos\DatingApp_2\DatingApp\DatingAppAPI\DatingAppAPI\obj\Debug\net8.0\DatingAppAPI.genruntimeconfig.cache
 C:\Users\ash\source\repos\DatingApp_2\DatingApp\DatingAppAPI\DatingAppAPI\obj\Debug\net8.0\ref\DatingAppAPI.dll
+C:\Users\ash\source\repos\DatingApp_2\DatingApp\DatingAppAPI\DatingAppAPI\bin\Debug\net8.0\DatingAppAPI.staticwebassets.runtime.json
+C:\Users\ash\source\repos\DatingApp_2\DatingApp\DatingAppAPI\DatingAppAPI\bin\Debug\net8.0\Data\seed_users.json

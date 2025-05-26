@@ -110,24 +110,23 @@ namespace DatingAppAPI.Controllers
 
                         // Lấy thông tin chi tiết của người vừa match, bao gồm Birthdate
                         var matchedUserFromDb = await _context.Users
-                                            .AsNoTracking()
-                                            .Select(u => new // Lấy các trường cần thiết
-                                            {
-                                                u.UserID,
-                                                u.FullName,
-                                                u.Avatar,
-                                                u.Birthdate // <<<< Lấy Birthdate
-                                            })
-                                            .FirstOrDefaultAsync(u => u.UserID == swipeDto.ToUserID);
+                                    .AsNoTracking()
+                                    .Select(u => new
+                                    {
+                                        u.UserID,
+                                        u.FullName,
+                                        u.Avatar, // This will be the URL
+                                        u.Birthdate
+                                    })
+                                    .FirstOrDefaultAsync(u => u.UserID == swipeDto.ToUserID);
 
                         if (matchedUserFromDb != null)
                         {
-                            // Gán cho matchedUserDetails kiểu MatchedUserDetailsDTO
                             matchedUserDetails = new MatchedUserDetailsDTO
                             {
                                 UserId = matchedUserFromDb.UserID,
                                 FullName = matchedUserFromDb.FullName,
-                                Avatar = matchedUserFromDb.Avatar,
+                                Avatar = matchedUserFromDb.Avatar, // Correctly uses the Avatar URL
                                 Age = AgeCalculator.CalculateAge(matchedUserFromDb.Birthdate)
                             };
                         }

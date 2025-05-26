@@ -1,4 +1,5 @@
-﻿namespace DatingAppAPI.Models
+﻿// DatingAppAPI.Models/AuthResponseDto.cs
+namespace DatingAppAPI.Models
 {
     public class RegisterDto
     {
@@ -19,10 +20,12 @@
         public string OtpCode { get; set; }
     }
 
-    public class AuthResponseDto
+    public class AuthResponseDto // ĐÂY LÀ DTO CHO RESPONSE CỦA LOGIN VÀ REGISTER
     {
-        public string Token { get; set; }
         public string Username { get; set; }
         public string Email { get; set; }
+        public string? Token { get; set; } // Cho phép null nếu chưa verify hoặc register
+        public bool IsEmailVerified { get; set; } // THÊM TRƯỜNG NÀY
+        public int UserID { get; set; } // THÊM TRƯỜNG NÀY
     }
 }

@@ -1,0 +1,424 @@
+﻿<Project>
+  <ItemGroup>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/22e1ff33-74d7-4a32-80f5-d2d4ab43a051_67eb392d-b2ec-4291-80da-4c374c710ebf.99sje718p4.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\22e1ff33-74d7-4a32-80f5-d2d4ab43a051_67eb392d-b2ec-4291-80da-4c374c710ebf.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"99sje718p4"},{"Name":"integrity","Value":"sha256-M5A2m6CQZmHVRg52/sVzkVcnJolpRvkegmaxC3\u002B6rLU="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/22e1ff33-74d7-4a32-80f5-d2d4ab43a051_67eb392d-b2ec-4291-80da-4c374c710ebf.jpeg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"21923"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022M5A2m6CQZmHVRg52/sVzkVcnJolpRvkegmaxC3\u002B6rLU=\u0022"},{"Name":"Last-Modified","Value":"Mon, 26 May 2025 07:40:34 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/22e1ff33-74d7-4a32-80f5-d2d4ab43a051_67eb392d-b2ec-4291-80da-4c374c710ebf.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\22e1ff33-74d7-4a32-80f5-d2d4ab43a051_67eb392d-b2ec-4291-80da-4c374c710ebf.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-M5A2m6CQZmHVRg52/sVzkVcnJolpRvkegmaxC3\u002B6rLU="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"21923"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022M5A2m6CQZmHVRg52/sVzkVcnJolpRvkegmaxC3\u002B6rLU=\u0022"},{"Name":"Last-Modified","Value":"Mon, 26 May 2025 07:40:34 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/23421a7d-f3ea-4a38-8128-bc288eb7c3fa_0e878a54-b33a-44f1-89a5-b2b771960fa4.99sje718p4.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\23421a7d-f3ea-4a38-8128-bc288eb7c3fa_0e878a54-b33a-44f1-89a5-b2b771960fa4.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"99sje718p4"},{"Name":"integrity","Value":"sha256-M5A2m6CQZmHVRg52/sVzkVcnJolpRvkegmaxC3\u002B6rLU="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/23421a7d-f3ea-4a38-8128-bc288eb7c3fa_0e878a54-b33a-44f1-89a5-b2b771960fa4.jpeg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"21923"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022M5A2m6CQZmHVRg52/sVzkVcnJolpRvkegmaxC3\u002B6rLU=\u0022"},{"Name":"Last-Modified","Value":"Sun, 25 May 2025 09:56:27 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/23421a7d-f3ea-4a38-8128-bc288eb7c3fa_0e878a54-b33a-44f1-89a5-b2b771960fa4.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\23421a7d-f3ea-4a38-8128-bc288eb7c3fa_0e878a54-b33a-44f1-89a5-b2b771960fa4.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-M5A2m6CQZmHVRg52/sVzkVcnJolpRvkegmaxC3\u002B6rLU="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"21923"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022M5A2m6CQZmHVRg52/sVzkVcnJolpRvkegmaxC3\u002B6rLU=\u0022"},{"Name":"Last-Modified","Value":"Sun, 25 May 2025 09:56:27 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/37b0207d-1efd-4bd0-98d2-f07a1d3fc81e_a43a6612-d00e-418e-bbbb-27ba0955cea0.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\37b0207d-1efd-4bd0-98d2-f07a1d3fc81e_a43a6612-d00e-418e-bbbb-27ba0955cea0.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-qBnGRfvD2HoIeLQqhpf37oWgj39M\u002BgKUxTFK6yIuu7w="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"20401"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022qBnGRfvD2HoIeLQqhpf37oWgj39M\u002BgKUxTFK6yIuu7w=\u0022"},{"Name":"Last-Modified","Value":"Mon, 26 May 2025 03:48:11 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/37b0207d-1efd-4bd0-98d2-f07a1d3fc81e_a43a6612-d00e-418e-bbbb-27ba0955cea0.szqwd33qy8.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\37b0207d-1efd-4bd0-98d2-f07a1d3fc81e_a43a6612-d00e-418e-bbbb-27ba0955cea0.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"szqwd33qy8"},{"Name":"integrity","Value":"sha256-qBnGRfvD2HoIeLQqhpf37oWgj39M\u002BgKUxTFK6yIuu7w="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/37b0207d-1efd-4bd0-98d2-f07a1d3fc81e_a43a6612-d00e-418e-bbbb-27ba0955cea0.jpeg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"20401"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022qBnGRfvD2HoIeLQqhpf37oWgj39M\u002BgKUxTFK6yIuu7w=\u0022"},{"Name":"Last-Modified","Value":"Mon, 26 May 2025 03:48:11 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/3c100365-5365-49ff-b7ff-d6821fa17e88_2d2fc6b9-608e-4482-b574-b4980ce2fdf4.99sje718p4.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\3c100365-5365-49ff-b7ff-d6821fa17e88_2d2fc6b9-608e-4482-b574-b4980ce2fdf4.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"99sje718p4"},{"Name":"integrity","Value":"sha256-M5A2m6CQZmHVRg52/sVzkVcnJolpRvkegmaxC3\u002B6rLU="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/3c100365-5365-49ff-b7ff-d6821fa17e88_2d2fc6b9-608e-4482-b574-b4980ce2fdf4.jpeg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"21923"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022M5A2m6CQZmHVRg52/sVzkVcnJolpRvkegmaxC3\u002B6rLU=\u0022"},{"Name":"Last-Modified","Value":"Sun, 25 May 2025 14:41:11 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/3c100365-5365-49ff-b7ff-d6821fa17e88_2d2fc6b9-608e-4482-b574-b4980ce2fdf4.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\3c100365-5365-49ff-b7ff-d6821fa17e88_2d2fc6b9-608e-4482-b574-b4980ce2fdf4.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-M5A2m6CQZmHVRg52/sVzkVcnJolpRvkegmaxC3\u002B6rLU="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"21923"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022M5A2m6CQZmHVRg52/sVzkVcnJolpRvkegmaxC3\u002B6rLU=\u0022"},{"Name":"Last-Modified","Value":"Sun, 25 May 2025 14:41:11 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/62d75649-f25c-4d43-bfe2-586e455a01ab_girl-8050719_640.e440kvtdjt.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\62d75649-f25c-4d43-bfe2-586e455a01ab_girl-8050719_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"e440kvtdjt"},{"Name":"integrity","Value":"sha256-ImswSHocnSSOO3WmMJBvF7Bb7yGsCtpvDpIdfvUfRFM="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/62d75649-f25c-4d43-bfe2-586e455a01ab_girl-8050719_640.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"101395"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022ImswSHocnSSOO3WmMJBvF7Bb7yGsCtpvDpIdfvUfRFM=\u0022"},{"Name":"Last-Modified","Value":"Sun, 25 May 2025 10:00:41 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/62d75649-f25c-4d43-bfe2-586e455a01ab_girl-8050719_640.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\62d75649-f25c-4d43-bfe2-586e455a01ab_girl-8050719_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-ImswSHocnSSOO3WmMJBvF7Bb7yGsCtpvDpIdfvUfRFM="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"101395"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022ImswSHocnSSOO3WmMJBvF7Bb7yGsCtpvDpIdfvUfRFM=\u0022"},{"Name":"Last-Modified","Value":"Sun, 25 May 2025 10:00:41 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/7d0259a1-72cb-469b-b42e-7deed4f11f3e_aac787e1-3a7d-41b3-817d-b71f010d0bf0.99sje718p4.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\7d0259a1-72cb-469b-b42e-7deed4f11f3e_aac787e1-3a7d-41b3-817d-b71f010d0bf0.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"99sje718p4"},{"Name":"integrity","Value":"sha256-M5A2m6CQZmHVRg52/sVzkVcnJolpRvkegmaxC3\u002B6rLU="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/7d0259a1-72cb-469b-b42e-7deed4f11f3e_aac787e1-3a7d-41b3-817d-b71f010d0bf0.jpeg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"21923"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022M5A2m6CQZmHVRg52/sVzkVcnJolpRvkegmaxC3\u002B6rLU=\u0022"},{"Name":"Last-Modified","Value":"Sun, 25 May 2025 15:36:30 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/7d0259a1-72cb-469b-b42e-7deed4f11f3e_aac787e1-3a7d-41b3-817d-b71f010d0bf0.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\7d0259a1-72cb-469b-b42e-7deed4f11f3e_aac787e1-3a7d-41b3-817d-b71f010d0bf0.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-M5A2m6CQZmHVRg52/sVzkVcnJolpRvkegmaxC3\u002B6rLU="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"21923"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022M5A2m6CQZmHVRg52/sVzkVcnJolpRvkegmaxC3\u002B6rLU=\u0022"},{"Name":"Last-Modified","Value":"Sun, 25 May 2025 15:36:30 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/add005e9-1a8f-48d0-8c43-18c939dc85e5_13155270-fb49-4398-ba9c-7eaa47ad4699.j7xzdxywga.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\add005e9-1a8f-48d0-8c43-18c939dc85e5_13155270-fb49-4398-ba9c-7eaa47ad4699.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"j7xzdxywga"},{"Name":"integrity","Value":"sha256-IfxJjQBaCq25xTls8/xp6LxvhawfiKipUsagGzqWesM="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/add005e9-1a8f-48d0-8c43-18c939dc85e5_13155270-fb49-4398-ba9c-7eaa47ad4699.jpeg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"22642"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022IfxJjQBaCq25xTls8/xp6LxvhawfiKipUsagGzqWesM=\u0022"},{"Name":"Last-Modified","Value":"Mon, 26 May 2025 08:13:50 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/add005e9-1a8f-48d0-8c43-18c939dc85e5_13155270-fb49-4398-ba9c-7eaa47ad4699.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\add005e9-1a8f-48d0-8c43-18c939dc85e5_13155270-fb49-4398-ba9c-7eaa47ad4699.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-IfxJjQBaCq25xTls8/xp6LxvhawfiKipUsagGzqWesM="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"22642"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022IfxJjQBaCq25xTls8/xp6LxvhawfiKipUsagGzqWesM=\u0022"},{"Name":"Last-Modified","Value":"Mon, 26 May 2025 08:13:50 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/ai-generated-7833751_640.gzjfhtxcio.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\ai-generated-7833751_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"gzjfhtxcio"},{"Name":"integrity","Value":"sha256-7GfxKpA16gpR6TygvMnsHOHNlAiGNUTW4PFyzgkznAI="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/ai-generated-7833751_640.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"88073"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u00227GfxKpA16gpR6TygvMnsHOHNlAiGNUTW4PFyzgkznAI=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:08:08 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/ai-generated-7833751_640.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\ai-generated-7833751_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-7GfxKpA16gpR6TygvMnsHOHNlAiGNUTW4PFyzgkznAI="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"88073"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u00227GfxKpA16gpR6TygvMnsHOHNlAiGNUTW4PFyzgkznAI=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:08:08 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/ai-generated-8266355_640.pispgzhflg.png">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\ai-generated-8266355_640.png'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"pispgzhflg"},{"Name":"integrity","Value":"sha256-X1ekg9aJ1TDkCqIL7\u002BE4QuueFfBT9oJszYoj8xAZHEY="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/ai-generated-8266355_640.png"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"315160"},{"Name":"Content-Type","Value":"image/png"},{"Name":"ETag","Value":"\u0022X1ekg9aJ1TDkCqIL7\u002BE4QuueFfBT9oJszYoj8xAZHEY=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:09:12 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/ai-generated-8266355_640.png">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\ai-generated-8266355_640.png'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-X1ekg9aJ1TDkCqIL7\u002BE4QuueFfBT9oJszYoj8xAZHEY="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"315160"},{"Name":"Content-Type","Value":"image/png"},{"Name":"ETag","Value":"\u0022X1ekg9aJ1TDkCqIL7\u002BE4QuueFfBT9oJszYoj8xAZHEY=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:09:12 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/ai-generated-8620811_640.i9fxz34vdt.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\ai-generated-8620811_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"i9fxz34vdt"},{"Name":"integrity","Value":"sha256-ekWwnHuueQ2yHJqbufn7rEq7c8oqdHDGwGASKO9v73g="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/ai-generated-8620811_640.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"154972"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022ekWwnHuueQ2yHJqbufn7rEq7c8oqdHDGwGASKO9v73g=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:08:14 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/ai-generated-8620811_640.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\ai-generated-8620811_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-ekWwnHuueQ2yHJqbufn7rEq7c8oqdHDGwGASKO9v73g="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"154972"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022ekWwnHuueQ2yHJqbufn7rEq7c8oqdHDGwGASKO9v73g=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:08:14 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/ai-generated-8646814_640.6yk623vyje.png">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\ai-generated-8646814_640.png'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"6yk623vyje"},{"Name":"integrity","Value":"sha256-jk06yNuZIvcHgL9mPcTW2cHv/9GEK0urLuncCMDcgf8="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/ai-generated-8646814_640.png"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"291496"},{"Name":"Content-Type","Value":"image/png"},{"Name":"ETag","Value":"\u0022jk06yNuZIvcHgL9mPcTW2cHv/9GEK0urLuncCMDcgf8=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:05:11 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/ai-generated-8646814_640.png">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\ai-generated-8646814_640.png'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-jk06yNuZIvcHgL9mPcTW2cHv/9GEK0urLuncCMDcgf8="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"291496"},{"Name":"Content-Type","Value":"image/png"},{"Name":"ETag","Value":"\u0022jk06yNuZIvcHgL9mPcTW2cHv/9GEK0urLuncCMDcgf8=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:05:11 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/ai-generated-8666822_640.4hguuhhhn5.png">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\ai-generated-8666822_640.png'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"4hguuhhhn5"},{"Name":"integrity","Value":"sha256-GD/XWqfxYvHTejijBZQpYXDUGbVLC6Sgkri35z1DksA="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/ai-generated-8666822_640.png"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"475930"},{"Name":"Content-Type","Value":"image/png"},{"Name":"ETag","Value":"\u0022GD/XWqfxYvHTejijBZQpYXDUGbVLC6Sgkri35z1DksA=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:07:30 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/ai-generated-8666822_640.png">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\ai-generated-8666822_640.png'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-GD/XWqfxYvHTejijBZQpYXDUGbVLC6Sgkri35z1DksA="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"475930"},{"Name":"Content-Type","Value":"image/png"},{"Name":"ETag","Value":"\u0022GD/XWqfxYvHTejijBZQpYXDUGbVLC6Sgkri35z1DksA=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:07:30 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/ai-generated-8720322_1280.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\ai-generated-8720322_1280.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-MNAA/0AktVsJPm\u002BufyYic4N3zkMKaCSAVKNNk3\u002BvsCY="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"360412"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022MNAA/0AktVsJPm\u002BufyYic4N3zkMKaCSAVKNNk3\u002BvsCY=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:03:52 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/ai-generated-8720322_1280.sxzhspqjix.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\ai-generated-8720322_1280.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"sxzhspqjix"},{"Name":"integrity","Value":"sha256-MNAA/0AktVsJPm\u002BufyYic4N3zkMKaCSAVKNNk3\u002BvsCY="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/ai-generated-8720322_1280.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"360412"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022MNAA/0AktVsJPm\u002BufyYic4N3zkMKaCSAVKNNk3\u002BvsCY=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:03:52 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/ai-generated-8773581_640.58u8ialfiv.png">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\ai-generated-8773581_640.png'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"58u8ialfiv"},{"Name":"integrity","Value":"sha256-BRUunkAg\u002BU1nu83\u002BvDe9YnQ\u002BQHXxu3HYX//vydPTG2o="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/ai-generated-8773581_640.png"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"432545"},{"Name":"Content-Type","Value":"image/png"},{"Name":"ETag","Value":"\u0022BRUunkAg\u002BU1nu83\u002BvDe9YnQ\u002BQHXxu3HYX//vydPTG2o=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:04:48 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/ai-generated-8773581_640.png">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\ai-generated-8773581_640.png'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-BRUunkAg\u002BU1nu83\u002BvDe9YnQ\u002BQHXxu3HYX//vydPTG2o="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"432545"},{"Name":"Content-Type","Value":"image/png"},{"Name":"ETag","Value":"\u0022BRUunkAg\u002BU1nu83\u002BvDe9YnQ\u002BQHXxu3HYX//vydPTG2o=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:04:48 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/ai-generated-8979876_640.6oeylbw6t7.png">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\ai-generated-8979876_640.png'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"6oeylbw6t7"},{"Name":"integrity","Value":"sha256-xj/4JtDOHfwqzCrWdqHxw8Gy\u002Br27e2BtNK8ynBp1sq8="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/ai-generated-8979876_640.png"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"447975"},{"Name":"Content-Type","Value":"image/png"},{"Name":"ETag","Value":"\u0022xj/4JtDOHfwqzCrWdqHxw8Gy\u002Br27e2BtNK8ynBp1sq8=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:09:22 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/ai-generated-8979876_640.png">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\ai-generated-8979876_640.png'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-xj/4JtDOHfwqzCrWdqHxw8Gy\u002Br27e2BtNK8ynBp1sq8="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"447975"},{"Name":"Content-Type","Value":"image/png"},{"Name":"ETag","Value":"\u0022xj/4JtDOHfwqzCrWdqHxw8Gy\u002Br27e2BtNK8ynBp1sq8=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:09:22 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/ai-generated-9153687_640.png">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\ai-generated-9153687_640.png'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-Ig0FbRUvr3qqCj78QwQLT9jv4vPAUQjEUVZsSH24WbY="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"224485"},{"Name":"Content-Type","Value":"image/png"},{"Name":"ETag","Value":"\u0022Ig0FbRUvr3qqCj78QwQLT9jv4vPAUQjEUVZsSH24WbY=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:09:09 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/ai-generated-9153687_640.yrj3g3ztyk.png">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\ai-generated-9153687_640.png'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"yrj3g3ztyk"},{"Name":"integrity","Value":"sha256-Ig0FbRUvr3qqCj78QwQLT9jv4vPAUQjEUVZsSH24WbY="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/ai-generated-9153687_640.png"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"224485"},{"Name":"Content-Type","Value":"image/png"},{"Name":"ETag","Value":"\u0022Ig0FbRUvr3qqCj78QwQLT9jv4vPAUQjEUVZsSH24WbY=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:09:09 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/b2988c52-86aa-4ec0-b89b-2a5ed74607f4_c8f990d1-11b4-498b-912d-a51a49c30703.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\b2988c52-86aa-4ec0-b89b-2a5ed74607f4_c8f990d1-11b4-498b-912d-a51a49c30703.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-qBnGRfvD2HoIeLQqhpf37oWgj39M\u002BgKUxTFK6yIuu7w="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"20401"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022qBnGRfvD2HoIeLQqhpf37oWgj39M\u002BgKUxTFK6yIuu7w=\u0022"},{"Name":"Last-Modified","Value":"Mon, 26 May 2025 03:15:46 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/b2988c52-86aa-4ec0-b89b-2a5ed74607f4_c8f990d1-11b4-498b-912d-a51a49c30703.szqwd33qy8.jpeg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\b2988c52-86aa-4ec0-b89b-2a5ed74607f4_c8f990d1-11b4-498b-912d-a51a49c30703.jpeg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"szqwd33qy8"},{"Name":"integrity","Value":"sha256-qBnGRfvD2HoIeLQqhpf37oWgj39M\u002BgKUxTFK6yIuu7w="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/b2988c52-86aa-4ec0-b89b-2a5ed74607f4_c8f990d1-11b4-498b-912d-a51a49c30703.jpeg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"20401"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022qBnGRfvD2HoIeLQqhpf37oWgj39M\u002BgKUxTFK6yIuu7w=\u0022"},{"Name":"Last-Modified","Value":"Mon, 26 May 2025 03:15:46 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/businessman-9187789_640.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\businessman-9187789_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-n8yuCFt0r69lWP8x3Jzrj0cOm\u002Bw4NHBF3MODYGiWy9k="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"43692"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022n8yuCFt0r69lWP8x3Jzrj0cOm\u002Bw4NHBF3MODYGiWy9k=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:09:18 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/businessman-9187789_640.r59lfbjs1v.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\businessman-9187789_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"r59lfbjs1v"},{"Name":"integrity","Value":"sha256-n8yuCFt0r69lWP8x3Jzrj0cOm\u002Bw4NHBF3MODYGiWy9k="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/businessman-9187789_640.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"43692"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022n8yuCFt0r69lWP8x3Jzrj0cOm\u002Bw4NHBF3MODYGiWy9k=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:09:18 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/ca4f9b8b-ad64-4005-8026-365966ec836b_girl-8073275_640.enqdy2uob3.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\ca4f9b8b-ad64-4005-8026-365966ec836b_girl-8073275_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"enqdy2uob3"},{"Name":"integrity","Value":"sha256-KlK3nmYiMGIFzFsosOLcAQg94eiGJs8\u002BvoQdjraL\u002B34="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/ca4f9b8b-ad64-4005-8026-365966ec836b_girl-8073275_640.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"96320"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022KlK3nmYiMGIFzFsosOLcAQg94eiGJs8\u002BvoQdjraL\u002B34=\u0022"},{"Name":"Last-Modified","Value":"Sun, 25 May 2025 06:29:15 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/ca4f9b8b-ad64-4005-8026-365966ec836b_girl-8073275_640.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\ca4f9b8b-ad64-4005-8026-365966ec836b_girl-8073275_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-KlK3nmYiMGIFzFsosOLcAQg94eiGJs8\u002BvoQdjraL\u002B34="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"96320"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022KlK3nmYiMGIFzFsosOLcAQg94eiGJs8\u002BvoQdjraL\u002B34=\u0022"},{"Name":"Last-Modified","Value":"Sun, 25 May 2025 06:29:15 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/fantasy-7878362_640.j2kol8eu20.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\fantasy-7878362_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"j2kol8eu20"},{"Name":"integrity","Value":"sha256-Zc8uhyQrXFfnENORL7UDs8gN\u002BAaaUal0v2UxhHb06nA="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/fantasy-7878362_640.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"51053"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022Zc8uhyQrXFfnENORL7UDs8gN\u002BAaaUal0v2UxhHb06nA=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:04:04 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/fantasy-7878362_640.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\fantasy-7878362_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-Zc8uhyQrXFfnENORL7UDs8gN\u002BAaaUal0v2UxhHb06nA="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"51053"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022Zc8uhyQrXFfnENORL7UDs8gN\u002BAaaUal0v2UxhHb06nA=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:04:04 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/fantasy-8777508_640.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\fantasy-8777508_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-5cYH4t0YrCnvi1e9lXHzT9RW3XNAGJSDuXCyOg/kO3o="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"124955"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u00225cYH4t0YrCnvi1e9lXHzT9RW3XNAGJSDuXCyOg/kO3o=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:04:36 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/fantasy-8777508_640.roen3f1wob.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\fantasy-8777508_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"roen3f1wob"},{"Name":"integrity","Value":"sha256-5cYH4t0YrCnvi1e9lXHzT9RW3XNAGJSDuXCyOg/kO3o="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/fantasy-8777508_640.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"124955"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u00225cYH4t0YrCnvi1e9lXHzT9RW3XNAGJSDuXCyOg/kO3o=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:04:36 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/girl-7873116_640.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\girl-7873116_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-8mPzG4/kvsauRF3dEevWOceptGWCf0aWrhHdN\u002Be6Dww="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"220977"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u00228mPzG4/kvsauRF3dEevWOceptGWCf0aWrhHdN\u002Be6Dww=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:01:58 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/girl-7873116_640.q5ov8aqopy.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\girl-7873116_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"q5ov8aqopy"},{"Name":"integrity","Value":"sha256-8mPzG4/kvsauRF3dEevWOceptGWCf0aWrhHdN\u002Be6Dww="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/girl-7873116_640.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"220977"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u00228mPzG4/kvsauRF3dEevWOceptGWCf0aWrhHdN\u002Be6Dww=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:01:58 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/girl-8011732_640.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\girl-8011732_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-xcI3HBkcb2ZVqmAwVBInA1g7ftnQ6HAzpty0DBVcUgM="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"108114"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022xcI3HBkcb2ZVqmAwVBInA1g7ftnQ6HAzpty0DBVcUgM=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:01:27 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/girl-8011732_640.xljaxkzi6y.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\girl-8011732_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"xljaxkzi6y"},{"Name":"integrity","Value":"sha256-xcI3HBkcb2ZVqmAwVBInA1g7ftnQ6HAzpty0DBVcUgM="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/girl-8011732_640.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"108114"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022xcI3HBkcb2ZVqmAwVBInA1g7ftnQ6HAzpty0DBVcUgM=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:01:27 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/girl-8050719_640.59ktki8ls4.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\girl-8050719_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"59ktki8ls4"},{"Name":"integrity","Value":"sha256-NxgLONfZfZeNkZs2nycVKhOSGCsyCkOUvUiA6K9Dta0="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/girl-8050719_640.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"185853"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022NxgLONfZfZeNkZs2nycVKhOSGCsyCkOUvUiA6K9Dta0=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:01:11 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/girl-8050719_640.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\girl-8050719_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-NxgLONfZfZeNkZs2nycVKhOSGCsyCkOUvUiA6K9Dta0="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"185853"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022NxgLONfZfZeNkZs2nycVKhOSGCsyCkOUvUiA6K9Dta0=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:01:11 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/girl-8073275_640.enqdy2uob3.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\girl-8073275_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"enqdy2uob3"},{"Name":"integrity","Value":"sha256-KlK3nmYiMGIFzFsosOLcAQg94eiGJs8\u002BvoQdjraL\u002B34="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/girl-8073275_640.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"96320"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022KlK3nmYiMGIFzFsosOLcAQg94eiGJs8\u002BvoQdjraL\u002B34=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:01:34 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/girl-8073275_640.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\girl-8073275_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-KlK3nmYiMGIFzFsosOLcAQg94eiGJs8\u002BvoQdjraL\u002B34="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"96320"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022KlK3nmYiMGIFzFsosOLcAQg94eiGJs8\u002BvoQdjraL\u002B34=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:01:34 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/girl-8097485_640.hk6np28jfb.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\girl-8097485_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"hk6np28jfb"},{"Name":"integrity","Value":"sha256-AcL46fhteBJY1kbSoR2UQE3oJLJrgncgnLNh0VI5c5s="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/girl-8097485_640.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"61706"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022AcL46fhteBJY1kbSoR2UQE3oJLJrgncgnLNh0VI5c5s=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:01:04 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/girl-8097485_640.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\girl-8097485_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-AcL46fhteBJY1kbSoR2UQE3oJLJrgncgnLNh0VI5c5s="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"61706"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022AcL46fhteBJY1kbSoR2UQE3oJLJrgncgnLNh0VI5c5s=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:01:04 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/girl-8097486_640.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\girl-8097486_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-kStjBbfxlo7X5qf0W85fl2VjjwO3BuGl/HXtVoIL3Dk="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"78329"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022kStjBbfxlo7X5qf0W85fl2VjjwO3BuGl/HXtVoIL3Dk=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:01:15 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/girl-8097486_640.nipd6r4bpq.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\girl-8097486_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"nipd6r4bpq"},{"Name":"integrity","Value":"sha256-kStjBbfxlo7X5qf0W85fl2VjjwO3BuGl/HXtVoIL3Dk="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/girl-8097486_640.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"78329"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022kStjBbfxlo7X5qf0W85fl2VjjwO3BuGl/HXtVoIL3Dk=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:01:15 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/girl-8097525_640.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\girl-8097525_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-Dar4PwyBE6ExE/g0h5LkISeNtO1jMxRnzo68dhWnHWc="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"162131"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022Dar4PwyBE6ExE/g0h5LkISeNtO1jMxRnzo68dhWnHWc=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:01:20 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/girl-8097525_640.lifm2otd8o.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\girl-8097525_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"lifm2otd8o"},{"Name":"integrity","Value":"sha256-Dar4PwyBE6ExE/g0h5LkISeNtO1jMxRnzo68dhWnHWc="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/girl-8097525_640.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"162131"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022Dar4PwyBE6ExE/g0h5LkISeNtO1jMxRnzo68dhWnHWc=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:01:20 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/girl-8154388_640.1piu2ajump.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\girl-8154388_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"1piu2ajump"},{"Name":"integrity","Value":"sha256-JRRXBzS1/Mdv8DtOT8Cffw8N2tOr7aHoAiodC/mcHoA="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/girl-8154388_640.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"121218"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022JRRXBzS1/Mdv8DtOT8Cffw8N2tOr7aHoAiodC/mcHoA=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:01:24 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/girl-8154388_640.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\girl-8154388_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-JRRXBzS1/Mdv8DtOT8Cffw8N2tOr7aHoAiodC/mcHoA="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"121218"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022JRRXBzS1/Mdv8DtOT8Cffw8N2tOr7aHoAiodC/mcHoA=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:01:24 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/girl-8252502_640.j1fy3capbq.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\girl-8252502_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"j1fy3capbq"},{"Name":"integrity","Value":"sha256-p/Oyjhvac11pRLJ8QKCasrwsURIdTz4W\u002BKIbs7ck51c="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/girl-8252502_640.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"89683"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022p/Oyjhvac11pRLJ8QKCasrwsURIdTz4W\u002BKIbs7ck51c=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:01:08 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/girl-8252502_640.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\girl-8252502_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-p/Oyjhvac11pRLJ8QKCasrwsURIdTz4W\u002BKIbs7ck51c="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"89683"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022p/Oyjhvac11pRLJ8QKCasrwsURIdTz4W\u002BKIbs7ck51c=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:01:08 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/girl-8252503_640.0cwbmvo8ut.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\girl-8252503_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"0cwbmvo8ut"},{"Name":"integrity","Value":"sha256-cKqTQWUBjsRftFzq5NU7mzPNspRGVn9w/AeZAqyJT1w="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/girl-8252503_640.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"89992"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022cKqTQWUBjsRftFzq5NU7mzPNspRGVn9w/AeZAqyJT1w=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:00:58 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/girl-8252503_640.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\girl-8252503_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-cKqTQWUBjsRftFzq5NU7mzPNspRGVn9w/AeZAqyJT1w="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"89992"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022cKqTQWUBjsRftFzq5NU7mzPNspRGVn9w/AeZAqyJT1w=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:00:58 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/girl-8722219_640.ndt0kl4noz.png">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\girl-8722219_640.png'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"ndt0kl4noz"},{"Name":"integrity","Value":"sha256-u5yIeKBv4Ks/2ugT\u002BW2z1RAJvPcjvP2TTodTem\u002BYCi4="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/girl-8722219_640.png"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"451192"},{"Name":"Content-Type","Value":"image/png"},{"Name":"ETag","Value":"\u0022u5yIeKBv4Ks/2ugT\u002BW2z1RAJvPcjvP2TTodTem\u002BYCi4=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:01:42 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/girl-8722219_640.png">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\girl-8722219_640.png'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-u5yIeKBv4Ks/2ugT\u002BW2z1RAJvPcjvP2TTodTem\u002BYCi4="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"451192"},{"Name":"Content-Type","Value":"image/png"},{"Name":"ETag","Value":"\u0022u5yIeKBv4Ks/2ugT\u002BW2z1RAJvPcjvP2TTodTem\u002BYCi4=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:01:42 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/Wh (2).jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\Wh (2).jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-WA08www0zbE9w6v6s8NkUkST7wsz6gvmY9H4UhUX5zA="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"302586"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022WA08www0zbE9w6v6s8NkUkST7wsz6gvmY9H4UhUX5zA=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:00:54 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/Wh (2).wegh04xcdz.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\Wh (2).jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"wegh04xcdz"},{"Name":"integrity","Value":"sha256-WA08www0zbE9w6v6s8NkUkST7wsz6gvmY9H4UhUX5zA="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/Wh (2).jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"302586"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022WA08www0zbE9w6v6s8NkUkST7wsz6gvmY9H4UhUX5zA=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:00:54 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/woman-8859570_640.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\woman-8859570_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-dfRuua2eaVFm4Rc/JvmwKCGDF\u002BR7jdr439J1bFNUty4="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"79005"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022dfRuua2eaVFm4Rc/JvmwKCGDF\u002BR7jdr439J1bFNUty4=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:04:14 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/woman-8859570_640.l0ab1z6as9.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\woman-8859570_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"l0ab1z6as9"},{"Name":"integrity","Value":"sha256-dfRuua2eaVFm4Rc/JvmwKCGDF\u002BR7jdr439J1bFNUty4="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/woman-8859570_640.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"79005"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022dfRuua2eaVFm4Rc/JvmwKCGDF\u002BR7jdr439J1bFNUty4=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:04:14 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/young-man-8801861_640.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\young-man-8801861_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-sRup1kwObXvQZi2EX0AdJvRp6dXINy/ywSQ5hFrsTJQ="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=3600, must-revalidate"},{"Name":"Content-Length","Value":"60214"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022sRup1kwObXvQZi2EX0AdJvRp6dXINy/ywSQ5hFrsTJQ=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:09:33 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/DatingAppAPI/images/avatars/young-man-8801861_640.r50u88qbn5.jpg">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\images\avatars\young-man-8801861_640.jpg'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"r50u88qbn5"},{"Name":"integrity","Value":"sha256-sRup1kwObXvQZi2EX0AdJvRp6dXINy/ywSQ5hFrsTJQ="},{"Name":"label","Value":"_content/DatingAppAPI/images/avatars/young-man-8801861_640.jpg"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"60214"},{"Name":"Content-Type","Value":"image/jpeg"},{"Name":"ETag","Value":"\u0022sRup1kwObXvQZi2EX0AdJvRp6dXINy/ywSQ5hFrsTJQ=\u0022"},{"Name":"Last-Modified","Value":"Thu, 22 May 2025 03:09:33 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+  </ItemGroup>
+</Project>

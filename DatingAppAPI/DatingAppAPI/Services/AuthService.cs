@@ -22,6 +22,7 @@ namespace DatingAppAPI.Services
             _emailService = emailService;
         }
 
+        // DatingAppAPI.Services/AuthService.cs
         public async Task<AuthResponseDto> RegisterAsync(RegisterDto registerDto)
         {
             var existingUser = await _context.Users
@@ -37,43 +38,63 @@ namespace DatingAppAPI.Services
                 Email = registerDto.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Password),
                 CreatedAt = DateTime.UtcNow,
-                IsEmailVerified = false
+                IsEmailVerified = false // Mặc định khi đăng ký
             };
 
             _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(); // Lưu để user.UserID có giá trị
 
             await SendOtpAsync(registerDto.Email);
 
             return new AuthResponseDto
             {
+                UserID = user.UserID, // Trả về UserID
                 Username = user.Username,
                 Email = user.Email,
-                Token = null
+                Token = null, // Mới đăng ký, chưa có token
+                IsEmailVerified = false // Luôn là false khi mới đăng ký
             };
         }
 
+        // DatingAppAPI.Services/AuthService.cs
         public async Task<AuthResponseDto> LoginAsync(LoginDto loginDto)
         {
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == loginDto.Email);
+
             if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
             {
-                throw new Exception("Invalid email or password.");
+                // Sai email hoặc mật khẩu
+                throw new Exception("Invalid email or password."); // Controller sẽ bắt và trả 400
             }
 
+            // Nếu email/password đúng, kiểm tra trạng thái verify
             if (!user.IsEmailVerified)
             {
-                await SendOtpAsync(user.Email);
-                throw new Exception("Email not verified. OTP sent.");
+                // Email đúng, mật khẩu đúng, NHƯNG CHƯA VERIFY
+                await SendOtpAsync(user.Email); // Vẫn gửi OTP nếu bạn muốn
+                                                // KHÔNG NÉM EXCEPTION NỮA
+                                                // Trả về thông tin user, không có token, và đánh dấu isVerified = false
+                                                // Controller sẽ nhận DTO này và trả về 200 OK
+                return new AuthResponseDto
+                {
+                    UserID = user.UserID,
+                    Username = user.Username,
+                    Email = user.Email,
+                    Token = null, // Không cấp token cho đến khi verify OTP
+                    IsEmailVerified = false
+                };
             }
 
+            // Email đúng, mật khẩu đúng, ĐÃ VERIFY
             var token = GenerateJwtToken(user);
             return new AuthResponseDto
             {
+                UserID = user.UserID,
                 Username = user.Username,
                 Email = user.Email,
-                Token = token
+                Token = token,
+                IsEmailVerified = true
             };
         }
         public async Task SendOtpToEmailAsync(string email)
@@ -217,7 +238,7 @@ namespace DatingAppAPI.Services
                 signingCredentials: creds);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
-        }
+        }   
         public async Task<User> GetUserByEmailAsync(string email)
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);

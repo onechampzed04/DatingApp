@@ -29,15 +29,17 @@ namespace DatingAppAPI.Controllers
             }
         }
 
+        // DatingAppAPI.Controllers/AuthController.cs
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
             try
             {
-                var result = await _authService.LoginAsync(loginDto);
-                return Ok(new { message = "Login successful.", data = result });
+                var result = await _authService.LoginAsync(loginDto); // result giờ sẽ là AuthResponseDto
+                                                                      // Client sẽ kiểm tra result.IsEmailVerified
+                return Ok(new { message = "Login attempt processed.", data = result });
             }
-            catch (Exception ex)
+            catch (Exception ex) // Exception này giờ chỉ là "Invalid email or password."
             {
                 return BadRequest(new { message = ex.Message });
             }
@@ -85,7 +87,8 @@ namespace DatingAppAPI.Controllers
                                 {
                                     userId = user.UserID,
                                     username = user.Username,
-                                    email = user.Email
+                                    email = user.Email,
+                                    isEmailVerified = user.IsEmailVerified // Thêm trường này
                                 },
                                 token
                             }
