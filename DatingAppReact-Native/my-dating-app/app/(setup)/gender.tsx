@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { updateUserProfile } from '../../utils/api'; // <<<< ĐIỀU CHỈNH ĐƯỜNG DẪN NÀY
+import { updateUserProfileWithFetch  } from '../../utils/api'; // <<<< ĐIỀU CHỈNH ĐƯỜNG DẪN NÀY
 
 const GenderScreen = () => {
   const [selectedGender, setSelectedGender] = useState<string>('Man'); // Giá trị mặc định
@@ -31,7 +31,7 @@ const GenderScreen = () => {
       // Gọi API để cập nhật giới tính
       // Backend của bạn mong đợi một đối tượng User đầy đủ cho PutUser,
       // updateUserProfile trong api.ts sẽ fetch user hiện tại rồi merge.
-      await updateUserProfile(userId, { gender: selectedGender });
+      await updateUserProfileWithFetch(userId, { gender: selectedGender }); // << THAY BẰNG DÒNG NÀY
 
       // Alert.alert("Thành công", "Đã cập nhật giới tính!"); // Có thể bỏ qua nếu chuyển trang ngay
       router.push('/(setup)/profile'); // Chuyển đến màn hình profile setup

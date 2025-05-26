@@ -53,12 +53,12 @@ export default function ProfileDetailsScreen() {
   };
 
   const handleSkip = () => {
-    router.push('/(auth)/habit');  // Replace with the actual screen path
+    router.push('/(setup)/habit');  // Replace with the actual screen path
   };
 
   const handleConfirm = () => {
     // Perform any save logic or validation if needed
-    router.push('/(auth)/habit');  // Replace with the actual screen path
+    router.push('/(setup)/habit');  // Replace with the actual screen path
   };
 
   return (

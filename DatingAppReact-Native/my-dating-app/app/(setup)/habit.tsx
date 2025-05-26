@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
-import { getAllInterests, saveUserInterests, Interest, UserInterestData } from '../../utils/api';
+import { getAllInterests, saveUserInterests, Interest, } from '../../utils/api';
 
 export default function HabitScreen() {
   const router = useRouter();
@@ -60,13 +60,13 @@ export default function HabitScreen() {
     }
 
     setSaving(true);
-    const dataToSave: UserInterestData = {
-      userId: user.userId,
-      interestIds: selectedInterestIds,
-    };
+    // const dataToSave: UserInterestData = {
+    //   userId: user.userId,
+    //   interestIds: selectedInterestIds,
+    // };
 
     try {
-      await saveUserInterests(dataToSave);
+      await saveUserInterests(user.userId, selectedInterestIds);
       Alert.alert(
         'Success',
         'Your interests have been saved!',

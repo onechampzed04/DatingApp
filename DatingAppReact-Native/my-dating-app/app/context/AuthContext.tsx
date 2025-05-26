@@ -1,11 +1,13 @@
+// AuthContext.tsx
+// ... (các phần import và khai báo interface giữ nguyên)
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as authApi from '../../utils/api';
-import { getUserByEmail } from '../../utils/api';
+import * as authApi from '../../utils/api'; // Giữ lại để dùng cho login, register
+import { getUserByEmail, sendOtp } from '../../utils/api'; // Import trực tiếp sendOtp
 import { useRouter } from 'expo-router';
 
 interface User {
-  userId: number; // Added userId
+  userId: number;
   username: string;
   email: string;
 }
@@ -16,7 +18,7 @@ interface AuthContextType {
   loginUser: (data: { email: string; password: string }) => Promise<void>;
   register: (data: { username: string; email: string; password: string }) => Promise<void>;
   logout: () => Promise<void>;
-  setAuthenticatedSession: (userData: User, token: string) => Promise<void>; // New function
+  setAuthenticatedSession: (userData: User, token: string) => Promise<void>;
   isLoading: boolean;
 }
 
@@ -26,7 +28,7 @@ export const AuthContext = createContext<AuthContextType>({
   loginUser: async () => {},
   register: async () => {},
   logout: async () => {},
-  setAuthenticatedSession: async () => {}, // New function default
+  setAuthenticatedSession: async () => {},
   isLoading: true,
 });
 
@@ -44,7 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (storedToken && storedUser) {
           const parsedUser = JSON.parse(storedUser);
           setToken(storedToken);
-          setUser(parsedUser); // Assumes storedUser contains userId
+          setUser(parsedUser);
         }
       } catch (error) {
         console.error('Error loading auth data:', error);
@@ -55,34 +57,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     loadAuth();
   }, []);
 
+  // ĐÂY LÀ HÀM loginUser ĐÃ CẬP NHẬT
   const loginUser = async (data: { email: string; password: string }) => {
     try {
-      const response = await authApi.login(data); // This is the token response
-      
-      // 👉 Gọi API để lấy thông tin user theo email to get full user details including UserID
-      const fullUserResponse = await getUserByEmail(data.email); // Assuming login email is the key
-      
+      const response = await authApi.login(data);
+      const fullUserResponse = await getUserByEmail(data.email);
+
       if (!fullUserResponse || !fullUserResponse.userID) {
         throw new Error("User details not found or UserID is missing.");
       }
 
       const userData: User = {
-        userId: fullUserResponse.userID, // Store UserID
-        username: fullUserResponse.username, // Assuming username is in fullUserResponse
-        email: fullUserResponse.email    // Assuming email is in fullUserResponse
+        userId: fullUserResponse.userID,
+        username: fullUserResponse.username,
+        email: fullUserResponse.email
       };
-  
+
       setUser(userData);
-      setToken(response.data.token); // Assuming token is in the login response
-  
+      setToken(response.data.token);
+
       await AsyncStorage.setItem('user', JSON.stringify(userData));
       await AsyncStorage.setItem('token', response.data.token ?? '');
-  
+
       if (fullUserResponse.isEmailVerified === false) {
-        // ❌ Chưa xác thực → chuyển sang OTP
+        try {
+          console.log(`[AuthContext] User ${userData.email} is not verified. Sending OTP.`);
+          await sendOtp(userData.email); // Gửi OTP
+          console.log(`[AuthContext] OTP sent to ${userData.email}. Navigating to OTP screen.`);
+        } catch (otpError) {
+          console.error('[AuthContext] Failed to send OTP during login for unverified user:', otpError);
+        }
         router.replace({ pathname: '/(auth)/otp', params: { email: userData.email } });
       } else {
-        // ✅ Đã xác thực → vào app
         router.replace('/(tabs)/explore');
       }
     } catch (error) {
@@ -91,17 +97,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // ĐÂY LÀ HÀM register ĐÃ CẬP NHẬT
   const register = async (data: { username: string; email: string; password: string }) => {
     try {
-      // Step 1: Register the user (backend should create the user and return basic info or just success)
-      // The current `authApi.register` returns AuthResponse which doesn't have userID.
-      await authApi.register(data); 
-
-      // Step 2: After successful registration, fetch the full user details including UserID
+      await authApi.register(data);
       const fullUserResponse = await getUserByEmail(data.email);
 
       if (!fullUserResponse || !fullUserResponse.userID) {
-        // This case should ideally not happen if registration was successful and user exists
         throw new Error("User details not found after registration or UserID is missing.");
       }
 
@@ -111,15 +113,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email: fullUserResponse.email
       };
       
-      setUser(userData);
-      // Typically, registration doesn't log the user in directly or issue a token.
-      // The user would then proceed to login.
-      // However, if your auth/register endpoint *does* return a token and logs in, adjust accordingly.
-      // For now, just storing user details. Token will be set upon login.
-      await AsyncStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData); // Có thể set user ở đây hoặc không, tùy thuộc vào luồng bạn muốn
+      await AsyncStorage.setItem('user', JSON.stringify(userData)); // Lưu user vào storage
 
-      // After registration, you likely want to navigate them to OTP verification or login.
-      // Assuming new users need to verify email via OTP:
+      // Sau khi đăng ký, gửi OTP và điều hướng đến màn hình OTP
+      try {
+        console.log(`[AuthContext] New user ${userData.email} registered. Sending OTP.`);
+        await sendOtp(userData.email); // Gửi OTP sau khi đăng ký thành công
+        console.log(`[AuthContext] OTP sent to ${userData.email} post-registration. Navigating to OTP screen.`);
+      } catch (otpError) {
+        console.error('[AuthContext] Failed to send OTP after registration:', otpError);
+      }
       router.replace({ pathname: '/(auth)/otp', params: { email: userData.email } });
 
     } catch (error) {
@@ -133,7 +137,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(null);
       setToken(null);
       await AsyncStorage.multiRemove(['user', 'token']);
-      router.replace('/(auth)/login'); // Ensure redirect on logout
+      router.replace('/(auth)/login');
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -147,11 +151,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await AsyncStorage.setItem('token', authToken);
     } catch (error) {
       console.error('Error setting authenticated session:', error);
-      // Optionally, clear session if saving fails to prevent inconsistent state
       setUser(null);
       setToken(null);
       await AsyncStorage.multiRemove(['user', 'token']);
-      throw error; // Re-throw to allow caller to handle
+      throw error;
     }
   };
 

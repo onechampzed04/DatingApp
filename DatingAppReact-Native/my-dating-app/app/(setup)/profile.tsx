@@ -16,8 +16,16 @@ import {
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as ImagePicker from 'expo-image-picker'; // <<<< THÊM IMPORT NÀY
-import { updateUserProfile, getUserById, ApiUser, UserProfileUpdateData } from '../../utils/api'; // Kiểm tra lại đường dẫn
+import * as ImagePicker from 'expo-image-picker';
+// Quan trọng: Import thêm ExpoImageFile và API_BASE_URL
+import {
+  updateUserProfileWithFetch,
+  getUserById,
+  ApiUser,
+  UserProfileModificationData, // Đổi tên từ UserProfileUpdateData cho nhất quán
+  ExpoImageFile,
+  API_BASE_URL, // Import API_BASE_URL
+} from '../../utils/api'; // Kiểm tra lại đường dẫn
 
 const ProfileSetupScreen = () => {
   const router = useRouter();
@@ -26,15 +34,14 @@ const ProfileSetupScreen = () => {
   const [birthday, setBirthday] = useState<Date | null>(null);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
-  const [selectedAvatarUri, setSelectedAvatarUri] = useState<string | null>(null); // <<<< URI để hiển thị
-  const [avatarBase64, setAvatarBase64] = useState<string | null>(null); // <<<< Base64 để gửi đi
+  // State mới để lưu trữ ImagePickerAsset
+  const [selectedAvatarAsset, setSelectedAvatarAsset] = useState<ImagePicker.ImagePickerAsset | null>(null);
+  // URI để hiển thị ảnh (có thể là local URI hoặc URL từ server)
+  const [displayAvatarUri, setDisplayAvatarUri] = useState<string | null>(null);
 
-  const [isLoading, setIsLoading] = useState(false); // Loading chung cho submit profile
-  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false); // Loading riêng cho upload avatar
+  const [isLoading, setIsLoading] = useState(false);
   const [isFetchingInitialData, setIsFetchingInitialData] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
-  const [initialAvatarUrl, setInitialAvatarUrl] = useState<string | null>(null); // Để lưu avatar từ DB
-
 
   useEffect(() => {
     const fetchInitialProfileData = async () => {
@@ -43,7 +50,7 @@ const ProfileSetupScreen = () => {
         const userIdStr = await AsyncStorage.getItem('userId');
         if (!userIdStr) {
           Alert.alert("Lỗi", "Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
-          router.replace('/login');
+          router.replace('/login'); // Hoặc màn hình đăng nhập của bạn
           return;
         }
         const id = parseInt(userIdStr, 10);
@@ -64,22 +71,15 @@ const ProfileSetupScreen = () => {
               console.warn("Ngày sinh không hợp lệ từ backend:", userProfile.birthdate);
             }
           }
-          if (userProfile.avatar) { // <<<< HIỂN THỊ AVATAR TỪ DB KHI LOAD
-            // Nếu avatar từ DB là Base64, đảm bảo nó có tiền tố data URI
-            if (userProfile.avatar.startsWith('data:image')) {
-                setSelectedAvatarUri(userProfile.avatar);
-            } else {
-                // Nếu là URL, bạn có thể set trực tiếp, nhưng ví dụ này tập trung base64
-                // Giả định ở đây là avatar trong DB là Base64 (có thể cần tiền tố)
-                // setSelectedAvatarUri(`data:image/jpeg;base64,${userProfile.avatar}`); // Tùy thuộc định dạng lưu
-                // HOẶC nếu bạn lưu base64 thuần:
-                setInitialAvatarUrl(userProfile.avatar); // Để biết avatar gốc từ DB là gì
-                // Bạn cần một cách để phân biệt URI local với base64 từ DB khi hiển thị
-            }
+          if (userProfile.avatar) {
+            // userProfile.avatar giờ là URL tương đối, ví dụ: /images/avatars/abc.jpg
+            // Nối với API_BASE_URL để có URL đầy đủ
+            setDisplayAvatarUri(`${API_BASE_URL}${userProfile.avatar}`);
           }
         }
       } catch (error) {
         console.error("Lỗi khi tải dữ liệu hồ sơ ban đầu:", error);
+        Alert.alert("Lỗi", "Không thể tải thông tin hồ sơ. Vui lòng thử lại.");
       } finally {
         setIsFetchingInitialData(false);
       }
@@ -90,7 +90,6 @@ const ProfileSetupScreen = () => {
 
 
   const pickImage = async () => {
-    // Yêu cầu quyền truy cập thư viện ảnh
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (permissionResult.granted === false) {
       Alert.alert("Cần quyền truy cập", "Bạn cần cấp quyền truy cập thư viện ảnh để chọn ảnh đại diện.");
@@ -100,77 +99,58 @@ const ProfileSetupScreen = () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [1, 1], // Tỷ lệ khung hình vuông
-      quality: 0.5, // Chất lượng ảnh (0-1), giảm để base64 nhỏ hơn
-      base64: true, // <<<< YÊU CẦU TRẢ VỀ BASE64
+      aspect: [1, 1],
+      quality: 0.7, // Giảm chất lượng một chút để file nhỏ hơn, không cần base64
+      // base64: true, // <<<< BỎ DÒNG NÀY
     });
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
       const asset = result.assets[0];
-      setSelectedAvatarUri(asset.uri); // URI để hiển thị trên máy
-      if (asset.base64) {
-        // Tạo chuỗi Base64 đầy đủ với data URI prefix
-        const base64WithPrefix = `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}`;
-        setAvatarBase64(base64WithPrefix);
-        // Nếu bạn muốn lưu ngay khi chọn, có thể gọi hàm lưu ở đây
-        // await handleSaveAvatar(base64WithPrefix); 
-      }
+      setSelectedAvatarAsset(asset); // Lưu toàn bộ asset
+      setDisplayAvatarUri(asset.uri); // Hiển thị URI local ngay lập tức
     }
   };
 
-  // Hàm lưu avatar (có thể gọi riêng hoặc gộp vào handleConfirmProfile)
-  const handleSaveAvatar = async (base64Data: string | null) => {
-    if (!currentUserId || !base64Data) {
-        // Không cần alert ở đây nếu nó được gọi tự động
-        return false; 
-    }
-    setIsUploadingAvatar(true);
-    try {
-        await updateUserProfile(currentUserId, { avatar: base64Data });
-        // Alert.alert("Thành công", "Đã cập nhật ảnh đại diện!");
-        setInitialAvatarUrl(base64Data); // Cập nhật lại initialAvatarUrl sau khi lưu thành công
-        return true;
-    } catch (error: any) {
-        console.error("Lỗi khi cập nhật ảnh đại diện:", error.response?.data || error.message);
-        Alert.alert("Lỗi", "Không thể cập nhật ảnh đại diện. Vui lòng thử lại.");
-        return false;
-    } finally {
-        setIsUploadingAvatar(false);
-    }
-  };
-
+  // Bỏ hàm handleSaveAvatar vì việc lưu avatar sẽ gộp vào handleConfirmProfile
 
   const handleConfirmProfile = async () => {
-    // ... (phần validation firstName, birthday, currentUserId như cũ)
     if (!firstName.trim() || !birthday || !currentUserId) {
-        // ... (Alerts tương ứng)
-        if (!firstName.trim()) Alert.alert("Thiếu thông tin", "Vui lòng nhập tên của bạn.");
-        else if (!birthday) Alert.alert("Thiếu thông tin", "Vui lòng chọn ngày sinh của bạn.");
-        else if (!currentUserId) Alert.alert("Lỗi", "Không tìm thấy ID người dùng. Vui lòng thử lại.");
-        return;
+      if (!firstName.trim()) Alert.alert("Thiếu thông tin", "Vui lòng nhập tên của bạn.");
+      else if (!birthday) Alert.alert("Thiếu thông tin", "Vui lòng chọn ngày sinh của bạn.");
+      else if (!currentUserId) Alert.alert("Lỗi", "Không tìm thấy ID người dùng. Vui lòng thử lại.");
+      return;
     }
 
     setIsLoading(true);
     try {
       const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
-      const birthdateString = birthday.toISOString();
+      const birthdateString = birthday.toISOString(); // Backend mong đợi ISO string
 
-      let updatePayload: UserProfileUpdateData = {
+      const updatePayload: UserProfileModificationData = { // Sử dụng tên nhất quán
         fullName: fullName,
         birthdate: birthdateString,
+        // Các trường khác nếu có: gender, bio, phoneNumber, address, profileVisibility
+        // Không có trường avatar ở đây
       };
 
-      // Chỉ thêm avatar vào payload nếu nó đã được chọn và khác với avatar ban đầu từ DB
-      // Hoặc nếu người dùng muốn xóa avatar (cần logic thêm)
-      if (avatarBase64 && avatarBase64 !== initialAvatarUrl) {
-        updatePayload.avatar = avatarBase64;
+      let avatarFileToUpload: ExpoImageFile | undefined = undefined;
+      if (selectedAvatarAsset) {
+        // Tạo tên file và type nếu ImagePicker không cung cấp đầy đủ
+        const fileName = selectedAvatarAsset.fileName || `avatar_${Date.now()}.${selectedAvatarAsset.uri.split('.').pop()}`;
+        const fileType = selectedAvatarAsset.mimeType || `image/${selectedAvatarAsset.uri.split('.').pop()}`;
+
+        avatarFileToUpload = {
+          uri: selectedAvatarAsset.uri,
+          name: fileName,
+          type: fileType,
+        };
       }
-      // Nếu không có avatar mới được chọn, backend sẽ không thay đổi avatar hiện tại (do Cách 2)
 
-      await updateUserProfile(currentUserId, updatePayload);
+      // Gọi API updateUserProfile với payload và file avatar (nếu có)
+      await updateUserProfileWithFetch(currentUserId, updatePayload, avatarFileToUpload); // << THAY BẰNG DÒNG NÀY
 
-      Alert.alert("Thành công", "Đã cập nhật hồ sơ!"); // Có thể gộp thông báo
-      router.push('/(setup)/habit');
+      Alert.alert("Thành công", "Đã cập nhật hồ sơ!");
+      router.push('/(setup)/habit'); // Hoặc màn hình tiếp theo
     } catch (error: any) {
       console.error("Lỗi khi cập nhật hồ sơ:", error.response?.data || error.message);
       Alert.alert("Lỗi", error.response?.data?.message || "Không thể cập nhật hồ sơ. Vui lòng thử lại.");
@@ -179,7 +159,6 @@ const ProfileSetupScreen = () => {
     }
   };
 
-  // ... (showDatePicker, hideDatePicker, handleConfirmDate, handleSkip như cũ)
   const showDatePicker = () => setDatePickerVisibility(true);
   const hideDatePicker = () => setDatePickerVisibility(false);
   const handleConfirmDate = (date: Date) => {
@@ -191,7 +170,6 @@ const ProfileSetupScreen = () => {
   };
 
   if (isFetchingInitialData) {
-    // ... (ActivityIndicator như cũ)
     return (
         <View style={[styles.container, { justifyContent: 'center', alignItems: 'center'}]}>
             <ActivityIndicator size="large" color="#eb3c58" />
@@ -202,29 +180,28 @@ const ProfileSetupScreen = () => {
         );
   }
 
-  // URI để hiển thị: ưu tiên ảnh mới chọn, sau đó là avatar từ DB (đã có tiền tố)
-  const displayAvatarUri = selectedAvatarUri || initialAvatarUrl;
-
-
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
       <View style={styles.innerContainer}>
-        <TouchableOpacity style={styles.skipBtn} onPress={handleSkip} disabled={isLoading || isUploadingAvatar}>
+        <TouchableOpacity style={styles.skipBtn} onPress={handleSkip} disabled={isLoading}>
           <Text style={styles.skipText}>Bỏ qua</Text>
         </TouchableOpacity>
         <Text style={styles.title}>Thông tin hồ sơ</Text>
 
         <View style={styles.avatarContainer}>
-          <TouchableOpacity onPress={pickImage} disabled={isUploadingAvatar}>
-            {isUploadingAvatar ? (
+          <TouchableOpacity onPress={pickImage} disabled={isLoading}>
+            {isLoading && selectedAvatarAsset ? ( // Hiển thị loading indicator nhỏ trên ảnh nếu đang upload
                 <View style={[styles.avatar, styles.avatarLoading]}>
-                    <ActivityIndicator color="#eb3c58" size="large"/>
+                    <ActivityIndicator color="#eb3c58" size="small"/>
                 </View>
             ) : (
                 <Image
-                // Hiển thị ảnh đã chọn (nếu có) hoặc avatar từ DB, hoặc ảnh mặc định
-                source={displayAvatarUri ? { uri: displayAvatarUri } : require('../../assets/images/dating-app.png')} // <<<< THAY BẰNG ẢNH MẶC ĐỊNH CỦA BẠN
+                source={displayAvatarUri ? { uri: displayAvatarUri } : require('../../assets/images/dating-app.png')} // Ảnh mặc định của bạn
                 style={styles.avatar}
+                onError={(e) => { // Xử lý lỗi nếu URL ảnh không hợp lệ
+                    console.warn("Error loading avatar image:", e.nativeEvent.error);
+                    setDisplayAvatarUri(null); // Reset để hiển thị ảnh mặc định
+                }}
                 />
             )}
             <View style={styles.cameraIcon}>
@@ -233,13 +210,12 @@ const ProfileSetupScreen = () => {
           </TouchableOpacity>
         </View>
 
-        {/* ... (TextInput cho firstName, lastName như cũ) ... */}
         <TextInput
           placeholder="Tên"
           value={firstName}
           onChangeText={setFirstName}
           style={styles.input}
-          editable={!isLoading && !isUploadingAvatar}
+          editable={!isLoading}
           placeholderTextColor="#aaa"
         />
 
@@ -248,28 +224,27 @@ const ProfileSetupScreen = () => {
           value={lastName}
           onChangeText={setLastName}
           style={styles.input}
-          editable={!isLoading && !isUploadingAvatar}
+          editable={!isLoading}
           placeholderTextColor="#aaa"
         />
 
-        {/* ... (TouchableOpacity cho birthday như cũ) ... */}
          <TouchableOpacity
-          style={[styles.birthdayButton, (isLoading || isUploadingAvatar) && styles.disabledInput]}
+          style={[styles.birthdayButton, isLoading && styles.disabledInput]}
           onPress={showDatePicker}
-          disabled={isLoading || isUploadingAvatar}
+          disabled={isLoading}
         >
           <Text style={styles.birthdayText}>
             {birthday
-              ? birthday.toLocaleDateString('vi-VN') 
+              ? birthday.toLocaleDateString('vi-VN')
               : 'Chọn ngày sinh'}
           </Text>
         </TouchableOpacity>
 
 
         <TouchableOpacity
-          style={[styles.confirmButton, (isLoading || isUploadingAvatar) && styles.disabledButton]}
+          style={[styles.confirmButton, (isLoading || !firstName.trim() || !birthday) && styles.disabledButton]}
           onPress={handleConfirmProfile}
-          disabled={isLoading || isUploadingAvatar || !firstName.trim() || !birthday}
+          disabled={isLoading || !firstName.trim() || !birthday}
         >
           {isLoading ? (
             <ActivityIndicator color="#fff" />
@@ -279,14 +254,13 @@ const ProfileSetupScreen = () => {
         </TouchableOpacity>
 
         <DateTimePickerModal
-          // ... (props như cũ) ...
             isVisible={isDatePickerVisible}
             mode="date"
-            date={birthday || new Date(new Date().setFullYear(new Date().getFullYear() - 18))} 
+            date={birthday || new Date(new Date().setFullYear(new Date().getFullYear() - 18))}
             onConfirm={handleConfirmDate}
             onCancel={hideDatePicker}
-            maximumDate={new Date(new Date().setFullYear(new Date().getFullYear() - 16))} 
-            minimumDate={new Date(new Date().setFullYear(new Date().getFullYear() - 80))} 
+            maximumDate={new Date(new Date().setFullYear(new Date().getFullYear() - 16))}
+            minimumDate={new Date(new Date().setFullYear(new Date().getFullYear() - 80))}
             confirmTextIOS="Chọn"
             cancelTextIOS="Huỷ"
             locale="vi-VN"
@@ -298,12 +272,11 @@ const ProfileSetupScreen = () => {
 
 export default ProfileSetupScreen;
 
-// StyleSheet (giữ nguyên styles cũ, thêm style cho avatar loading)
 const styles = StyleSheet.create({
-  // ... (tất cả styles cũ của bạn)
-  container: { // Cần có backgroundColor cho View gốc của ActivityIndicator loading
+  // ... (giữ nguyên styles của bạn)
+  container: {
     flex: 1,
-    backgroundColor: '#fff', 
+    backgroundColor: '#fff',
   },
   scrollContainer: {
     flexGrow: 1,
@@ -312,31 +285,31 @@ const styles = StyleSheet.create({
   innerContainer: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingVertical: 30, 
+    paddingVertical: 30,
     backgroundColor: '#fff',
     alignItems: 'center',
-    justifyContent: 'center', 
+    justifyContent: 'center',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 24, 
+    marginBottom: 24,
     textAlign: 'center',
     color: '#333',
   },
   avatarContainer: {
     position: 'relative',
-    marginBottom: 30, 
+    marginBottom: 30,
   },
   avatar: {
-    width: 120, 
+    width: 120,
     height: 120,
-    borderRadius: 60, 
-    borderWidth: 3, 
+    borderRadius: 60,
+    borderWidth: 3,
     borderColor: '#eb3c58',
-    backgroundColor: '#e0e0e0', // Màu nền cho avatar khi chưa có ảnh
+    backgroundColor: '#e0e0e0',
   },
-  avatarLoading: { // Style khi avatar đang tải
+  avatarLoading: {
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -345,53 +318,53 @@ const styles = StyleSheet.create({
     bottom: 0,
     right: 0,
     backgroundColor: '#eb3c58',
-    borderRadius: 18, 
-    width: 36, 
+    borderRadius: 18,
+    width: 36,
     height: 36,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#fff', 
+    borderColor: '#fff',
   },
   input: {
     width: '100%',
-    paddingVertical: 14, 
+    paddingVertical: 14,
     paddingHorizontal: 16,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#ddd',
-    marginBottom: 18, 
+    marginBottom: 18,
     fontSize: 16,
-    backgroundColor: '#f9f9f9', 
+    backgroundColor: '#f9f9f9',
     color: '#333',
   },
   birthdayButton: {
     width: '100%',
     backgroundColor: '#f9f9f9',
-    paddingVertical: 16, 
+    paddingVertical: 16,
     paddingHorizontal: 16,
     borderRadius: 10,
-    marginBottom: 24, 
+    marginBottom: 24,
     borderWidth: 1,
     borderColor: '#ddd',
   },
   birthdayText: {
     color: '#333',
     fontSize: 16,
-    textAlign: 'left', 
+    textAlign: 'left',
   },
   confirmButton: {
     backgroundColor: '#eb3c58',
-    paddingVertical: 16, 
+    paddingVertical: 16,
     borderRadius: 10,
     width: '100%',
     alignItems: 'center',
-    marginTop: 10, 
+    marginTop: 10,
   },
   disabledButton: {
     backgroundColor: '#f9a0ae',
   },
-  disabledInput: { 
+  disabledInput: {
     backgroundColor: '#e9e9e9',
     opacity: 0.7,
   },
@@ -402,7 +375,7 @@ const styles = StyleSheet.create({
   },
   skipBtn: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 50 : 30, 
+    top: Platform.OS === 'ios' ? 50 : 30,
     right: 20,
     padding: 8,
   },

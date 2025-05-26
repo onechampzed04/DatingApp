@@ -1,9 +1,8 @@
-// app/(tabs)/explore.tsx
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View, Text, StyleSheet, Image, ActivityIndicator, Modal,
   TouchableOpacity, Dimensions, ImageSourcePropType, Platform,
-  InteractionManager, // THÊM DÒNG NÀY
+  InteractionManager,
 } from 'react-native';
 import Swiper from 'react-native-deck-swiper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,6 +16,7 @@ import {
   createSwipe,
   SwipeCreateDTO,
   SwipeMatchResponse,
+  API_BASE_URL // Import từ utils/api.ts
 } from '../../utils/api';
 
 const { width, height } = Dimensions.get('window');
@@ -27,9 +27,9 @@ const MAIN_GRADIENT_END = '#f8f8f8';
 const CARD_GRADIENT_COLORS: [ColorValue, ColorValue, ...ColorValue[]] = ['transparent', 'rgba(0,0,0,0.1)', 'rgba(0,0,0,0.6)', 'rgba(0,0,0,0.85)'];
 const MATCH_MODAL_GRADIENT_COLORS: [ColorValue, ColorValue] = ['#FF6B6B', '#FF8E53'];
 
-const INITIAL_PAGE_SIZE = 5;
-const SUBSEQUENT_PAGE_SIZE = 1;
-const LOAD_MORE_THRESHOLD_COUNT = INITIAL_PAGE_SIZE;
+const INITIAL_PAGE_SIZE = 10;
+const SUBSEQUENT_PAGE_SIZE = 5;
+const LOAD_MORE_THRESHOLD_COUNT = 3;
 
 export default function ExploreScreen() {
   const [allLoadedUsers, setAllLoadedUsers] = useState<ApiUserCard[]>([]);
@@ -45,8 +45,9 @@ export default function ExploreScreen() {
   const [showMatchModal, setShowMatchModal] = useState(false);
 
   const swiperRef = useRef<Swiper<ApiUserCard>>(null);
-  const isFetching = useRef(false);
+  const isFetchingUsers = useRef(false);
 
+  // 1. Lấy User ID khi component mount
   useEffect(() => {
     const fetchCurrentUserId = async () => {
       const userIdStr = await AsyncStorage.getItem('userId');
@@ -61,30 +62,38 @@ export default function ExploreScreen() {
     fetchCurrentUserId();
   }, []);
 
-  const fetchUsers = useCallback(async (page: number, isInitial: boolean) => {
-    if (isFetching.current || !hasMoreDataInBackend) {
+  // 2. Hàm tải User (useCallback)
+  const fetchUsers = useCallback(async (page: number, isInitialLoad: boolean) => {
+    if (isFetchingUsers.current || (!isInitialLoad && !hasMoreDataInBackend)) {
+      if(!hasMoreDataInBackend && !isInitialLoad) console.log(`ExploreScreen: Fetch for page ${page} skipped, no more data and not initial.`);
+      if(isFetchingUsers.current) console.log(`ExploreScreen: Fetch for page ${page} skipped, already fetching.`);
       return;
     }
 
-    isFetching.current = true;
-    if (isInitial) setIsLoadingInitial(true);
+    isFetchingUsers.current = true;
+    if (isInitialLoad) setIsLoadingInitial(true);
     else setIsLoadingMore(true);
 
-    console.log(`ExploreScreen: Fetching page ${page} (Initial: ${isInitial})`);
+    console.log(`ExploreScreen: Fetching page ${page} (Initial: ${isInitialLoad}) with pageSize ${isInitialLoad ? INITIAL_PAGE_SIZE : SUBSEQUENT_PAGE_SIZE}`);
     try {
-      const pageSize = isInitial ? INITIAL_PAGE_SIZE : SUBSEQUENT_PAGE_SIZE;
-      const newUsers = await getUsersForSwiping({ pageNumber: page, pageSize: pageSize });
+      const pageSizeToFetch = isInitialLoad ? INITIAL_PAGE_SIZE : SUBSEQUENT_PAGE_SIZE;
+      const newUsers = await getUsersForSwiping({ pageNumber: page, pageSize: pageSizeToFetch });
 
-      if (newUsers.length < pageSize) {
+      if (newUsers.length < pageSizeToFetch) {
         setHasMoreDataInBackend(false);
-        console.log("ExploreScreen: No more users to fetch from backend or last page fetched.");
+        console.log(`ExploreScreen: Fetched ${newUsers.length} users, less than pageSize ${pageSizeToFetch}. This is likely the last page.`);
+      } else if (isInitialLoad && newUsers.length === pageSizeToFetch) {
+        // If initial load and got full page, ensure hasMoreData is true
+        setHasMoreDataInBackend(true);
       }
+      // If newUsers.length === 0, and it's not the first page, setHasMoreDataInBackend was already handled by newUsers.length < pageSizeToFetch
+      // If newUsers.length === 0 on the first page, it also means no more data.
 
       setAllLoadedUsers(prevUsers => {
         const existingUserIDs = new Set(prevUsers.map(u => u.userID));
         const uniqueNewUsers = newUsers.filter(u => !existingUserIDs.has(u.userID));
-        const updatedUsers = (isInitial || prevUsers.length === 0) ? uniqueNewUsers : [...prevUsers, ...uniqueNewUsers];
-        console.log(`ExploreScreen: Added ${uniqueNewUsers.length} new users. Total loaded: ${updatedUsers.length}`);
+        const updatedUsers = (isInitialLoad) ? uniqueNewUsers : [...prevUsers, ...uniqueNewUsers];
+        console.log(`ExploreScreen: Added ${uniqueNewUsers.length} new users. Total loaded: ${updatedUsers.length}. Initial load: ${isInitialLoad}`);
         return updatedUsers;
       });
 
@@ -94,34 +103,36 @@ export default function ExploreScreen() {
 
     } catch (error) {
       console.error("ExploreScreen: Failed to fetch users:", error);
-      setHasMoreDataInBackend(false);
     } finally {
-      if (isInitial) setIsLoadingInitial(false);
+      if (isInitialLoad) setIsLoadingInitial(false);
       else setIsLoadingMore(false);
-      isFetching.current = false;
+      isFetchingUsers.current = false;
     }
-  }, [hasMoreDataInBackend]);
+  }, [hasMoreDataInBackend]); // Dependency: hasMoreDataInBackend. Others are stable or constants.
 
+  // 3. Tải User lần đầu hoặc khi User ID thay đổi
   useEffect(() => {
     if (loggedInUserId !== null) {
-      setAllLoadedUsers([]);
-      setCurrentSwiperIndex(0);
-      setNextPageToFetch(1);
-      setHasMoreDataInBackend(true);
-      setIsLoadingInitial(true);
-      isFetching.current = false;
+      console.log(`ExploreScreen: UserID ${loggedInUserId} detected. Resetting and performing initial fetch.`);
+      setAllLoadedUsers([]); // Reset
+      setCurrentSwiperIndex(0); // Reset
+      setNextPageToFetch(1); // Reset
+      setHasMoreDataInBackend(true); // QUAN TRỌNG: Luôn reset thành true cho lần tải đầu của user mới
+      isFetchingUsers.current = false; // Reset cờ
+      // Gọi phiên bản fetchUsers hiện tại mà không đưa nó vào dependencies
       fetchUsers(1, true);
     }
-  }, [loggedInUserId, fetchUsers]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loggedInUserId]);// fetchUsers is a dependency here
 
-  // SỬA ĐỔI HÀM NÀY
+  // 4. Xử lý Swipe và tăng index
   const handleSwipeActionAndAdvance = useCallback(async (swipedCardAbsoluteIndex: number, isLike: boolean, isSuperLike: boolean = false) => {
     if (!loggedInUserId || !allLoadedUsers[swipedCardAbsoluteIndex]) {
-      console.warn(`ExploreScreen: Invalid swipe attempt for card index ${swipedCardAbsoluteIndex}.`);
+      console.warn(`ExploreScreen: Invalid swipe. UserID: ${loggedInUserId}, CardIndex: ${swipedCardAbsoluteIndex}`);
       return;
     }
     const swipedUser = allLoadedUsers[swipedCardAbsoluteIndex];
-    console.log(`[SWIPE_ACTION] User: ${swipedUser?.fullName} (absIndex: ${swipedCardAbsoluteIndex}), isLike: ${isLike}`);
+    console.log(`[SWIPE_ACTION] User: ${swipedUser.fullName} (absIndex: ${swipedCardAbsoluteIndex}), isLike: ${isLike}, isSuperLike: ${isSuperLike}`);
 
     const swipeData: SwipeCreateDTO = { toUserID: swipedUser.userID, isLike: isLike || isSuperLike };
     try {
@@ -134,54 +145,46 @@ export default function ExploreScreen() {
       console.error("ExploreScreen: Error processing swipe:", error);
     }
 
-    // Trì hoãn việc cập nhật currentSwiperIndex cho đến khi các tương tác/animation hoàn tất
     InteractionManager.runAfterInteractions(() => {
-      console.log(`[SWIPE_ACTION] InteractionManager: Updating currentSwiperIndex for ${swipedUser?.fullName}`);
       setCurrentSwiperIndex(prevIndex => {
-        // Đảm bảo rằng chúng ta đang tăng index dựa trên thẻ vừa được swipe,
-        // phòng trường hợp có nhiều swipe nhanh hoặc prevIndex không như mong đợi.
-        // Với cấu trúc hiện tại, prevIndex nên bằng swipedCardAbsoluteIndex.
-        if (prevIndex === swipedCardAbsoluteIndex) {
-          console.log(`[SWIPE_ACTION] setCurrentSwiperIndex from ${prevIndex} to ${prevIndex + 1}`);
-          return prevIndex + 1;
-        }
-        // Nếu không khớp, có thể có lỗi logic ở đâu đó, log ra và không thay đổi.
-        console.warn(`[SWIPE_ACTION] Mismatch! prevIndex: ${prevIndex}, swipedCardAbsoluteIndex: ${swipedCardAbsoluteIndex}. Index not advanced.`);
-        return prevIndex;
+        console.log(`[SWIPE_ACTION] Advancing currentSwiperIndex from ${prevIndex} to ${swipedCardAbsoluteIndex + 1}`);
+        return swipedCardAbsoluteIndex + 1;
       });
     });
-  }, [loggedInUserId, allLoadedUsers, createSwipe, setMatchDetails, setShowMatchModal]); // Dependencies cho useCallback
+  }, [loggedInUserId, allLoadedUsers]); // createSwipe, setMatchDetails, setShowMatchModal are stable from useState/import
 
+  // 5. Logic tải thêm (Prefetching)
   useEffect(() => {
-    const cardsAvailableToSwipe = allLoadedUsers.length - currentSwiperIndex;
-    // console.log(`ExploreScreen: Check load more. Available: ${cardsAvailableToSwipe}, Threshold: ${LOAD_MORE_THRESHOLD_COUNT}, HasMore: ${hasMoreDataInBackend}, Fetching: ${isFetching.current}, isLoadingInitial: ${isLoadingInitial}, isLoadingMore: ${isLoadingMore}`);
-
-    if (!isLoadingInitial && !isLoadingMore && hasMoreDataInBackend && !isFetching.current) {
-      if (cardsAvailableToSwipe < LOAD_MORE_THRESHOLD_COUNT && allLoadedUsers.length > 0) {
-         // Điều kiện cardsAvailableToSwipe === 0 đã được bao gồm trong cardsAvailableToSwipe < LOAD_MORE_THRESHOLD_COUNT nếu LOAD_MORE_THRESHOLD_COUNT > 0
-        console.log(`ExploreScreen: Threshold met (Available: ${cardsAvailableToSwipe} < ${LOAD_MORE_THRESHOLD_COUNT}), fetching next page ${nextPageToFetch}.`);
+    const cardsLeftToSwipe = allLoadedUsers.length - currentSwiperIndex;
+    if (!isLoadingInitial && !isLoadingMore && hasMoreDataInBackend && !isFetchingUsers.current) {
+      if (cardsLeftToSwipe <= LOAD_MORE_THRESHOLD_COUNT && allLoadedUsers.length > 0) {
+        console.log(`ExploreScreen: Prefetch threshold met (${cardsLeftToSwipe} <= ${LOAD_MORE_THRESHOLD_COUNT}), fetching page ${nextPageToFetch}.`);
         fetchUsers(nextPageToFetch, false);
       }
     }
   }, [currentSwiperIndex, allLoadedUsers.length, hasMoreDataInBackend, nextPageToFetch, fetchUsers, isLoadingInitial, isLoadingMore]);
 
-
-  const renderCard = (userCard: ApiUserCard | undefined): React.ReactElement | null => {
+  // 6. Render Card
+  const renderCard = (userCard: ApiUserCard | undefined, indexWithinSwiperBatch: number): React.ReactElement | null => {
     if (!userCard) {
       return <View style={[styles.card, styles.cardPlaceholder]}><ActivityIndicator color="#fff" /></View>;
     }
-    let imageSource: ImageSourcePropType = FALLBACK_AVATAR;
-    if (userCard.avatar && (userCard.avatar.startsWith('http') || userCard.avatar.startsWith('data:image'))) {
-      imageSource = { uri: userCard.avatar };
+    let finalCardAvatarUri: string | null = null;
+    if (userCard.avatar) {
+      if (userCard.avatar.startsWith('http://') || userCard.avatar.startsWith('https://') || userCard.avatar.startsWith('data:image')) {
+        finalCardAvatarUri = userCard.avatar;
+      } else {
+        // Ensure API_BASE_URL is defined and avatar path is correctly prefixed if needed
+        finalCardAvatarUri = `${API_BASE_URL}${userCard.avatar.startsWith('/') ? '' : '/'}${userCard.avatar}`;
+      }
     }
+    const imageSource: ImageSourcePropType = finalCardAvatarUri ? { uri: finalCardAvatarUri } : FALLBACK_AVATAR;
     return (
       <View style={styles.card} key={userCard.userID}>
         <Image
             source={imageSource}
             style={styles.cardImage}
-            onError={(e) => {
-                console.warn(`Image load error for user ${userCard.userID} - ${userCard.fullName}: `, e.nativeEvent.error);
-            }}
+            onError={(e) => console.warn(`Image load error for user ${userCard.userID} (${userCard.fullName}) with URI '${finalCardAvatarUri || userCard.avatar}': `, e.nativeEvent.error)}
             progressiveRenderingEnabled
             fadeDuration={0}
         />
@@ -194,6 +197,7 @@ export default function ExploreScreen() {
     );
   };
 
+  // --- UI Rendering ---
   if (isLoadingInitial && allLoadedUsers.length === 0 && loggedInUserId !== null) {
     return (
       <LinearGradient colors={[MAIN_GRADIENT_START, MAIN_GRADIENT_END]} style={styles.centered}>
@@ -204,28 +208,23 @@ export default function ExploreScreen() {
   }
 
   const cardsForSwiper = allLoadedUsers.slice(currentSwiperIndex);
-  // console.log(`[RENDER] currentSwiperIndex: ${currentSwiperIndex}, allLoadedUsers: ${allLoadedUsers.length}, cardsForSwiper: ${cardsForSwiper.length > 0 ? cardsForSwiper[0].fullName : 'EMPTY'}`);
 
   return (
     <LinearGradient colors={[MAIN_GRADIENT_START, MAIN_GRADIENT_END]} style={styles.screenContainer}>
       {cardsForSwiper.length > 0 ? (
         <Swiper<ApiUserCard>
-          key={currentSwiperIndex === 0 && !hasMoreDataInBackend && allLoadedUsers.length > 0 ? 'swiper-restarted' : `swiper-${currentSwiperIndex}-${allLoadedUsers.length}`}
+          key={`swiper-${loggedInUserId}-${allLoadedUsers.length > 0 ? allLoadedUsers[0].userID : 'empty'}-${currentSwiperIndex}`}
           ref={swiperRef}
           cards={cardsForSwiper}
           renderCard={renderCard}
-          cardIndex={0} // Luôn hiển thị thẻ đầu tiên của `cardsForSwiper`
-          // onSwiped sẽ được gọi với index tương ứng trong mảng `cardsForSwiper` (luôn là 0 ở đây)
+          cardIndex={0}
           onSwipedLeft={(indexInSwiperArray) => handleSwipeActionAndAdvance(currentSwiperIndex + indexInSwiperArray, false)}
           onSwipedRight={(indexInSwiperArray) => handleSwipeActionAndAdvance(currentSwiperIndex + indexInSwiperArray, true)}
           onSwipedTop={(indexInSwiperArray) => handleSwipeActionAndAdvance(currentSwiperIndex + indexInSwiperArray, true, true)}
           onSwipedAll={() => {
             console.log('ExploreScreen: Swiped all cards in current Swiper batch.');
             if (!hasMoreDataInBackend && currentSwiperIndex >= allLoadedUsers.length && allLoadedUsers.length > 0) {
-              console.log("ExploreScreen: All loaded users swiped, no more from backend. Looping to start.");
-              InteractionManager.runAfterInteractions(() => { // Cũng có thể bọc cái này nếu cần
-                 setCurrentSwiperIndex(0);
-              });
+              console.log("ExploreScreen: All loaded users swiped, no more from backend.");
             }
           }}
           backgroundColor={'transparent'}
@@ -255,12 +254,12 @@ export default function ExploreScreen() {
             <>
               <Text style={styles.noUsersText}>No more profiles right now. 😢</Text>
               <Text style={styles.subNoUsersText}>Check back later!</Text>
-              {allLoadedUsers.length > 0 && !hasMoreDataInBackend && (
+              {allLoadedUsers.length > 0 && !hasMoreDataInBackend && currentSwiperIndex >= allLoadedUsers.length && (
                  <TouchableOpacity onPress={() => {
-                    console.log("Manual restart deck");
+                    console.log("Manual restart deck: Resetting currentSwiperIndex to 0.");
                     setCurrentSwiperIndex(0);
-                 }} style={{marginTop: 20, padding:10, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 5}}>
-                   <Text style={{color: 'white'}}>Restart Deck</Text>
+                 }} style={styles.restartButton}>
+                   <Text style={styles.restartButtonText}>Restart Deck</Text>
                  </TouchableOpacity>
               )}
             </>
@@ -294,7 +293,11 @@ export default function ExploreScreen() {
             {matchDetails && (
               <>
                 <Image
-                  source={matchDetails.avatar && matchDetails.avatar.startsWith('http') ? { uri: matchDetails.avatar } : FALLBACK_AVATAR}
+                  source={
+                    matchDetails.avatar && (matchDetails.avatar.startsWith('http') || matchDetails.avatar.startsWith('data:image'))
+                      ? { uri: matchDetails.avatar }
+                      : (matchDetails.avatar ? {uri: `${API_BASE_URL}${matchDetails.avatar.startsWith('/') ? '' : '/'}${matchDetails.avatar}`} : FALLBACK_AVATAR)
+                  }
                   style={styles.matchAvatar}
                   onError={() => console.warn("Error loading match avatar: ", matchDetails.avatar)}
                 />
@@ -318,7 +321,6 @@ export default function ExploreScreen() {
   );
 }
 
-// --- Styles (giữ nguyên styles của bạn) ---
 const styles = StyleSheet.create({
   screenContainer: { flex: 1 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
@@ -331,10 +333,10 @@ const styles = StyleSheet.create({
     width: width * 0.9,
     height: height * 0.70,
     borderRadius: 20,
-    backgroundColor: '#555', 
+    backgroundColor: '#555',
     overflow: 'hidden',
-    elevation: Platform.OS === 'android' ? 5 : 0, 
-    shadowColor: '#000', 
+    elevation: Platform.OS === 'android' ? 5 : 0,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
@@ -365,4 +367,16 @@ const styles = StyleSheet.create({
   matchName: { fontSize: 20, fontWeight: '600', textAlign: 'center', marginBottom: 25, color: 'white' },
   modalButton: { backgroundColor: 'white', borderRadius: 25, paddingVertical: 12, paddingHorizontal: 30, elevation: 2 },
   modalButtonText: { color: MATCH_MODAL_GRADIENT_COLORS[0] || '#FF6B6B', fontWeight: 'bold', textAlign: 'center', fontSize: 16 },
+  restartButton: {
+    marginTop: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 8,
+  },
+  restartButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });

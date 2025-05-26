@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
-import { getUserById, getUserInterests, ApiUser, Interest } from '../../utils/api';
+import { getUserById, getUserInterests, ApiUser, Interest, API_BASE_URL, } from '../../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Calculate age based on birthdate
@@ -144,8 +144,20 @@ const UserProfileScreen = () => {
 
   const age = calculateAge(userData.birthdate);
   const displayNameAndAge = `${userData.fullName || userData.username || ''}${age ? `, ${age}` : ''}`;
-  const avatarSource = userData.avatar
-    ? { uri: userData.avatar.startsWith('data:image') ? userData.avatar : `data:image/jpeg;base64,${userData.avatar}` }
+  let finalAvatarUri: string | null = null;
+  if (userData.avatar) {
+    if (userData.avatar.startsWith('http://') || userData.avatar.startsWith('https://') || userData.avatar.startsWith('data:image')) {
+      // Nếu avatar đã là URL đầy đủ hoặc data URI, dùng trực tiếp
+      finalAvatarUri = userData.avatar;
+    } else {
+      // Nếu là URL tương đối (ví dụ: /images/avatars/...)
+      // Nối với API_BASE_URL
+      finalAvatarUri = `${API_BASE_URL}${userData.avatar}`;
+    }
+  }
+
+  const avatarSource = finalAvatarUri
+    ? { uri: finalAvatarUri }
     : require('../../assets/images/dating-app.png');
 
   return (
