@@ -1,3 +1,4 @@
+// app/(auth)/otp.tsx
 import { useRef, useState, useEffect } from 'react';
 import {
   View,
@@ -12,55 +13,52 @@ import {
   Keyboard,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { verifyOtp, sendOtp, getUserByEmail } from '../../utils/api';
-import { useAuth } from '../context/AuthContext';
+import { verifyOtp, sendOtp, getUserByEmail, ApiUser } from '../../utils/api'; // << THÊM ApiUser
+import { useAuth } from '../context/AuthContext'; // << Đảm bảo đây là useAuth từ context của bạn
 
 export default function OtpScreen() {
   const router = useRouter();
-  const { email } = useLocalSearchParams<{ email: string }>();
-  const { setAuthenticatedSession, token: authTokenFromContext } = useAuth(); // Lấy token từ context
+  const { email: emailFromParams } = useLocalSearchParams<{ email: string }>(); // Đổi tên để tránh nhầm lẫn
+  const { setAuthenticatedSession, token: authTokenFromContext } = useAuth();
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const inputs = useRef<Array<TextInput | null>>([]);
   const [loading, setLoading] = useState(false);
   const [resendDisabled, setResendDisabled] = useState(false);
   const [countdown, setCountdown] = useState(60);
 
-  const hasVerifiedThisSession = useRef(false); // Cờ mới: Đã xác thực thành công trong phiên này của màn hình OTP chưa?
-  const verifyApiCallInProgres = useRef(false); // Cờ mới: API call verifyOtp đang chạy?
+  const hasVerifiedThisSession = useRef(false);
+  const verifyApiCallInProgres = useRef(false);
 
-  useEffect(() => {
-    // Nếu đã có token từ AuthContext VÀ đã xác thực thành công trong phiên này,
-    // có thể người dùng quay lại màn hình này sau khi đã xác thực. Điều hướng đi.
-    // Điều này giúp tránh kẹt ở OTP nếu user back lại sau khi đã vào /gender
-    if (authTokenFromContext && hasVerifiedThisSession.current) {
-      console.log('[OtpScreen] Token exists and OTP was verified this session, redirecting from useEffect.');
-      // router.replace('/gender'); // Hoặc route phù hợp
-      // Cân nhắc: Có thể không cần thiết nếu AuthLayout đã xử lý tốt.
-      // Nếu bạn vẫn thấy lỗi Axious verify, có thể AuthLayout vẫn cho render OtpScreen
-      // và OtpScreen lại cố verify.
-    }
-  }, [authTokenFromContext, router]);
+  // ... (useEffect cho authTokenFromContext và timer giữ nguyên) ...
+    useEffect(() => {
+        if (authTokenFromContext && hasVerifiedThisSession.current) {
+        console.log('[OtpScreen] Token exists and OTP was verified this session, redirecting from useEffect.');
+        // Cân nhắc điều hướng ở đây nếu AuthLayout không xử lý kịp
+        // router.replace('/(setup)/gender'); // Ví dụ
+        }
+    }, [authTokenFromContext, router]);
 
 
-  useEffect(() => {
-    let timer: NodeJS.Timeout | null = null;
-    if (resendDisabled && countdown > 0) {
-      timer = setInterval(() => {
-        setCountdown((prev) => prev - 1);
-      }, 1000);
-    }
-    if (countdown === 0) {
-      setResendDisabled(false);
-      setCountdown(60);
-    }
-    return () => {
-      if (timer) clearInterval(timer);
-    };
-  }, [resendDisabled, countdown]);
+    useEffect(() => {
+        let timer: NodeJS.Timeout | null = null;
+        if (resendDisabled && countdown > 0) {
+        timer = setInterval(() => {
+            setCountdown((prev) => prev - 1);
+        }, 1000);
+        }
+        if (countdown === 0) {
+        setResendDisabled(false);
+        setCountdown(60);
+        }
+        return () => {
+        if (timer) clearInterval(timer);
+        };
+    }, [resendDisabled, countdown]);
 
-  useEffect(() => {
-    inputs.current[0]?.focus();
-  }, []);
+    useEffect(() => {
+        inputs.current[0]?.focus();
+    }, []);
+
 
   const handleVerify = async (currentFullOtpFromChange?: string) => {
     if (verifyApiCallInProgres.current || hasVerifiedThisSession.current) {
@@ -69,6 +67,12 @@ export default function OtpScreen() {
     }
 
     const fullOtpToVerify = currentFullOtpFromChange || otp.join('');
+    const currentEmail = emailFromParams as string; // Lấy email từ params
+
+    if (!currentEmail) {
+        Alert.alert('Error', 'Email not found. Cannot verify OTP.');
+        return;
+    }
 
     if (fullOtpToVerify.length !== 6) {
       Alert.alert('Error', 'Please enter the 6-digit OTP code.');
@@ -80,145 +84,160 @@ export default function OtpScreen() {
     Keyboard.dismiss();
 
     try {
-      console.log('[OtpScreen] Sending verifyOtp request:', { email, fullOtp: fullOtpToVerify });
-      const response = await verifyOtp(email as string, fullOtpToVerify);
-      console.log('[OtpScreen] verifyOtp response:', response);
+      console.log('[OtpScreen] Sending verifyOtp request:', { email: currentEmail, fullOtp: fullOtpToVerify });
+      const verifyResponse = await verifyOtp(currentEmail, fullOtpToVerify);
+      console.log('[OtpScreen] verifyOtp response:', verifyResponse);
 
-      if (response.message === 'OTP verified successfully.' && response.data?.user && response.data?.token) {
+      if (verifyResponse.message === 'OTP verified successfully.' && verifyResponse.data?.user && verifyResponse.data?.token) {
+        // OTP đúng, token được tạo. Giờ fetch thông tin user đầy đủ.
+        const basicUserInfoFromOtp = verifyResponse.data.user;
+        const newAuthToken = verifyResponse.data.token;
+
+        console.log('[OtpScreen] OTP verified. Fetching full user details for:', basicUserInfoFromOtp.email);
+        const fullUserDetails: ApiUser | null = await getUserByEmail(basicUserInfoFromOtp.email);
+
+        if (!fullUserDetails) {
+          // Đây là trường hợp lạ: OTP đúng, user có trong verifyOtp response, nhưng getUserByEmail không tìm thấy
+          // Hoặc user đã bị xóa ngay sau khi verify OTP.
+          throw new Error(`User details for ${basicUserInfoFromOtp.email} not found after successful OTP verification.`);
+        }
+        console.log('[OtpScreen] Full user details fetched:', fullUserDetails);
+
         hasVerifiedThisSession.current = true; // Đánh dấu đã xác thực thành công
+
+        // Gọi setAuthenticatedSession với thông tin đầy đủ
         await setAuthenticatedSession(
-          {
-            userId: response.data.user.userId,
-            username: response.data.user.username,
-            email: response.data.user.email,
+          { // Object này phải khớp với interface User trong AuthContext
+            userId: fullUserDetails.userID, // từ fullUserDetails
+            username: fullUserDetails.username, // từ fullUserDetails
+            email: fullUserDetails.email, // từ fullUserDetails
+            avatar: fullUserDetails.avatar, // từ fullUserDetails
+            fullName: fullUserDetails.fullName, // từ fullUserDetails
           },
-          response.data.token
+          newAuthToken // Token mới từ verifyResponse
         );
+
         Alert.alert(
           'Success',
           'Email verification successful.',
-          [{ text: 'OK', onPress: () => router.replace('/gender') }]
+          // Điều hướng sau khi Alert được nhấn OK
+          [{ text: 'OK', onPress: () => router.replace('/(setup)/gender') }] // Đổi thành (setup)/gender
         );
       } else {
-        // Backend trả về success false hoặc data không đúng cấu trúc
-        throw new Error(response.message || 'Invalid OTP response structure from server.');
+        // Backend trả về success false hoặc data không đúng cấu trúc từ verifyOtp
+        throw new Error(verifyResponse.message || 'Invalid OTP response structure from server.');
       }
     } catch (err: any) {
-      console.error('[OtpScreen] OTP verification error:', err.response?.data || err.message, err);
-      // Lỗi Axios (ví dụ 400 - OTP sai/hết hạn, 500 - lỗi server, etc.) sẽ rơi vào đây
-      // hasVerifiedThisSession.current sẽ vẫn là false, cho phép thử lại OTP khác.
-
-      let alertMessage = 'Failed to verify OTP. Please try again.';
+      console.error('[OtpScreen] OTP verification or subsequent user fetch error:', err.response?.data || err.message, err);
+      let alertMessage = 'Failed to verify OTP or process session. Please try again.';
       if (err.response?.data?.message) {
-        alertMessage = err.response.data.message; // Ưu tiên thông báo lỗi từ backend
-      } else if (err.message) {
-        // Tránh hiển thị thông báo lỗi kỹ thuật nếu có thể
-        if (!err.message.toLowerCase().includes('network request failed') &&
-            !err.message.toLowerCase().includes('timeout') &&
-            !err.message.includes('Invalid OTP response structure')) {
-             // Chỉ hiển thị err.message nếu nó không phải là lỗi mạng chung chung
-             // hoặc lỗi cấu trúc tự định nghĩa.
-        }
+        alertMessage = err.response.data.message;
+      } else if (err.message && !err.message.toLowerCase().includes('network request failed') && !err.message.toLowerCase().includes('timeout')) {
+        // Chỉ hiển thị err.message nếu nó không phải là lỗi mạng chung chung
+        // hoặc lỗi tự định nghĩa.
+         if (err.message !== 'Invalid OTP response structure from server.' && !err.message.startsWith('User details for')) {
+            // alertMessage = err.message; // Bỏ comment nếu muốn hiển thị lỗi cụ thể hơn
+         }
       }
-       Alert.alert('Error', alertMessage);
-
-      // Bỏ qua việc gọi getUserByEmail ở đây để đơn giản hóa luồng lỗi.
-      // Người dùng nên thử lại OTP hoặc resend.
-      // Nếu OTP đúng nhưng token không được tạo, đó là vấn đề của backend.
+      Alert.alert('Error', alertMessage);
     } finally {
       setLoading(false);
       verifyApiCallInProgres.current = false;
-      // Không reset hasVerifiedThisSession.current ở đây. Nó chỉ reset khi resend OTP hoặc component unmount.
     }
   };
 
-  const handleChange = (text: string, index: number) => {
-    if (!/^[0-9]?$/.test(text)) return;
+  // ... (các hàm handleChange, handleKeyPress, handleResendOtp giữ nguyên) ...
+    const handleChange = (text: string, index: number) => {
+        if (!/^[0-9]?$/.test(text)) return;
 
-    const newOtp = [...otp];
-    newOtp[index] = text;
-    setOtp(newOtp);
-
-    if (text && index < otp.length - 1) {
-      inputs.current[index + 1]?.focus();
-    }
-
-    if (text && index === otp.length - 1) {
-      const currentFullOtp = newOtp.join('');
-      const isComplete = newOtp.every(digit => digit.length === 1); // Chính xác hơn là !== ''
-
-      if (isComplete && currentFullOtp.length === 6) {
-        // Keyboard.dismiss(); // Chuyển vào handleVerify
-        setTimeout(() => {
-          // Chỉ gọi nếu chưa xác thực thành công TRONG PHIÊN NÀY và không có API call nào đang chạy
-          if (!hasVerifiedThisSession.current && !verifyApiCallInProgres.current) {
-            handleVerify(currentFullOtp);
-          }
-        }, 300);
-      }
-    }
-  };
-
-  const handleKeyPress = (e: any, index: number) => {
-    if (e.nativeEvent.key === 'Backspace') {
-      const newOtp = [...otp];
-      if (otp[index] === '') {
-        if (index > 0) {
-          newOtp[index - 1] = '';
-          setOtp(newOtp);
-          inputs.current[index - 1]?.focus();
-        }
-      } else {
-        newOtp[index] = '';
+        const newOtp = [...otp];
+        newOtp[index] = text;
         setOtp(newOtp);
-      }
-    }
-  };
 
-  const handleResendOtp = async () => {
-    if (resendDisabled || loading || verifyApiCallInProgres.current) return;
+        if (text && index < otp.length - 1) {
+        inputs.current[index + 1]?.focus();
+        }
 
-    setLoading(true);
-    hasVerifiedThisSession.current = false; // Quan trọng: Reset cờ này
-    verifyApiCallInProgres.current = false; // Đảm bảo cờ này cũng false
-    setOtp(['', '', '', '', '', '']);
-    inputs.current[0]?.focus();
+        if (text && index === otp.length - 1) {
+        const currentFullOtp = newOtp.join('');
+        // Chính xác hơn là !== '' hoặc kiểm tra length
+        const isComplete = newOtp.every(digit => digit.length === 1); 
 
-    try {
-      console.log('[OtpScreen] Sending resendOtp request for email:', email);
-      await sendOtp(email as string);
-      Alert.alert('Success', `A new OTP has been sent to ${email}`);
-      setResendDisabled(true);
-      setCountdown(60);
-    } catch (err: any) {
-      console.error('[OtpScreen] Resend OTP error:', err.response?.data || err.message);
-      Alert.alert('Error', err.response?.data?.message || 'Failed to resend OTP. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+        if (isComplete && currentFullOtp.length === 6) {
+            setTimeout(() => {
+            if (!hasVerifiedThisSession.current && !verifyApiCallInProgres.current) {
+                handleVerify(currentFullOtp);
+            }
+            }, 300);
+        }
+        }
+    };
 
-  // JSX (đảm bảo không có text trần)
+    const handleKeyPress = (e: any, index: number) => {
+        if (e.nativeEvent.key === 'Backspace') {
+        const newOtp = [...otp];
+        if (otp[index] === '') {
+            if (index > 0) {
+            newOtp[index - 1] = '';
+            setOtp(newOtp);
+            inputs.current[index - 1]?.focus();
+            }
+        } else {
+            newOtp[index] = '';
+            setOtp(newOtp);
+        }
+        }
+    };
+
+    const handleResendOtp = async () => {
+        if (resendDisabled || loading || verifyApiCallInProgres.current) return;
+        const currentEmail = emailFromParams as string;
+        if (!currentEmail) {
+             Alert.alert('Error', 'Email not found. Cannot resend OTP.');
+             return;
+        }
+
+        setLoading(true);
+        hasVerifiedThisSession.current = false; 
+        verifyApiCallInProgres.current = false; 
+        setOtp(['', '', '', '', '', '']);
+        inputs.current[0]?.focus();
+
+        try {
+        console.log('[OtpScreen] Sending resendOtp request for email:', currentEmail);
+        await sendOtp(currentEmail);
+        Alert.alert('Success', `A new OTP has been sent to ${currentEmail}`);
+        setResendDisabled(true);
+        setCountdown(60);
+        } catch (err: any) {
+        console.error('[OtpScreen] Resend OTP error:', err.response?.data || err.message);
+        Alert.alert('Error', err.response?.data?.message || 'Failed to resend OTP. Please try again.');
+        } finally {
+        setLoading(false);
+        }
+    };
+
+  // ... (JSX giữ nguyên) ...
   return (
     <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
+    style={styles.container}
+    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
     >
-      <Text style={styles.title}>Verify Your Email</Text>
-      <Text style={styles.subtitle}>
+    <Text style={styles.title}>Verify Your Email</Text>
+    <Text style={styles.subtitle}>
         <Text>Enter the 6-digit code sent to </Text>
-        <Text style={{ fontWeight: 'bold' }}>{email || 'your email'}</Text>
-      </Text>
+        <Text style={{ fontWeight: 'bold' }}>{emailFromParams || 'your email'}</Text>
+    </Text>
 
-      <View style={styles.otpContainer}>
+    <View style={styles.otpContainer}>
         {otp.map((digit, index) => (
-          <TextInput
+        <TextInput
             key={index}
             ref={(ref) => (inputs.current[index] = ref)}
             style={[
-              styles.otpInput,
-              digit ? styles.otpFilled : null,
+            styles.otpInput,
+            digit ? styles.otpFilled : null,
             ]}
             keyboardType="numeric"
             maxLength={1}
@@ -227,88 +246,87 @@ export default function OtpScreen() {
             onKeyPress={(e) => handleKeyPress(e, index)}
             textAlign="center"
             selectTextOnFocus
-          />
+        />
         ))}
-      </View>
+    </View>
 
-      <TouchableOpacity
+    <TouchableOpacity
         style={[
             styles.button,
             (loading || verifyApiCallInProgres.current || hasVerifiedThisSession.current) && styles.buttonDisabled
         ]}
         onPress={() => {
-            if(!hasVerifiedThisSession.current && !verifyApiCallInProgres.current){ // Kiểm tra kỹ hơn
-                 handleVerify();
+            if(!hasVerifiedThisSession.current && !verifyApiCallInProgres.current){ 
+                handleVerify();
             }
         }}
         disabled={loading || verifyApiCallInProgres.current || hasVerifiedThisSession.current || otp.join('').length !== 6}
-      >
+    >
         {loading ? (
-          <ActivityIndicator color="#fff" />
+        <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.buttonText}>Verify</Text>
+        <Text style={styles.buttonText}>Verify</Text>
         )}
-      </TouchableOpacity>
+    </TouchableOpacity>
 
-      <TouchableOpacity
+    <TouchableOpacity
         onPress={handleResendOtp}
         disabled={resendDisabled || loading || verifyApiCallInProgres.current}
         style={styles.resendButton}
-      >
+    >
         <Text style={[
-          styles.resendText,
-          (resendDisabled || loading || verifyApiCallInProgres.current) && styles.resendDisabled,
+        styles.resendText,
+        (resendDisabled || loading || verifyApiCallInProgres.current) && styles.resendDisabled,
         ]}>
-          {resendDisabled
+        {resendDisabled
             ? `Resend OTP (${countdown}s)`
             : 'Resend OTP'}
         </Text>
-      </TouchableOpacity>
+    </TouchableOpacity>
 
-      <TouchableOpacity
+    <TouchableOpacity
         onPress={() => {
             if (router.canGoBack()) {
                 router.back();
             } else {
-                router.replace('/(auth)/login'); // Hoặc màn hình phù hợp
+                router.replace('/(auth)/login'); 
             }
         }}
         style={styles.backButton}
-        disabled={loading || verifyApiCallInProgres.current} // Disable khi đang có action
-      >
+        disabled={loading || verifyApiCallInProgres.current}
+    >
         <Text style={styles.backButtonText}>Back</Text>
-      </TouchableOpacity>
+    </TouchableOpacity>
     </KeyboardAvoidingView>
-  );
+);
 }
-
-// Styles giữ nguyên
+// ... (styles giữ nguyên)
 const styles = StyleSheet.create({
-  container: {
+container: {
     flex: 1,
     backgroundColor: '#fff',
     justifyContent: 'center',
     paddingHorizontal: 32,
-  },
-  title: {
+},
+title: {
     fontSize: 28,
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#000',
     marginBottom: 8,
-  },
-  subtitle: { // Đã sửa: bọc các phần text con bên trong <Text>
+},
+subtitle: {
     fontSize: 16,
     textAlign: 'center',
     color: '#777',
     marginBottom: 32,
-  },
-  otpContainer: {
+},
+otpContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 40,
-  },
-  otpInput: {
+},
+otpInput: {
     width: 50,
     height: 60,
     borderWidth: 2,
@@ -318,46 +336,46 @@ const styles = StyleSheet.create({
     color: '#000',
     backgroundColor: '#f8f8f8',
     textAlign: 'center',
-  },
-  otpFilled: {
+},
+otpFilled: {
     borderColor: '#EB3C58',
-  },
-  button: {
+},
+button: {
     backgroundColor: '#EB3C58',
     paddingVertical: 16,
     borderRadius: 24,
     alignItems: 'center',
     marginBottom: 16,
-  },
-  buttonDisabled: {
+},
+buttonDisabled: {
     backgroundColor: '#f9a7b5',
-  },
-  buttonText: {
+},
+buttonText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',
-  },
-  resendButton: {
+},
+resendButton: {
     paddingVertical: 8,
     alignSelf: 'center',
-  },
-  resendText: {
+},
+resendText: {
     color: '#EB3C58',
     textAlign: 'center',
     fontSize: 16,
     fontWeight: '500',
-  },
-  resendDisabled: {
+},
+resendDisabled: {
     color: '#999',
-  },
-  backButton: {
+},
+backButton: {
     marginTop: 24,
     paddingVertical: 8,
     alignSelf: 'center',
-  },
-  backButtonText: {
+},
+backButtonText: {
     color: '#555',
     textAlign: 'center',
     fontSize: 16,
-  }
+}
 });

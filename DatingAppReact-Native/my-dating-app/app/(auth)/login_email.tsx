@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'expo-router';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
-import { checkEmail, sendOtp } from '../../utils/api';
+import { checkEmail } from '../../utils/api';
 
 
 export default function LoginWithEmail() {

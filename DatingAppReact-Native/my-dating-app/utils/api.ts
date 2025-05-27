@@ -301,6 +301,8 @@ export interface UserProfileModificationData {
   phoneNumber?: string | null;
   address?: string | null;
   profileVisibility?: number | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 // --- USER FUNCTIONS ---
@@ -444,6 +446,148 @@ export const saveUserInterests = async (userId: number, interestIds: number[]): 
     });
     return response.data;
   } catch (error: any) {
+    throw error;
+  }
+};
+
+// --- MEDIA TYPES & FUNCTIONS ---
+export interface UploadedMediaResponse {
+  url: string; // URL tương đối của file đã upload
+}
+
+// Tạo một instance Axios mới cho MediaController nếu cần headers khác
+// Hoặc bạn có thể dùng userApi nếu headers giống nhau và chỉ thay đổi Content-Type khi cần
+const mediaApi = axios.create({
+  baseURL: `${API_BASE_URL}/api/Media`, // Trỏ đến MediaController
+});
+mediaApi.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+  const token = await AsyncStorage.getItem('token');
+  if (token) {
+    config.headers = config.headers || {};
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  // Khi upload file, Content-Type sẽ là 'multipart/form-data' và được Axios tự xử lý khi data là FormData
+  return config;
+});
+
+export const uploadChatMedia = async (file: ExpoImageFile): Promise<UploadedMediaResponse> => {
+  const formData = new FormData();
+  formData.append('file', { // Tên 'file' phải khớp với tham số IFormFile ở backend
+    uri: file.uri,
+    name: file.name,
+    type: file.type,
+  } as any);
+
+  try {
+    console.log(`[uploadChatMedia] Uploading file: ${file.name}, type: ${file.type}`);
+    const response = await mediaApi.post<UploadedMediaResponse>('/upload/chat-media', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data', // Explicitly set for FormData
+      },
+    });
+    console.log('[uploadChatMedia] Upload successful, URL:', response.data.url);
+    return response.data;
+  } catch (error: any) {
+    console.error('[uploadChatMedia] Error uploading file:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+
+// --- MESSAGE TYPES & FUNCTIONS ---
+// Enum này nên đồng bộ với backend (C# enum)
+export enum MessageTypeEnum {
+  Text = 0,
+  Image = 1,
+  Video = 2,
+}
+
+export interface MessageDTO {
+  messageID: number;
+  matchID: number;
+  senderUserID: number;
+  senderFullName?: string | null; // Thêm từ backend
+  senderAvatar?: string | null;   // Thêm từ backend
+  receiverUserID: number;
+  content: string;
+  timestamp: string; // Dạng ISO string
+  isRead: boolean;
+  isMe: boolean; // Client tự xác định dựa trên senderUserID
+  type: MessageTypeEnum;
+  mediaUrl?: string | null;
+}
+
+export interface SendMessageDTO {
+  matchID: number;
+  content: string; // Có thể là caption cho media
+  type: MessageTypeEnum;
+  mediaUrl?: string | null; // URL sau khi upload media
+}
+
+export interface ConversationPreviewDTO {
+  matchID: number;
+  matchedUserID: number;
+  matchedUsername?: string | null;
+  matchedUserAvatar?: string | null;
+  lastMessageContent?: string | null;
+  lastMessageTimestamp?: string | null; // Dạng ISO string
+  unreadCount: number;
+  isLastMessageFromMe: boolean;
+  isMatchedUserOnline?: boolean; // Thêm dấu ? nếu backend có thể không gửi (dù nên gửi)
+  matchedUserLastSeen?: string | null; // Dạng ISO string
+}
+
+// Tạo một instance Axios mới cho MessagesController
+const messagesApi = axios.create({
+  baseURL: `${API_BASE_URL}/api/Messages`,
+});
+messagesApi.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+  const token = await AsyncStorage.getItem('token');
+  if (token) {
+    config.headers = config.headers || {};
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export const sendMessage = async (data: SendMessageDTO): Promise<MessageDTO> => {
+  try {
+    const response = await messagesApi.post<MessageDTO>('/send', data);
+    return response.data;
+  } catch (error: any) {
+    console.error('[sendMessage] Error sending message:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const getMessagesForMatch = async (matchId: number, pageNumber: number = 1, pageSize: number = 20): Promise<MessageDTO[]> => {
+  try {
+    const response = await messagesApi.get<MessageDTO[]>(`/match/${matchId}`, {
+      params: { pageNumber, pageSize },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error(`[getMessagesForMatch] Error fetching messages for match ${matchId}:`, error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const getConversationPreviews = async (): Promise<ConversationPreviewDTO[]> => {
+  try {
+    const response = await messagesApi.get<ConversationPreviewDTO[]>('/conversations');
+    return response.data;
+  } catch (error: any) {
+    console.error('[getConversationPreviews] Error fetching conversations:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const markMessagesAsRead = async (matchId: number): Promise<{ message: string }> => {
+  try {
+    const response = await messagesApi.post<{ message: string }>(`/match/${matchId}/read`);
+    return response.data;
+  } catch (error: any) {
+    console.error(`[markMessagesAsRead] Error marking messages as read for match ${matchId}:`, error.response?.data || error.message);
     throw error;
   }
 };

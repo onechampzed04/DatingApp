@@ -10,6 +10,8 @@ interface User {
   userId: number;
   username: string;
   email: string;
+  avatar?: string | null; // << THÊM DÒNG NÀY
+  fullName?: string | null; // << CÓ THỂ THÊM CẢ DÒNG NÀY NẾU CẦ
 }
 
 interface AuthContextType {
@@ -59,43 +61,50 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // ĐÂY LÀ HÀM loginUser ĐÃ CẬP NHẬT
   const loginUser = async (data: { email: string; password: string }) => {
-    try {
-      const response = await authApi.login(data);
-      const fullUserResponse = await getUserByEmail(data.email);
+  try {
+    const response = await authApi.login(data);
+    const fullUserResponse = await getUserByEmail(data.email);
 
-      if (!fullUserResponse || !fullUserResponse.userID) {
-        throw new Error("User details not found or UserID is missing.");
-      }
-
-      const userData: User = {
-        userId: fullUserResponse.userID,
-        username: fullUserResponse.username,
-        email: fullUserResponse.email
-      };
-
-      setUser(userData);
-      setToken(response.data.token);
-
-      await AsyncStorage.setItem('user', JSON.stringify(userData));
-      await AsyncStorage.setItem('token', response.data.token ?? '');
-
-      if (fullUserResponse.isEmailVerified === false) {
-        try {
-          console.log(`[AuthContext] User ${userData.email} is not verified. Sending OTP.`);
-          await sendOtp(userData.email); // Gửi OTP
-          console.log(`[AuthContext] OTP sent to ${userData.email}. Navigating to OTP screen.`);
-        } catch (otpError) {
-          console.error('[AuthContext] Failed to send OTP during login for unverified user:', otpError);
-        }
-        router.replace({ pathname: '/(auth)/otp', params: { email: userData.email } });
-      } else {
-        router.replace('/(tabs)/explore');
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
+    if (!fullUserResponse || !fullUserResponse.userID) {
+      throw new Error("User details not found or UserID is missing.");
     }
-  };
+
+    const userData: User = {
+      userId: fullUserResponse.userID,
+      username: fullUserResponse.username,
+      email: fullUserResponse.email,
+      avatar: fullUserResponse.avatar,
+      fullName: fullUserResponse.fullName,
+    };
+
+    setUser(userData);
+    setToken(response.data.token);
+
+    await AsyncStorage.setItem('user', JSON.stringify(userData));
+    await AsyncStorage.setItem('token', response.data.token ?? '');
+
+    if (fullUserResponse.isEmailVerified === false) {
+      // Kiểm tra thời gian tạo tài khoản để xác định xem có vừa đăng ký
+      const createdAt = new Date(fullUserResponse.createdAt);
+      const now = new Date();
+      const timeDiff = (now.getTime() - createdAt.getTime()) / 1000; // Thời gian chênh lệch (giây)
+
+      if (timeDiff > 60) { // Chỉ gửi OTP nếu tài khoản được tạo cách đây hơn 60 giây
+        console.log(`[AuthContext] User ${userData.email} is not verified. Backend should send OTP. Navigating to OTP screen.`);
+        // await sendOtp(userData.email); // COMMENTED OUT
+        // console.log(`[AuthContext] OTP sent to ${userData.email}. Navigating to OTP screen.`);
+      } else {
+        console.log(`[AuthContext] User ${userData.email} likely just registered. Backend should handle OTP if needed, or user was just navigated from registration. Skipping explicit OTP send from frontend.`);
+      }
+      router.replace({ pathname: '/(auth)/otp', params: { email: userData.email } });
+    } else {
+      router.replace('/(tabs)/explore');
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    throw error;
+  }
+};
 
   // ĐÂY LÀ HÀM register ĐÃ CẬP NHẬT
   const register = async (data: { username: string; email: string; password: string }) => {
@@ -110,7 +119,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const userData: User = {
         userId: fullUserResponse.userID,
         username: fullUserResponse.username,
-        email: fullUserResponse.email
+        email: fullUserResponse.email,
+        avatar: fullUserResponse.avatar, // << LẤY AVATAR
+        fullName: fullUserResponse.fullName, // << LẤY FULLNAME (NẾU CÓ)
       };
       
       setUser(userData); // Có thể set user ở đây hoặc không, tùy thuộc vào luồng bạn muốn
@@ -118,11 +129,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       // Sau khi đăng ký, gửi OTP và điều hướng đến màn hình OTP
       try {
-        console.log(`[AuthContext] New user ${userData.email} registered. Sending OTP.`);
-        await sendOtp(userData.email); // Gửi OTP sau khi đăng ký thành công
-        console.log(`[AuthContext] OTP sent to ${userData.email} post-registration. Navigating to OTP screen.`);
+        console.log(`[AuthContext] New user ${userData.email} registered. Backend should send OTP. Navigating to OTP screen.`);
+        // await sendOtp(userData.email); // Gửi OTP sau khi đăng ký thành công - COMMENTED OUT
+        // console.log(`[AuthContext] OTP sent to ${userData.email} post-registration. Navigating to OTP screen.`);
       } catch (otpError) {
-        console.error('[AuthContext] Failed to send OTP after registration:', otpError);
+        // This catch block might not be necessary if sendOtp is removed,
+        // but keeping it in case of other errors during this phase.
+        console.error('[AuthContext] Error during post-registration phase (OTP sending was removed):', otpError);
       }
       router.replace({ pathname: '/(auth)/otp', params: { email: userData.email } });
 
