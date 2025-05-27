@@ -5,14 +5,14 @@ namespace DatingAppAPI.Helpers
 {
     public static class AgeCalculator
     {
-        public static int? CalculateAge(DateTime? birthdate)
+        public static int? CalculateAge(DateTimeOffset? birthdate)
         {
             if (!birthdate.HasValue)
             {
                 return null;
             }
 
-            var today = DateTime.Today;
+            var today = DateTimeOffset.UtcNow.Date; // Sử dụng DateTimeOffset
             var age = today.Year - birthdate.Value.Year;
 
             // Kiểm tra xem đã qua ngày sinh nhật năm nay chưa

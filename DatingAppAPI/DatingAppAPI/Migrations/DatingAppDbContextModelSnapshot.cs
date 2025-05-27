@@ -22,7 +22,7 @@ namespace DatingAppAPI.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("DatingAppAPI.Models.EmailOTP", b =>
+            modelBuilder.Entity("DatingAppAPI.DTO.EmailOTP", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -34,8 +34,8 @@ namespace DatingAppAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ExpirationTime")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("ExpirationTime")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<bool>("IsUsed")
                         .HasColumnType("bit");
@@ -74,8 +74,8 @@ namespace DatingAppAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MatchID"));
 
-                    b.Property<DateTime>("MatchTime")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("MatchTime")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<int>("User1ID")
                         .HasColumnType("int");
@@ -101,18 +101,31 @@ namespace DatingAppAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MessageID"));
 
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
                     b.Property<int>("MatchID")
                         .HasColumnType("int");
 
+                    b.Property<string>("MediaUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("MessageText")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("ReceiverUserID")
+                        .HasColumnType("int");
 
                     b.Property<int>("SenderID")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("SentTime")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("SentTime")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
 
                     b.HasKey("MessageID");
 
@@ -159,8 +172,8 @@ namespace DatingAppAPI.Migrations
                     b.Property<bool>("IsLike")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime>("SwipeTime")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("SwipeTime")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<int>("ToUserID")
                         .HasColumnType("int");
@@ -194,11 +207,11 @@ namespace DatingAppAPI.Migrations
                     b.Property<string>("Bio")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("Birthdate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset?>("Birthdate")
+                        .HasColumnType("datetimeoffset");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
@@ -218,8 +231,8 @@ namespace DatingAppAPI.Migrations
                     b.Property<bool>("IsEmailVerified")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime?>("LastLoginDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset?>("LastLoginDate")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<decimal?>("Latitude")
                         .HasColumnType("decimal(18,2)");
@@ -291,7 +304,7 @@ namespace DatingAppAPI.Migrations
                     b.HasOne("DatingAppAPI.Models.User", "Sender")
                         .WithMany("Messages")
                         .HasForeignKey("SenderID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Match");

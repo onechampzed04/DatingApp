@@ -63,6 +63,24 @@ namespace DatingAppAPI.Data
                 .HasOne(ui => ui.Interest)
                 .WithMany(i => i.UserInterests)
                 .HasForeignKey(ui => ui.InterestId);
+
+            // message
+            modelBuilder.Entity<Message>(entity =>
+            {
+                entity.HasKey(e => e.MessageID);
+
+                entity.HasOne(d => d.Match)
+                    .WithMany(p => p.Messages) // Đảm bảo Match model có ICollection<Message> Messages
+                    .HasForeignKey(d => d.MatchID)
+                    .OnDelete(DeleteBehavior.Cascade); // Nếu Match bị xóa, tin nhắn liên quan cũng xóa (OK)
+
+                entity.HasOne(d => d.Sender)
+                    .WithMany(p => p.Messages) // Đảm bảo User model có ICollection<Message> Messages (Sent)
+                    .HasForeignKey(d => d.SenderID)
+                    .OnDelete(DeleteBehavior.Restrict); // HOẶC .NoAction // THAY ĐỔI: Tránh xóa User thì xóa Message của người khác
+
+                // Không cần cấu hình cho ReceiverUserID nếu không tạo FK trực tiếp đến User table
+            });
         }
     }
 }

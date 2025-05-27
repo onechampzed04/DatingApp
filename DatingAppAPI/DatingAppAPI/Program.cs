@@ -10,7 +10,7 @@ using DatingAppAPI.Models; // << THÊM USING CHO MODEL USER
 using System.Text.Json;  // << THÊM USING CHO JSONSERIALIZER
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddSignalR();
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
     serverOptions.Limits.MaxRequestBodySize = 10 * 1024 * 1024;
@@ -92,6 +92,7 @@ app.UseStaticFiles();
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapHub<DatingAppAPI.Hubs.ChatHub>("/chathub");
 app.MapControllers();
 app.Run();
 
@@ -208,7 +209,9 @@ public static class SeedData
                         Avatar = dto.Avatar,
                         CreatedAt = DateTime.UtcNow,
                         IsEmailVerified = dto.IsEmailVerified,
-                        AccountStatus = dto.AccountStatus ?? 1,
+                        AccountStatus = dto.AccountStatus.HasValue
+                                        ? (UserAccountStatus)dto.AccountStatus.Value // Ép kiểu từ int? (JSON) sang UserAccountStatus
+                                        : UserAccountStatus.Online, // Mặc định là Online nếu không có trong JSON
                         Photos = new List<Photo>(),
                         SwipesMade = new List<Swipe>(),
                         SwipesReceived = new List<Swipe>(),

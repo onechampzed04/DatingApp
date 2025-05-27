@@ -4,6 +4,7 @@ wwwroot\images\avatars\37b0207d-1efd-4bd0-98d2-f07a1d3fc81e_a43a6612-d00e-418e-b
 wwwroot\images\avatars\3c100365-5365-49ff-b7ff-d6821fa17e88_2d2fc6b9-608e-4482-b574-b4980ce2fdf4.jpeg
 wwwroot\images\avatars\62d75649-f25c-4d43-bfe2-586e455a01ab_girl-8050719_640.jpg
 wwwroot\images\avatars\7d0259a1-72cb-469b-b42e-7deed4f11f3e_aac787e1-3a7d-41b3-817d-b71f010d0bf0.jpeg
+wwwroot\images\avatars\8dd3ccca-bd9d-4cdc-b6ac-8dd36cb1cc9c_70ccda67-9a19-44d7-8667-e5d71547471f.jpeg
 wwwroot\images\avatars\add005e9-1a8f-48d0-8c43-18c939dc85e5_13155270-fb49-4398-ba9c-7eaa47ad4699.jpeg
 wwwroot\images\avatars\ai-generated-7833751_640.jpg
 wwwroot\images\avatars\ai-generated-8266355_640.png
@@ -33,3 +34,18 @@ wwwroot\images\avatars\girl-8722219_640.png
 wwwroot\images\avatars\Wh (2).jpg
 wwwroot\images\avatars\woman-8859570_640.jpg
 wwwroot\images\avatars\young-man-8801861_640.jpg
+wwwroot\images\avatars\8d249622-bbe9-4e22-82d6-53d8d428d358_1807ccf2-4550-4f47-8115-bde94a912e6d.jpeg
+wwwroot\images\avatars\6c4b8b75-92cd-499a-9548-96f5d0db662b_637696ad-214e-41a1-83db-b655d269681c.jpeg
+wwwroot\uploads\chat_media\a1981707-7988-44d6-9cad-c96ddb8a9d0a_94bc46e8-a9d1-4899-a504-921100f03774.jpeg
+wwwroot\images\avatars\f63e0fb1-38af-439a-94cc-5ce3c66e2ec7_3255100b-caad-41c1-af52-e8a8a61261fc.jpeg
+wwwroot\uploads\chat_media\15693c48-5d81-444a-8c0a-1a8d110c0018_07bf537d-2aba-4375-9756-a29fa7aeb99a.jpeg
+wwwroot\images\avatars\ad439b7f-cd27-4e8c-9abd-87dcabe9459b_52abd1f7-2e5d-493a-90e3-31c14628fdeb.jpeg
+wwwroot\uploads\chat_media\67bc6b35-cd47-40c1-ad7b-9112d2a7db20_44ec77c7-45eb-4f65-8000-a1db68320b53.jpeg
+wwwroot\uploads\chat_media\fd96ba9f-eb6d-4409-9412-13ea3e54d80c_5a3b4fe9-edd3-47d0-a201-e21458e7b04d.jpeg
+wwwroot\uploads\chat_media\35422f9d-8a80-485c-b8d8-6ccd49a5877f_50d00272-92b9-400a-b6af-dfc848bd3272.jpeg
+wwwroot\uploads\chat_media\2661b11a-cc3e-496e-8bc1-203a4abe360b_48363b44-27c3-4ddd-9325-494d262e5ec1.jpeg
+wwwroot\uploads\chat_media\e770f087-53fe-49df-8208-9019661f39a4_f41c3c6b-8ee0-46aa-8dc6-dd2bb0df153f.jpeg
+wwwroot\uploads\chat_media\356b299d-a235-459a-8ac2-7c703dafc571_dfa1eb2c-e0b1-4bcf-a2b6-3144724273e4.jpeg
+wwwroot\uploads\chat_media\3c639c82-808b-4b61-bf19-52dd7c3f0138_00328643-74b2-4de6-b5cd-5adcd4dfeacb.jpeg
+wwwroot\uploads\chat_media\f7d4df4f-224e-40a9-93dd-6b063a7a5cfa_48eae5a0-5d3b-4ef3-b574-1a0415e8c188.jpeg
+wwwroot\uploads\chat_media\2e6ae7c5-f4b2-4722-98b8-f6340b152e4a_802fe6a6-2b38-4d7d-bfa8-f7ff5a1634e4.jpeg

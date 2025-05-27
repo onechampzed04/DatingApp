@@ -124,19 +124,19 @@ namespace DatingAppAPI.Controllers
             }
         }
 
-        [HttpPost("send-otp-for-any")]
-        public async Task<IActionResult> SendOtpForAny([FromBody] string email)
-        {
-            try
-            {
-                await _authService.SendOtpToEmailAsync(email);
-                return Ok(new { message = "OTP sent to the provided email address." });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+        //[HttpPost("send-otp-for-any")]
+        //public async Task<IActionResult> SendOtpForAny([FromBody] string email)
+        //{
+        //    try
+        //    {
+        //        await _authService.SendOtpToEmailAsync(email);
+        //        return Ok(new { message = "OTP sent to the provided email address." });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(new { message = ex.Message });
+        //    }
+        //}
 
     }
 }

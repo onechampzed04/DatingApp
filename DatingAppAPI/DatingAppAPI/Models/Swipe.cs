@@ -6,7 +6,7 @@
         public int FromUserID { get; set; }
         public int ToUserID { get; set; }
         public bool IsLike { get; set; }
-        public DateTime SwipeTime { get; set; }
+        public DateTimeOffset  SwipeTime { get; set; }
 
         public User FromUser { get; set; }
         public User ToUser { get; set; }

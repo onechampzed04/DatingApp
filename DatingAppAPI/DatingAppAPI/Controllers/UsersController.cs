@@ -256,7 +256,7 @@ namespace DatingAppAPI.Controllers
                 ProfileVisibility = userCreateDto.ProfileVisibility,
                 CreatedAt = DateTime.UtcNow,
                 IsEmailVerified = false, // Default for new users
-                AccountStatus = 1,       // Default to active, manage as needed
+                AccountStatus = (UserAccountStatus)1,       // Default to active, manage as needed
                 // Initialize collections
                 Photos = new List<Photo>(),
                 SwipesMade = new List<Swipe>(),

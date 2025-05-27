@@ -1,6 +1,8 @@
 ﻿using DatingAppAPI.Data;
-using DatingAppAPI.Models;
 using DatingAppAPI.DTO;
+using DatingAppAPI.Hubs;
+using DatingAppAPI.Models;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -14,12 +16,14 @@ namespace DatingAppAPI.Services
         private readonly DatingAppDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
+        private readonly IHubContext<ChatHub, IChatClient> _chatHubContext; // << THÊM TRƯỜNG NÀY
 
-        public AuthService(DatingAppDbContext context, IConfiguration configuration, IEmailService emailService)
+        public AuthService(DatingAppDbContext context, IConfiguration configuration, IEmailService emailService, IHubContext<ChatHub, IChatClient> chatHubContext )
         {
             _context = context;
             _configuration = configuration;
             _emailService = emailService;
+            _chatHubContext = chatHubContext; // << GÁN
         }
 
         // DatingAppAPI.Services/AuthService.cs
@@ -85,9 +89,30 @@ namespace DatingAppAPI.Services
                     IsEmailVerified = false
                 };
             }
+            user.AccountStatus = UserAccountStatus.Online; // << CẬP NHẬT TRẠNG THÁI ONLINE
+            user.LastLoginDate = DateTimeOffset.UtcNow;    // << CẬP NHẬT LAST LOGIN
+            await _context.SaveChangesAsync();             // << LƯU THAY ĐỔI
 
             // Email đúng, mật khẩu đúng, ĐÃ VERIFY
             var token = GenerateJwtToken(user);
+            var relatedUserIds = await _context.Matches
+            .Where(m => m.User1ID == user.UserID || m.User2ID == user.UserID)
+            .Select(m => m.User1ID == user.UserID ? m.User2ID : m.User1ID)
+            .Distinct()
+            .ToListAsync();
+
+            foreach (var relatedUserId in relatedUserIds)
+            {
+                var connections = ChatHub.GetConnectionsForUser(relatedUserId.ToString());
+                if (connections.Any())
+                {
+                    // Sử dụng _chatHubContext vì đang ở ngoài Hub class
+                    await _chatHubContext.Clients.Clients(connections).UserStatusChanged(user.UserID, true, null);
+                }
+            }
+            Console.WriteLine($"[AuthService] User {user.UserID} logged in. Status set to Online. LastLogin: {user.LastLoginDate}");
+
+
             return new AuthResponseDto
             {
                 UserID = user.UserID,

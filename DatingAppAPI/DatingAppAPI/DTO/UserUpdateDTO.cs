@@ -4,7 +4,7 @@
     {
         public string? FullName { get; set; }
         public string? Gender { get; set; }
-        public DateTime? Birthdate { get; set; }
+        public DateTimeOffset ? Birthdate { get; set; }
         public string? Bio { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Address { get; set; }
