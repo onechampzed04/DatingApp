@@ -143,10 +143,10 @@ export default function MessagesScreen() {
 
       // 3. Kiểm tra xem có phải "hôm nay" hoặc "hôm qua" theo lịch Việt Nam không
       if (isTodayFn(dateInVietnam)) { // isTodayFn kiểm tra ngày của dateInVietnam
-        return `Seen today at ${formatInTimeZone(dateUtc, VIETNAM_TIME_ZONE, 'HH:mm')}`;
+        return `Active today at ${formatInTimeZone(dateUtc, VIETNAM_TIME_ZONE, 'HH:mm')}`;
       }
       if (isYesterdayFn(dateInVietnam)) { // isYesterdayFn kiểm tra ngày của dateInVietnam
-        return `Seen yesterday at ${formatInTimeZone(dateUtc, VIETNAM_TIME_ZONE, 'HH:mm')}`;
+        return `Active yesterday at ${formatInTimeZone(dateUtc, VIETNAM_TIME_ZONE, 'HH:mm')}`;
       }
 
       // 4. Nếu không phải hôm nay hoặc hôm qua
@@ -212,7 +212,7 @@ export default function MessagesScreen() {
       <TouchableOpacity
         style={styles.conversationItem}
     onPress={() => {
-       router.push(`/chat/${item.matchID}?matchedUserName=${encodeURIComponent(item.matchedUsername || 'Chat')}&matchedUserAvatar=${encodeURIComponent(encodedAvatarForNav)}&matchedUserID=${item.matchedUserID}`);
+       router.push(`/chat/${item.matchID}?matchedUserName=${encodeURIComponent(item.matchedUsername || 'Chat')}&matchedUserAvatar=${encodeURIComponent(encodedAvatarForNav)}&matchedUserID=${item.matchedUserID}&isMatchedUserOnline=${item.isMatchedUserOnline}&matchedUserLastSeen=${item.matchedUserLastSeen || ''}`);
     }}
   >
         <View style={styles.avatarContainer}>

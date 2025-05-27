@@ -12,7 +12,6 @@ import { isToday as isTodayFn, isYesterday as isYesterdayFn } from 'date-fns';
 const DEFAULT_AVATAR = 'https://via.placeholder.com/40'; // Bạn có thể import từ constants
 const VIETNAM_TIME_ZONE = 'Asia/Ho_Chi_Minh';
 
-// Component ChatHeaderTitle (có thể copy từ ChatScreen.tsx hoặc tạo file riêng)
 const ChatHeaderTitleComponent = ({ userName, avatarUrl, isOnline, lastSeen }: { userName: string; avatarUrl: string; isOnline?: boolean; lastSeen?: string | null }) => {
   const formatLastSeenHeader = (isoString: string | null | undefined): string => {
     if (!isoString) return 'Offline';
@@ -50,32 +49,52 @@ const ChatHeaderTitleComponent = ({ userName, avatarUrl, isOnline, lastSeen }: {
 
 export default function ChatStackLayout() {
   const router = useRouter();
-  // Lấy params cho màn hình [matchId] để cấu hình header động
-  // Lưu ý: useLocalSearchParams ở đây sẽ lấy params của route hiện tại của Stack này,
-  // không phải của screen con cụ thể nếu không có cách truyền trực tiếp.
-  // Cách tốt hơn là để screen con tự quản lý header của nó.
 
   return (
     <Stack>
-      <Stack.Screen name="[matchId]" />
       <Stack.Screen
-        name="settings/[matchId]" // <-- THÊM SCREEN MỚI
+        name="[matchId]"
+        options={({ route }) => {
+          const params = route.params as { matchedUserName?: string } || {};
+          const initialTitle = params.matchedUserName
+            ? decodeURIComponent(params.matchedUserName) 
+            : ''; 
+
+          return {
+            headerTitle: () => null,
+            headerBackTitleVisible: false,
+            headerTitleAlign: 'left', 
+            headerLeft: () => (
+              <TouchableOpacity onPress={() => router.back()} style={{ marginLeft: Platform.OS === 'ios' ? 10 : 0, paddingHorizontal: 5 }}>
+                <Ionicons name="arrow-back" size={28} color="#EA405A" />
+              </TouchableOpacity>
+            ),
+           
+          };
+        }}
+      />
+      <Stack.Screen
+        name="settings/[matchId]"
         options={{
-          // title: "Chat Settings", // Title sẽ được set động trong screen
-          presentation: 'modal', // Hiển thị như một modal (tùy chọn)
-                                  // hoặc để mặc định nếu muốn push bình thường
+          presentation: 'modal',
+          headerLeft: () => ( 
+            <TouchableOpacity onPress={() => router.back()} style={{ marginLeft: Platform.OS === 'ios' ? 10 : 0, paddingHorizontal: 5 }}>
+              <Ionicons name={Platform.OS === 'ios' ? "close-outline" : "arrow-back"} size={28} color="#EA405A" />
+            </TouchableOpacity>
+          ),
         }}
       />
       <Stack.Screen
         name="user-profile/[userId]"
-        options={{
-          title: "Profile", // Title mặc định, có thể bị ghi đè bởi screen
+        options={({ navigation, route }) => ({ 
+          title: "Profile",
+          headerBackTitleVisible: false,
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()} style={{ marginLeft: Platform.OS === 'ios' ? 10 : 0, paddingHorizontal: 5 }}>
               <Ionicons name="arrow-back" size={28} color="#EA405A" />
             </TouchableOpacity>
           ),
-        }}
+        })}
       />
     </Stack>
   );
