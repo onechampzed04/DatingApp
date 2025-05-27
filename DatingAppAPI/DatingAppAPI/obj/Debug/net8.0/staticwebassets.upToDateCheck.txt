@@ -49,3 +49,4 @@ wwwroot\uploads\chat_media\356b299d-a235-459a-8ac2-7c703dafc571_dfa1eb2c-e0b1-4b
 wwwroot\uploads\chat_media\3c639c82-808b-4b61-bf19-52dd7c3f0138_00328643-74b2-4de6-b5cd-5adcd4dfeacb.jpeg
 wwwroot\uploads\chat_media\f7d4df4f-224e-40a9-93dd-6b063a7a5cfa_48eae5a0-5d3b-4ef3-b574-1a0415e8c188.jpeg
 wwwroot\uploads\chat_media\2e6ae7c5-f4b2-4722-98b8-f6340b152e4a_802fe6a6-2b38-4d7d-bfa8-f7ff5a1634e4.jpeg
+wwwroot\uploads\chat_media\96362cbb-e0aa-40c5-a439-b761dc32583e_a6ab98a2-60b2-498c-8077-72b6e9f3e090.jpeg
