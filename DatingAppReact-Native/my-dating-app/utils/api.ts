@@ -54,6 +54,22 @@ userApi.interceptors.response.use(
   }
 );
 
+const postsApi = axios.create({
+  baseURL: `${API_BASE_URL}/api/Posts`, // Trỏ đến PostsController
+});
+postsApi.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+  const token = await AsyncStorage.getItem('token');
+  if (token) {
+    config.headers = config.headers || {};
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  // Khi upload file, Content-Type sẽ là 'multipart/form-data'
+  // Axios tự xử lý nếu data là FormData, nhưng bạn có thể đặt ở đây nếu cần
+  // if (config.data instanceof FormData) {
+  //   config.headers['Content-Type'] = 'multipart/form-data';
+  // }
+  return config;
+});
 
 export const updateUserProfileWithFetch = async (
   userId: number,
@@ -303,6 +319,88 @@ export interface UserProfileModificationData {
   profileVisibility?: number | null;
   latitude?: number | null;
   longitude?: number | null;
+}
+
+// --- POST TYPES --- (Đảm bảo đồng bộ với DTOs ở backend)
+export interface PostUser { // Tương ứng PostUserDTO
+  userID: number;
+  username: string;
+  fullName?: string | null;
+  avatar?: string | null;
+}
+
+export enum ReactionType { // Đồng bộ với backend C# enum
+  Like = 1,
+  Love = 2,
+  Haha = 3,
+  Wow = 4,
+  Sad = 5,
+  Angry = 6,
+}
+
+export interface PostReaction { // Tương ứng PostReactionDTO
+  postReactionID: number;
+  userID: number;
+  username: string; // Hoặc FullName
+  reactionType: ReactionType;
+  createdAt: string; // ISO date string
+}
+
+export interface PostComment { // Tương ứng PostCommentDTO
+  postCommentID: number;
+  postID: number;
+  user: PostUser;
+  parentCommentID?: number | null;
+  content: string;
+  createdAt: string; // ISO date string
+  updatedAt?: string | null; // ISO date string
+  repliesCount: number;
+  replies: PostComment[]; // Có thể là một vài replies gần nhất
+}
+
+export interface Post { // Tương ứng PostDTO
+  postID: number;
+  user: PostUser;
+  content: string;
+  imageUrl?: string | null;
+  videoUrl?: string | null;
+  createdAt: string; // ISO date string
+  updatedAt?: string | null; // ISO date string
+  totalReactions: number;
+  reactionCounts: Record<ReactionType, number>; // { [key in ReactionType]?: number }
+  currentUserReaction?: ReactionType | null;
+  totalComments: number;
+  comments: PostComment[]; // Danh sách comment gốc
+}
+
+export interface PostCreateData { // Tương ứng PostCreateDTO
+  content: string;
+  imageUrl?: string | null; // URL sau khi upload qua MediaController
+  videoUrl?: string | null; // URL sau khi upload qua MediaController
+}
+
+export interface PostUpdateData { // Tương ứng PostUpdateDTO
+  content?: string;
+  // Các trường khác có thể cập nhật
+}
+
+export interface PostReactionCreateData { // Tương ứng PostReactionCreateDTO
+  reactionType: ReactionType;
+}
+
+export interface PostCommentCreateData { // Tương ứng PostCommentCreateDTO
+  content: string;
+  parentCommentID?: number | null;
+}
+
+export interface PostCommentUpdateData { // Tương ứng PostCommentUpdateDTO
+  content: string;
+}
+
+export interface ReactionSummaryResponse { // Phản hồi từ API reaction
+    totalReactions: number;
+    reactionCounts: Record<ReactionType, number>;
+    currentUserReaction?: ReactionType | null;
 }
 
 // --- USER FUNCTIONS ---
@@ -588,6 +686,176 @@ export const markMessagesAsRead = async (matchId: number): Promise<{ message: st
     return response.data;
   } catch (error: any) {
     console.error(`[markMessagesAsRead] Error marking messages as read for match ${matchId}:`, error.response?.data || error.message);
+    throw error;
+  }
+};
+
+
+
+// --- POST FUNCTIONS ---
+export const getPosts = async (pageNumber: number = 1, pageSize: number = 10, forUserId?: number): Promise<Post[]> => {
+  try {
+    const params: any = { pageNumber, pageSize };
+    if (forUserId) {
+      params.forUserId = forUserId;
+    }
+    const response = await postsApi.get<Post[]>('/', { params });
+    return response.data;
+  } catch (error: any) {
+    console.error('[API] Error fetching posts:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const getPostById = async (postId: number): Promise<Post> => {
+  try {
+    const response = await postsApi.get<Post>(`/${postId}`);
+    return response.data;
+  } catch (error: any) {
+    console.error(`[API] Error fetching post ${postId}:`, error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const createPost = async (data: PostCreateData): Promise<Post> => {
+  try {
+    // Nếu bạn xử lý upload file trong PostsController, bạn sẽ cần gửi FormData ở đây
+    // Hiện tại, chúng ta giả định imageUrl/videoUrl đã được upload trước đó
+    const response = await postsApi.post<Post>('/', data, {
+      headers: { 'Content-Type': 'application/json' }, // Vì data là JSON
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('[API] Error creating post:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const updatePost = async (postId: number, data: PostUpdateData): Promise<void> => {
+  try {
+    await postsApi.put(`/${postId}`, data, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error: any) {
+    console.error(`[API] Error updating post ${postId}:`, error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const deletePost = async (postId: number): Promise<void> => {
+  try {
+    await postsApi.delete(`/${postId}`);
+  } catch (error: any) {
+    console.error(`[API] Error deleting post ${postId}:`, error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// Reactions
+export const addOrUpdateReactionToPost = async (postId: number, data: PostReactionCreateData): Promise<ReactionSummaryResponse> => {
+  try {
+    const response = await postsApi.post<ReactionSummaryResponse>(`/${postId}/reactions`, data, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error(`[API] Error reacting to post ${postId}:`, error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const getPostReactions = async (postId: number, type?: ReactionType): Promise<PostReaction[]> => {
+  try {
+    const params: any = {};
+    if (type !== undefined && type !== null) {
+      params.type = type;
+    }
+    const response = await postsApi.get<PostReaction[]>(`/${postId}/reactions`, { params });
+    return response.data;
+  } catch (error: any) {
+    console.error(`[API] Error fetching reactions for post ${postId}:`, error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// Comments
+export const addCommentToPost = async (postId: number, data: PostCommentCreateData): Promise<PostComment> => {
+  try {
+    const response = await postsApi.post<PostComment>(`/${postId}/comments`, data, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error(`[API] Error adding comment to post ${postId}:`, error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const getPostComments = async (postId: number, parentCommentId?: number, pageNumber: number = 1, pageSize: number = 10): Promise<PostComment[]> => {
+  try {
+    const params: any = { pageNumber, pageSize };
+    if (parentCommentId !== undefined && parentCommentId !== null) {
+      params.parentCommentId = parentCommentId;
+    }
+    const response = await postsApi.get<PostComment[]>(`/${postId}/comments`, { params });
+    return response.data;
+  } catch (error: any) {
+    console.error(`[API] Error fetching comments for post ${postId}:`, error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const getCommentById = async (postId: number, commentId: number): Promise<PostComment> => {
+  try {
+    const response = await postsApi.get<PostComment>(`/${postId}/comments/${commentId}`);
+    return response.data;
+  } catch (error: any) {
+    console.error(`[API] Error fetching comment ${commentId} for post ${postId}:`, error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const updateComment = async (postId: number, commentId: number, data: PostCommentUpdateData): Promise<void> => {
+  try {
+    await postsApi.put(`/${postId}/comments/${commentId}`, data, {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error: any) {
+    console.error(`[API] Error updating comment ${commentId} for post ${postId}:`, error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const deleteComment = async (postId: number, commentId: number): Promise<void> => {
+  try {
+    await postsApi.delete(`/${postId}/comments/${commentId}`);
+  } catch (error: any) {
+    console.error(`[API] Error deleting comment ${commentId} for post ${postId}:`, error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// --- MEDIA FUNCTIONS (Đã có uploadChatMedia, thêm uploadPostMedia) ---
+export const uploadPostMedia = async (file: ExpoImageFile): Promise<UploadedMediaResponse> => {
+  const formData = new FormData();
+  formData.append('file', { // Tên 'file' phải khớp với tham số IFormFile ở backend
+    uri: file.uri,
+    name: file.name,
+    type: file.type, // Ví dụ: 'image/jpeg' hoặc 'video/mp4'
+  } as any);
+
+  try {
+    console.log(`[uploadPostMedia] Uploading file: ${file.name}, type: ${file.type}`);
+    // Sử dụng mediaApi đã được tạo (hoặc tạo mới nếu cần cấu hình riêng)
+    const response = await mediaApi.post<UploadedMediaResponse>('/upload/post-media', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    console.log('[uploadPostMedia] Upload successful, URL:', response.data.url);
+    return response.data;
+  } catch (error: any) {
+    console.error('[uploadPostMedia] Error uploading post media:', error.response?.data || error.message);
     throw error;
   }
 };
