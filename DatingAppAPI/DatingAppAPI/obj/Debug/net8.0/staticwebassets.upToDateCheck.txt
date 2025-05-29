@@ -50,3 +50,5 @@ wwwroot\uploads\chat_media\3c639c82-808b-4b61-bf19-52dd7c3f0138_00328643-74b2-4d
 wwwroot\uploads\chat_media\f7d4df4f-224e-40a9-93dd-6b063a7a5cfa_48eae5a0-5d3b-4ef3-b574-1a0415e8c188.jpeg
 wwwroot\uploads\chat_media\2e6ae7c5-f4b2-4722-98b8-f6340b152e4a_802fe6a6-2b38-4d7d-bfa8-f7ff5a1634e4.jpeg
 wwwroot\uploads\chat_media\96362cbb-e0aa-40c5-a439-b761dc32583e_a6ab98a2-60b2-498c-8077-72b6e9f3e090.jpeg
+wwwroot\uploads\post_media\0cb9352d-50e7-4a3c-9360-cae942d8a656_4a1e15d7-f97e-4b74-9929-17eb601802ce.jpeg
+wwwroot\images\avatars\809cf0fa-181e-4423-b002-022df43fefb9_52fb68b5-0a02-4a1a-a8df-51512ac7daab.jpeg

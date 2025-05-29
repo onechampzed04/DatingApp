@@ -16,8 +16,7 @@ namespace DatingAppAPI.DTO
     public class PostReactionDTO
     {
         public int PostReactionID { get; set; }
-        public int UserID { get; set; }
-        public string Username { get; set; } // Hoặc FullName
+        public PostUserDTO User { get; set; } // <<<< QUAN TRỌNG
         public ReactionType ReactionType { get; set; }
         public DateTimeOffset CreatedAt { get; set; }
     }

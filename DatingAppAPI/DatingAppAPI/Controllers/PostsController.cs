@@ -319,7 +319,7 @@ namespace DatingAppAPI.Controllers
 
             var query = _context.PostReactions
                 .Where(r => r.PostID == postId)
-                .Include(r => r.User)
+                .Include(r => r.User) // Quan trọng: Include User để có thông tin avatar
                 .AsNoTracking();
 
             if (type.HasValue)
@@ -328,12 +328,17 @@ namespace DatingAppAPI.Controllers
             }
 
             var reactions = await query
-                .OrderByDescending(r => r.CreatedAt)
+                .OrderByDescending(r => r.CreatedAt) // Có thể bạn muốn sắp xếp khác cho summary (ví dụ: người dùng hiện tại trước)
                 .Select(r => new PostReactionDTO
                 {
                     PostReactionID = r.PostReactionID,
-                    UserID = r.UserID,
-                    Username = r.User.FullName ?? r.User.Username,
+                    User = new PostUserDTO // Tạo PostUserDTO
+                    {
+                        UserID = r.User.UserID,
+                        Username = r.User.Username,
+                        FullName = r.User.FullName,
+                        Avatar = r.User.Avatar // Lấy avatar
+                    },
                     ReactionType = r.ReactionType,
                     CreatedAt = r.CreatedAt
                 })
