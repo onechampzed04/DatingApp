@@ -322,7 +322,7 @@ export interface UserProfileModificationData {
 }
 
 // --- POST TYPES --- (Đảm bảo đồng bộ với DTOs ở backend)
-export interface PostUser { // Tương ứng PostUserDTO
+export interface PostUser { // Giữ nguyên hoặc đảm bảo đã có
   userID: number;
   username: string;
   fullName?: string | null;
@@ -338,12 +338,11 @@ export enum ReactionType { // Đồng bộ với backend C# enum
   Angry = 6,
 }
 
-export interface PostReaction { // Tương ứng PostReactionDTO
+export interface PostReaction {
   postReactionID: number;
-  userID: number;
-  username: string; // Hoặc FullName
+  user: PostUser; // <<<< Đảm bảo đã cập nhật
   reactionType: ReactionType;
-  createdAt: string; // ISO date string
+  createdAt: string;
 }
 
 export interface PostComment { // Tương ứng PostCommentDTO

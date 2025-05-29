@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,14 +7,28 @@ import {
   ScrollView,
   ActivityIndicator,
   Button,
-  StyleSheet,Alert
+  StyleSheet,
+  Alert,
+  FlatList,
+  RefreshControl,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
-import { getUserById, getUserInterests, ApiUser, Interest, API_BASE_URL, } from '../../utils/api';
+import {
+  getUserById,
+  getUserInterests,
+  ApiUser,
+  Interest,
+  API_BASE_URL,
+  Post,
+  getPosts,
+} from '../../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import PostCard from '../../components/posts/PostCard';
 
-// Calculate age based on birthdate
+const FALLBACK_AVATAR_SMALL = require('../../assets/images/dating-app.png');
+
 const calculateAge = (birthdateString?: string | null): number | null => {
   if (!birthdateString) return null;
   const birthDate = new Date(birthdateString);
@@ -28,7 +42,6 @@ const calculateAge = (birthdateString?: string | null): number | null => {
   return age;
 };
 
-// Reusable ProfileHeader component
 const ProfileHeader = ({ avatarSource, onEdit, onFriends }: { avatarSource: any; onEdit: () => void; onFriends: () => void }) => (
   <>
     <Image source={avatarSource} style={styles.headerImage} />
@@ -46,7 +59,6 @@ const ProfileHeader = ({ avatarSource, onEdit, onFriends }: { avatarSource: any;
   </>
 );
 
-// Reusable ProfileSection component
 const ProfileSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <View>
     <Text style={styles.sectionTitle}>{title}</Text>
@@ -54,7 +66,6 @@ const ProfileSection = ({ title, children }: { title: string; children: React.Re
   </View>
 );
 
-// InterestItem component
 const InterestItem = ({ name }: { name: string }) => (
   <View style={styles.interest}>
     <Text style={styles.interestText}>{name}</Text>
@@ -64,17 +75,36 @@ const InterestItem = ({ name }: { name: string }) => (
 const UserProfileScreen = () => {
   const { user: authUser, logout } = useAuth();
   const router = useRouter();
-  const [profileState, setProfileState] = useState<{ userData: ApiUser | null; interests: Interest[]; loading: boolean; userId: number | null }>({
+  const [profileState, setProfileState] = useState<{
+    userData: ApiUser | null;
+    interests: Interest[];
+    loading: boolean;
+    userId: number | null;
+  }>({
     userData: null,
     interests: [],
     loading: true,
     userId: null,
   });
 
-  const fetchProfileData = useCallback(async (userId: number) => {
+  const [userPosts, setUserPosts] = useState<Post[]>([]);
+  const [isLoadingPosts, setIsLoadingPosts] = useState(false);
+  const [isRefreshingPosts, setIsRefreshingPosts] = useState(false);
+  const [postsPage, setPostsPage] = useState(1);
+  const [hasMorePosts, setHasMorePosts] = useState(true);
+  const [isLoadingMorePosts, setIsLoadingMorePosts] = useState(false);
+
+  const POSTS_PAGE_SIZE = 5;
+  const postsIsMounted = useRef(false);
+
+  const fetchProfileData = useCallback(async (userIdToFetch: number) => {
+    console.log(`[UserProfileScreen] Fetching profile data for userID: ${userIdToFetch}`);
     setProfileState((prev) => ({ ...prev, loading: true }));
     try {
-      const [profile, interests] = await Promise.all([getUserById(userId), getUserInterests(userId)]);
+      const [profile, interests] = await Promise.all([
+        getUserById(userIdToFetch),
+        getUserInterests(userIdToFetch),
+      ]);
       setProfileState((prev) => ({ ...prev, userData: profile, interests: interests || [] }));
     } catch (error: any) {
       console.error('Failed to fetch profile data:', error);
@@ -88,8 +118,73 @@ const UserProfileScreen = () => {
     }
   }, [logout]);
 
+  const fetchUserPostsData = useCallback(async (userIdToFetchPosts: number, pageNum: number, isRefreshAction = false) => {
+  if (!userIdToFetchPosts) return;
+  console.log(`[UserProfileScreen] Fetching posts for userID: ${userIdToFetchPosts}, Page: ${pageNum}, Refresh: ${isRefreshAction}`);
+
+  // Sử dụng trực tiếp giá trị state hiện tại thay vì đưa vào dependency của useCallback
+  // if (!isRefreshAction && ((isLoadingMorePosts && pageNum > 1) || (!hasMorePosts && pageNum > 1))) {
+  //   return;
+  // }
+  // -> Logic này có thể không cần thiết nếu các cờ loading được quản lý tốt
+
+  if (isRefreshAction) {
+    // Chỉ set refreshing nếu thực sự là hành động refresh từ người dùng hoặc focus
+    // Nếu chỉ là load lần đầu (pageNum === 1 và không phải isRefreshAction), thì isLoadingPosts sẽ xử lý
+    if (pageNum === 1) setIsRefreshingPosts(true);
+  } else if (pageNum === 1) {
+    setIsLoadingPosts(true);
+  } else {
+    // Chỉ set isLoadingMorePosts nếu thực sự đang load thêm và chưa có request nào đang chạy
+    if (!isLoadingMorePosts && hasMorePosts) { // Thêm kiểm tra hasMorePosts
+        setIsLoadingMorePosts(true);
+    } else {
+        // Nếu đang loading hoặc không còn gì để load, không làm gì cả
+        if (isLoadingMorePosts) console.log("[fetchUserPostsData] Already loading more, bailing.");
+        if (!hasMorePosts) console.log("[fetchUserPostsData] No more posts, bailing.");
+        return;
+    }
+  }
+
+  try {
+    const newPosts = await getPosts(pageNum, POSTS_PAGE_SIZE, userIdToFetchPosts);
+    if (!postsIsMounted.current) return;
+
+    if (newPosts.length < POSTS_PAGE_SIZE) {
+      setHasMorePosts(false);
+    } else {
+      // Nếu fetch thành công và có dữ liệu = PAGE_SIZE, giả định là còn nữa
+      // (trừ khi API trả về thông tin đã hết)
+      setHasMorePosts(true);
+    }
+
+    setUserPosts(prevPosts => {
+      const finalPosts = (pageNum === 1 || isRefreshAction) ? newPosts : [...prevPosts, ...newPosts];
+      const uniquePosts = Array.from(new Map(finalPosts.map(p => [p.postID, p])).values());
+      return uniquePosts;
+    });
+
+    if (newPosts.length > 0 && !isRefreshAction) { // Chỉ tăng page nếu không phải refresh và có post mới
+      setPostsPage(pageNum + 1);
+    } else if (isRefreshAction) {
+      setPostsPage(2); // Sau khi refresh, trang tiếp theo sẽ là 2
+    }
+  } catch (error) {
+    console.error(`Failed to fetch posts for user ${userIdToFetchPosts}:`, error);
+    if (postsIsMounted.current) setHasMorePosts(false); // An toàn khi có lỗi
+  } finally {
+    if (!postsIsMounted.current) return;
+    if (isRefreshAction && pageNum === 1) setIsRefreshingPosts(false);
+    if (pageNum === 1 && !isRefreshAction) setIsLoadingPosts(false);
+    // Luôn reset isLoadingMorePosts sau khi hoàn tất, bất kể thành công hay thất bại
+    if (!isRefreshAction && pageNum > 1) setIsLoadingMorePosts(false);
+  }
+  // Bỏ hasMorePosts, isLoadingMorePosts khỏi dependencies
+  // POSTS_PAGE_SIZE là hằng số, không cần đưa vào
+}, [POSTS_PAGE_SIZE]); // Dependency array có thể chỉ cần các hằng số hoặc props ổn định
+
   useEffect(() => {
-    const fetchUserId = async () => {
+    const fetchInitialUserId = async () => {
       let idToFetch: number | null = null;
       if (authUser?.userId) {
         idToFetch = authUser.userId;
@@ -99,22 +194,34 @@ const UserProfileScreen = () => {
           idToFetch = parseInt(userIdStr, 10);
         }
       }
-      setProfileState((prev) => ({ ...prev, userId: idToFetch }));
-      if (!idToFetch) {
+
+      if (idToFetch) {
+        setProfileState((prev) => ({ ...prev, userId: idToFetch, loading: false }));
+      } else {
         Alert.alert('Error', 'User not identified. Please log in.', [{ text: 'OK', onPress: logout }]);
-        setProfileState((prev) => ({ ...prev, loading: false }));
+        setProfileState((prev) => ({ ...prev, loading: false, userId: null }));
       }
     };
-    fetchUserId();
+    fetchInitialUserId();
   }, [authUser, logout]);
 
   useFocusEffect(
     useCallback(() => {
-      if (profileState.userId) {
-        console.log(`Fetching data for user ID: ${profileState.userId} on focus`);
-        fetchProfileData(profileState.userId);
+      postsIsMounted.current = true;
+      const currentUserIdToFetch = profileState.userId;
+
+      if (currentUserIdToFetch) {
+        console.log(`[UserProfileScreen] Screen focused. Fetching data for user ID: ${currentUserIdToFetch}`);
+        fetchProfileData(currentUserIdToFetch);
+        setUserPosts([]);
+        setPostsPage(1);
+        setHasMorePosts(true);
+        fetchUserPostsData(currentUserIdToFetch, 1, true);
       }
-    }, [profileState.userId, fetchProfileData])
+      return () => {
+        postsIsMounted.current = false;
+      };
+    }, [profileState.userId, fetchProfileData, fetchUserPostsData])
   );
 
   const handleLogout = () => {
@@ -124,9 +231,34 @@ const UserProfileScreen = () => {
 
   const navigateToEditProfile = () => router.push('/(setup)/edit-profile');
   const navigateToFriendList = () => router.push('/(tabs)/interaction/friend-list');
+  const navigateToCreatePost = () => router.push('../post-detail/createpost');
+  const navigateToPostDetailFromProfile = (postId: number) => {
+    router.push({ pathname: '/(tabs)/post-detail/[postId]', params: { postId: postId.toString() } });
+  };
+
+  const handleUpdatePostInProfileList = (updatedPost: Post) => {
+    setUserPosts(prevPosts =>
+      prevPosts.map(p => (p.postID === updatedPost.postID ? updatedPost : p))
+    );
+  };
+
+  const handleRefreshPosts = () => {
+    if (profileState.userId && !isRefreshingPosts) {
+      setPostsPage(1);
+      setHasMorePosts(true);
+      fetchUserPostsData(profileState.userId, 1, true);
+    }
+  };
+
+  const handleLoadMorePosts = () => {
+    if (profileState.userId && !isLoadingMorePosts && hasMorePosts) {
+      fetchUserPostsData(profileState.userId, postsPage);
+    }
+  };
 
   const { loading, userData, interests, userId } = profileState;
-  if (loading) {
+
+  if (loading && !userData) {
     return (
       <View style={styles.centeredLoader}>
         <ActivityIndicator size="large" color="#eb3c58" />
@@ -137,31 +269,34 @@ const UserProfileScreen = () => {
   if (!userData || !userId) {
     return (
       <View style={styles.centeredLoader}>
-        <Text>Could not load user profile. Please try again.</Text>
+        <Text>Could not load user profile. Please try again or log in.</Text>
       </View>
     );
   }
 
   const age = calculateAge(userData.birthdate);
   const displayNameAndAge = `${userData.fullName || userData.username || ''}${age ? `, ${age}` : ''}`;
+
   let finalAvatarUri: string | null = null;
   if (userData.avatar) {
-    if (userData.avatar.startsWith('http://') || userData.avatar.startsWith('https://') || userData.avatar.startsWith('data:image')) {
-      // Nếu avatar đã là URL đầy đủ hoặc data URI, dùng trực tiếp
-      finalAvatarUri = userData.avatar;
-    } else {
-      // Nếu là URL tương đối (ví dụ: /images/avatars/...)
-      // Nối với API_BASE_URL
-      finalAvatarUri = `${API_BASE_URL}${userData.avatar}`;
-    }
+    finalAvatarUri = userData.avatar.startsWith('http') ? userData.avatar : `${API_BASE_URL}${userData.avatar}`;
   }
+  const avatarSource = finalAvatarUri ? { uri: finalAvatarUri } : FALLBACK_AVATAR_SMALL;
 
-  const avatarSource = finalAvatarUri
-    ? { uri: finalAvatarUri }
-    : require('../../assets/images/dating-app.png');
+  const renderCreatePostHeader = () => (
+    <View style={styles.createPostSection}>
+      <Image source={avatarSource} style={styles.createPostAvatar} />
+      <TouchableOpacity style={styles.createPostInputContainer} onPress={navigateToCreatePost}>
+        <Text style={styles.createPostInputPlaceholder}>What's on your mind?</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={navigateToCreatePost} style={styles.createPostMediaButton}>
+        <Ionicons name="images-outline" size={24} color="#4CAF50" />
+      </TouchableOpacity>
+    </View>
+  );
 
-  return (
-    <ScrollView style={styles.container}>
+  const ListHeader = () => (
+    <>
       <ProfileHeader avatarSource={avatarSource} onEdit={navigateToEditProfile} onFriends={navigateToFriendList} />
       <View style={styles.profileDetails}>
         <Text style={styles.name}>{displayNameAndAge}</Text>
@@ -178,11 +313,53 @@ const UserProfileScreen = () => {
             )}
           </View>
         </ProfileSection>
-        <View style={styles.logoutContainer}>
-          <Button title="Đăng xuất" onPress={handleLogout} color="#eb3c58" />
-        </View>
+        {renderCreatePostHeader()}
+        <Text style={styles.sectionTitle}>My Posts</Text>
       </View>
-    </ScrollView>
+    </>
+  );
+
+  return (
+    <FlatList
+      ListHeaderComponent={ListHeader}
+      data={userPosts}
+      renderItem={({ item }) => (
+        <View style={{ paddingHorizontal: 10 }}>
+          <PostCard
+            post={item}
+            onCommentPress={() => navigateToPostDetailFromProfile(item.postID)}
+            onSharePress={(postId) => console.log('Share post:', postId)}
+            onUpdatePost={handleUpdatePostInProfileList}
+          />
+        </View>
+      )}
+      keyExtractor={(item) => item.postID.toString()}
+      ListEmptyComponent={
+        !isLoadingPosts && !isRefreshingPosts && userPosts.length === 0 ? (
+          <View style={styles.noPostsContainerList}>
+            <Ionicons name="newspaper-outline" size={50} color="#ccc" />
+            <Text style={styles.noPostsText}>This user hasn't posted anything yet.</Text>
+          </View>
+        ) : null
+      }
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefreshingPosts || (loading && !!userData)}
+          onRefresh={handleRefreshPosts}
+          colors={['#eb3c58']}
+        />
+      }
+      onEndReached={handleLoadMorePosts}
+      onEndReachedThreshold={0.7}
+      ListFooterComponent={
+        isLoadingMorePosts ? (
+          <ActivityIndicator style={{ marginVertical: 20 }} />
+        ) : !hasMorePosts && userPosts.length > 0 ? (
+          <Text style={styles.noMorePostsText}>No more posts</Text>
+        ) : null
+      }
+      contentContainerStyle={styles.container}
+    />
   );
 };
 
@@ -190,13 +367,15 @@ export default UserProfileScreen;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: '#fff',
+    paddingBottom: 20,
   },
   centeredLoader: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#fff',
   },
   headerImage: {
     width: '100%',
@@ -290,9 +469,57 @@ const styles = StyleSheet.create({
     color: '#777',
     fontStyle: 'italic',
   },
-  logoutContainer: {
-    marginTop: 40,
-    marginBottom: 50,
+  createPostSection: {
+    flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingVertical: 10,
+    paddingHorizontal: 0,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: '#e0e0e0',
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  createPostAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 10,
+    backgroundColor: '#eee',
+  },
+  createPostInputContainer: {
+    flex: 1,
+    height: 40,
+    justifyContent: 'center',
+    borderColor: '#e0e0e0',
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    backgroundColor: '#f7f7f7',
+  },
+  createPostInputPlaceholder: {
+    color: '#888',
+    fontSize: 15,
+  },
+  createPostMediaButton: {
+    marginLeft: 10,
+    padding: 5,
+  },
+  noPostsContainerList: {
+    alignItems: 'center',
+    paddingVertical: 50,
+    justifyContent: 'center',
+  },
+  noPostsText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#777',
+  },
+  noMorePostsText: {
+    textAlign: 'center',
+    color: '#888',
+    paddingVertical: 20,
+    fontSize: 14,
   },
 });

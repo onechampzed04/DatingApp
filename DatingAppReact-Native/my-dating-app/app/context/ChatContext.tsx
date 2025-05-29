@@ -5,7 +5,7 @@ import { useAuth } from './AuthContext';
 
 // ChatContextType should be inferred or explicitly defined based on useChatHub's return
 // For now, extending ReturnType<typeof useChatHub> is fine.
-interface ChatContextType extends ReturnType<typeof useChatHub> {}
+interface ChatContextType extends ReturnType<typeof useChatHub> { }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 

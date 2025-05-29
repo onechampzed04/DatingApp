@@ -11,6 +11,7 @@ import { useAuth } from '../context/AuthContext'; // Điều chỉnh đường d
 const FALLBACK_AVATAR = require('../../assets/images/dating-app.png'); // Đường dẫn đến avatar mặc định
 
 export default function PostsScreen() {
+  
   const router = useRouter();
   const { user } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
@@ -176,17 +177,29 @@ export default function PostsScreen() {
   }
 
   return (
+    
     <View style={styles.container}>
       <FlatList
         data={posts}
-        renderItem={({ item }) => (
-            <PostCard
-                post={item}
-                onCommentPress={() => navigateToPostDetail(item.postID)}
-                onSharePress={(postId) => console.log("Share post:", postId)}
-                onUpdatePost={handleUpdatePostInList}
-            />
-        )}
+        renderItem={({ item }) => {
+  // Log để xem dữ liệu gốc của từng post
+  console.log(
+    `[PostsScreen] Data for PostID ${item.postID}:`,
+    JSON.stringify(item.reactionCounts, null, 2),
+    "TotalReactions:",
+    item.totalReactions
+  );
+
+  return (
+    <PostCard
+      post={item}
+      onCommentPress={() => navigateToPostDetail(item.postID)}
+      onSharePress={(postId) => console.log("Share post:", postId)}
+      onUpdatePost={handleUpdatePostInList}
+    />
+  );
+}}
+
         keyExtractor={(item) => item.postID.toString()}
         ListHeaderComponent={renderHeader} // << THÊM HEADER Ở ĐÂY
         contentContainerStyle={styles.listContentContainer}
