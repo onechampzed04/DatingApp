@@ -39,5 +39,8 @@ namespace DatingAppAPI.Models
         public ICollection<Match> Matches2 { get; set; }
         public ICollection<Message> Messages { get; set; }
         public ICollection<UserInterest> UserInterests { get; set; }
+        public virtual ICollection<Post> Posts { get; set; }
+        public virtual ICollection<PostReaction> PostReactions { get; set; }
+        public virtual ICollection<PostComment> PostComments { get; set; }
     }
 }

@@ -16,7 +16,9 @@ namespace DatingAppAPI.Data
         public DbSet<EmailOTP> EmailOtps { get; set; }
         public DbSet<Interest> Interests { get; set; }
         public DbSet<UserInterest> UserInterests { get; set; }
-
+        public DbSet<Post> Posts { get; set; }
+        public DbSet<PostReaction> PostReactions { get; set; }
+        public DbSet<PostComment> PostComments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -81,6 +83,47 @@ namespace DatingAppAPI.Data
 
                 // Không cần cấu hình cho ReceiverUserID nếu không tạo FK trực tiếp đến User table
             });
+            // User - Post (One-to-Many)
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Posts)
+                .WithOne(p => p.User)
+                .HasForeignKey(p => p.UserID)
+                .OnDelete(DeleteBehavior.Cascade); // Nếu User bị xóa, các Post của họ cũng bị xóa
+
+            // Post - PostReaction (One-to-Many)
+            modelBuilder.Entity<Post>()
+                .HasMany(p => p.Reactions)
+                .WithOne(r => r.Post)
+                .HasForeignKey(r => r.PostID)
+                .OnDelete(DeleteBehavior.Cascade); // Nếu Post bị xóa, Reactions của nó cũng bị xóa
+
+            // User - PostReaction (One-to-Many)
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.PostReactions)
+                .WithOne(r => r.User)
+                .HasForeignKey(r => r.UserID)
+                .OnDelete(DeleteBehavior.Restrict); // Nếu User bị xóa, Reaction của họ trên post khác vẫn còn (hoặc Cascade tùy logic)
+
+            // Post - PostComment (One-to-Many)
+            modelBuilder.Entity<Post>()
+                .HasMany(p => p.Comments)
+                .WithOne(c => c.Post)
+                .HasForeignKey(c => c.PostID)
+                .OnDelete(DeleteBehavior.Cascade); // Nếu Post bị xóa, Comments của nó cũng bị xóa
+
+            // User - PostComment (One-to-Many)
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.PostComments)
+                .WithOne(c => c.User)
+                .HasForeignKey(c => c.UserID)
+                .OnDelete(DeleteBehavior.Restrict); // Nếu User bị xóa, Comment của họ trên post khác vẫn còn (hoặc Cascade)
+
+            // PostComment - Replies (Self-referencing One-to-Many for threaded comments)
+            modelBuilder.Entity<PostComment>()
+                .HasMany(c => c.Replies)
+                .WithOne(r => r.ParentComment)
+                .HasForeignKey(r => r.ParentCommentID)
+                .OnDelete(DeleteBehavior.Restrict); // Hoặc Cascade nếu muốn xóa replies khi parent comment bị xóa
         }
     }
 }
