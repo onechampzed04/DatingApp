@@ -18,7 +18,7 @@ namespace DatingAppAPI.Hubs // << Đảm bảo namespace Hubs đúng
         Task NotifyTyping(int matchId, int typingUserId, string userName);
         Task NotifyStoppedTyping(int matchId, int typingUserId);
         Task UserStatusChanged(int userId, bool isOnline, DateTimeOffset? lastSeen); // << THÊM METHOD MỚI
-
+        Task ReceiveNotification(NotificationDTO notification); // <<< THÊM DÒNG NÀY
     }
 
     [Authorize]

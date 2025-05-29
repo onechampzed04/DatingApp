@@ -2,6 +2,7 @@
 using DatingAppAPI.Data;
 using DatingAppAPI.DTO;
 using DatingAppAPI.Models; // For ReactionType, UserAccountStatus, etc.
+using DatingAppAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -23,11 +24,12 @@ namespace DatingAppAPI.Controllers
     {
         private readonly DatingAppDbContext _context;
         // private readonly IHubContext<NotificationHub, INotificationClient> _notificationHubContext; // Ví dụ nếu có NotificationHub
+        private readonly INotificationService _notificationService; // << THÊM FIELD
 
-        public PostsController(DatingAppDbContext context /*, IHubContext<NotificationHub, INotificationClient> notificationHubContext*/)
+        public PostsController(DatingAppDbContext context, INotificationService notificationService)
         {
             _context = context;
-            // _notificationHubContext = notificationHubContext;
+            _notificationService = notificationService; // << GÁN
         }
 
         private int GetCurrentUserId()
@@ -273,22 +275,30 @@ namespace DatingAppAPI.Controllers
             try { currentUserId = GetCurrentUserId(); }
             catch (UnauthorizedAccessException) { return HandleUnauthorizedAccess(); }
 
-            var postExists = await _context.Posts.AnyAsync(p => p.PostID == postId);
-            if (!postExists) return NotFound(new ProblemDetails { Title = "Post Not Found" });
+            var post = await _context.Posts.Include(p => p.User).FirstOrDefaultAsync(p => p.PostID == postId);
+            if (post == null) return NotFound(new ProblemDetails { Title = "Post Not Found" });
+
+            var reactor = await _context.Users.FindAsync(currentUserId); // Lấy thông tin người reaction
+            if (reactor == null) return HandleUnauthorizedAccess();
 
             var existingReaction = await _context.PostReactions
                 .FirstOrDefaultAsync(r => r.PostID == postId && r.UserID == currentUserId);
+
+            bool sendNotification = false;
+            string notificationMessage = "";
 
             if (existingReaction != null)
             {
                 if (existingReaction.ReactionType == reactionDto.ReactionType)
                 {
-                    _context.PostReactions.Remove(existingReaction); // Toggle off
+                    _context.PostReactions.Remove(existingReaction); // Toggle off - không gửi noti
                 }
                 else
                 {
-                    existingReaction.ReactionType = reactionDto.ReactionType; // Change reaction
+                    existingReaction.ReactionType = reactionDto.ReactionType;
                     _context.PostReactions.Update(existingReaction);
+                    sendNotification = true; // Changed reaction
+                    notificationMessage = $"{reactor.FullName ?? reactor.Username} đã thay đổi cảm xúc về bài viết của bạn.";
                 }
             }
             else
@@ -301,11 +311,26 @@ namespace DatingAppAPI.Controllers
                     CreatedAt = DateTimeOffset.UtcNow
                 };
                 _context.PostReactions.Add(newReaction);
+                sendNotification = true; // New reaction
+                notificationMessage = $"{reactor.FullName ?? reactor.Username} đã bày tỏ cảm xúc về bài viết của bạn.";
             }
 
             await _context.SaveChangesAsync();
 
-            // Trả về thông tin reaction counts mới của post
+            // Gửi thông báo cho chủ bài viết (nếu không phải là họ tự reaction)
+            if (sendNotification && post.UserID != currentUserId)
+            {
+                await _notificationService.CreateAndSendNotificationAsync(
+                    recipientUserId: post.UserID,
+                    type: NotificationType.PostReaction,
+                    messageText: notificationMessage,
+                    senderUserId: currentUserId,
+                    referenceId: postId,
+                    senderUsername: reactor.FullName ?? reactor.Username,
+                    senderAvatar: reactor.Avatar
+                );
+            }
+
             var reactionSummary = await GetPostReactionSummary(postId, currentUserId);
             return Ok(reactionSummary);
         }
@@ -372,9 +397,8 @@ namespace DatingAppAPI.Controllers
                 }
             }
 
-            var user = await _context.Users.FindAsync(currentUserId); // For DTO
-            if (user == null) return HandleUnauthorizedAccess();
-
+            var commenter = await _context.Users.FindAsync(currentUserId);
+            if (commenter == null) return HandleUnauthorizedAccess();
 
             var newComment = new PostComment
             {
@@ -383,20 +407,62 @@ namespace DatingAppAPI.Controllers
                 Content = commentDto.Content.Trim(),
                 ParentCommentID = commentDto.ParentCommentID,
                 CreatedAt = DateTimeOffset.UtcNow,
-                User = user // Gán trực tiếp để MapCommentToDTO có thể sử dụng ngay
+                User = commenter // Gán commenter để DTO có thể dùng
             };
 
             _context.PostComments.Add(newComment);
             await _context.SaveChangesAsync();
 
-            // TODO: Gửi thông báo cho chủ post (và parent comment author nếu là reply)
-            // if (post.UserID != currentUserId) await NotifyUser(post.UserID, $"New comment on your post");
-            // if (commentDto.ParentCommentID.HasValue) {
-            //    var parent = await _context.PostComments.FindAsync(commentDto.ParentCommentID.Value);
-            //    if(parent.UserID != currentUserId && parent.UserID != post.UserID) await NotifyUser(parent.UserID, $"New reply to your comment");
-            // }
+            // Gửi thông báo
+            if (commentDto.ParentCommentID.HasValue) // Đây là một reply
+            {
+                var parentComment = await _context.PostComments.Include(pc => pc.User).FirstOrDefaultAsync(pc => pc.PostCommentID == commentDto.ParentCommentID.Value);
+                if (parentComment != null && parentComment.UserID != currentUserId) // Thông báo cho chủ của comment gốc (nếu khác người reply)
+                {
+                    string replyMessage = $"{commenter.FullName ?? commenter.Username} đã trả lời bình luận của bạn.";
+                    await _notificationService.CreateAndSendNotificationAsync(
+                        recipientUserId: parentComment.UserID,
+                        type: NotificationType.CommentReply,
+                        messageText: replyMessage,
+                        senderUserId: currentUserId,
+                        referenceId: parentComment.PostCommentID, // ID của comment gốc
+                        senderUsername: commenter.FullName ?? commenter.Username,
+                        senderAvatar: commenter.Avatar
+                    );
+                }
+                // Cũng có thể thông báo cho chủ bài viết nếu người reply khác chủ bài viết và khác chủ comment gốc
+                if (post.UserID != currentUserId && post.UserID != parentComment?.UserID)
+                {
+                    string postOwnerMessage = $"{commenter.FullName ?? commenter.Username} đã trả lời một bình luận trong bài viết của bạn.";
+                    await _notificationService.CreateAndSendNotificationAsync(
+                       recipientUserId: post.UserID,
+                       type: NotificationType.CommentReply, // Hoặc một type riêng cho "new activity on post"
+                       messageText: postOwnerMessage,
+                       senderUserId: currentUserId,
+                       referenceId: postId, // ID của bài viết
+                       senderUsername: commenter.FullName ?? commenter.Username,
+                       senderAvatar: commenter.Avatar
+                   );
+                }
+            }
+            else // Đây là một comment gốc mới cho bài viết
+            {
+                if (post.UserID != currentUserId) // Thông báo cho chủ bài viết
+                {
+                    string commentMessage = $"{commenter.FullName ?? commenter.Username} đã bình luận về bài viết của bạn.";
+                    await _notificationService.CreateAndSendNotificationAsync(
+                        recipientUserId: post.UserID,
+                        type: NotificationType.PostComment,
+                        messageText: commentMessage,
+                        senderUserId: currentUserId,
+                        referenceId: postId, // ID của bài viết
+                        senderUsername: commenter.FullName ?? commenter.Username,
+                        senderAvatar: commenter.Avatar
+                    );
+                }
+            }
 
-            var resultDto = MapCommentToDTO(newComment, new List<PostComment>(), currentUserId, user);
+            var resultDto = MapCommentToDTO(newComment, new List<PostComment>(), currentUserId, commenter);
             return CreatedAtAction(nameof(GetComment), new { postId = postId, commentId = newComment.PostCommentID }, resultDto);
         }
 

@@ -1,16 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using DatingAppAPI.Data;
+using DatingAppAPI.DTO;
+using DatingAppAPI.Helpers;
+using DatingAppAPI.Models;
+using DatingAppAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using DatingAppAPI.Data;
-using DatingAppAPI.Models;
-using DatingAppAPI.DTO;
-using Microsoft.AspNetCore.Authorization;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
-using DatingAppAPI.Helpers;
+using System.Threading.Tasks;
 
 namespace DatingAppAPI.Controllers
 {
@@ -19,10 +20,12 @@ namespace DatingAppAPI.Controllers
     public class SwipesController : ControllerBase
     {
         private readonly DatingAppDbContext _context;
+        private readonly INotificationService _notificationService; // << THÊM FIELD
 
-        public SwipesController(DatingAppDbContext context)
+        public SwipesController(DatingAppDbContext context, INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService; // << GÁN
         }
         // GET: api/Swipes (Có thể giữ lại để debug hoặc cho admin, nhưng không cần thiết cho client)
         [HttpGet]
@@ -40,6 +43,8 @@ namespace DatingAppAPI.Controllers
         public async Task<IActionResult> CreateSwipe([FromBody] SwipeCreateDTO swipeDto)
         {
             var fromUserIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            Match? createdMatch = null; // <<< KHAI BÁO createdMatch ở đây, cho phép null
+
             if (fromUserIdClaim == null || !int.TryParse(fromUserIdClaim, out int fromUserId))
             {
                 return Unauthorized(new ProblemDetails { Title = "Unauthorized", Detail = "User ID không hợp lệ từ token." });
@@ -98,14 +103,17 @@ namespace DatingAppAPI.Controllers
 
                     if (existingMatch == null)
                     {
-                        var newMatch = new Match
+                        var tempNewMatch = new Match // Sử dụng biến tạm để tránh lỗi "use of unassigned local variable"
                         {
                             User1ID = fromUserId,
                             User2ID = swipeDto.ToUserID,
                             MatchTime = DateTime.UtcNow,
                             Messages = new List<Message>()
                         };
-                        await _context.Matches.AddAsync(newMatch);
+                        await _context.Matches.AddAsync(tempNewMatch);
+                        // Gán cho biến ngoài scope sau khi add vào context nhưng TRƯỚC SaveChangesAsync
+                        // để có thể lấy ID sau khi SaveChangesAsync nếu cần (EF Core sẽ tự gán ID)
+                        createdMatch = tempNewMatch; // <<< GÁN GIÁ TRỊ CHO createdMatch
                         isNewMatch = true;
 
                         // Lấy thông tin chi tiết của người vừa match, bao gồm Birthdate
@@ -155,13 +163,44 @@ namespace DatingAppAPI.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new ProblemDetails { Title = "Database Error", Detail = "Lỗi khi lưu dữ liệu swipe hoặc match." });
             }
 
-            if (isNewMatch && matchedUserDetails != null)
+            if (isNewMatch && matchedUserDetails != null && createdMatch != null) // <<< THÊM KIỂM TRA createdMatch != null
             {
-                return Ok(new SwipeMatchResponseDTO // Sử dụng DTO cho toàn bộ response
+                var fromUser = await _context.Users
+                                    .AsNoTracking()
+                                    .Select(u => new { u.UserID, u.FullName, u.Username, u.Avatar })
+                                    .FirstOrDefaultAsync(u => u.UserID == fromUserId);
+
+                if (fromUser != null)
+                {
+                    string messageToMatchedUser = $"{fromUser.FullName ?? fromUser.Username} đã tương hợp với bạn!";
+                    await _notificationService.CreateAndSendNotificationAsync(
+                        recipientUserId: swipeDto.ToUserID,
+                        type: NotificationType.NewMatch,
+                        messageText: messageToMatchedUser,
+                        senderUserId: fromUserId,
+                        referenceId: createdMatch.MatchID, // <<< SỬ DỤNG createdMatch.MatchID
+                        senderUsername: fromUser.FullName ?? fromUser.Username,
+                        senderAvatar: fromUser.Avatar
+                    );
+
+                    var matchedUserDto = (MatchedUserDetailsDTO)matchedUserDetails;
+                    string messageToSwiper = $"Bạn đã tương hợp với {matchedUserDto.FullName}!";
+                    await _notificationService.CreateAndSendNotificationAsync(
+                        recipientUserId: fromUserId,
+                        type: NotificationType.NewMatch,
+                        messageText: messageToSwiper,
+                        senderUserId: swipeDto.ToUserID,
+                        referenceId: createdMatch.MatchID, // <<< SỬ DỤNG createdMatch.MatchID
+                        senderUsername: matchedUserDto.FullName,
+                        senderAvatar: matchedUserDto.Avatar
+                    );
+                }
+
+                return Ok(new SwipeMatchResponseDTO
                 {
                     Message = "It's a Match!",
                     IsMatch = true,
-                    MatchedWithUser = (MatchedUserDetailsDTO)matchedUserDetails // Ép kiểu nếu cần
+                    MatchedWithUser = (MatchedUserDetailsDTO)matchedUserDetails
                 });
             }
 

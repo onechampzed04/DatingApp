@@ -19,6 +19,8 @@ namespace DatingAppAPI.Data
         public DbSet<Post> Posts { get; set; }
         public DbSet<PostReaction> PostReactions { get; set; }
         public DbSet<PostComment> PostComments { get; set; }
+        public DbSet<Notification> Notifications { get; set; } // << THÊM DÒNG NÀY
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -124,6 +126,20 @@ namespace DatingAppAPI.Data
                 .WithOne(r => r.ParentComment)
                 .HasForeignKey(r => r.ParentCommentID)
                 .OnDelete(DeleteBehavior.Restrict); // Hoặc Cascade nếu muốn xóa replies khi parent comment bị xóa
+            
+            // nofitication
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.RecipientUser)
+                .WithMany() // Một User có thể nhận nhiều thông báo
+                .HasForeignKey(n => n.RecipientUserID)
+                .OnDelete(DeleteBehavior.Restrict); // Hoặc Cascade nếu muốn xóa thông báo khi user bị xóa
+
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.SenderUser)
+                .WithMany() // Một User có thể gửi (gây ra) nhiều thông báo
+                .HasForeignKey(n => n.SenderUserID)
+                .IsRequired(false) // SenderUserID có thể null
+                .OnDelete(DeleteBehavior.Restrict); // Hoặc Cascade
         }
     }
 }
