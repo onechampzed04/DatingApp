@@ -27,10 +27,10 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType>({
   user: null,
   token: null,
-  loginUser: async () => { },
-  register: async () => { },
-  logout: async () => { },
-  setAuthenticatedSession: async () => { },
+  loginUser: async () => {},
+  register: async () => {},
+  logout: async () => {},
+  setAuthenticatedSession: async () => {},
   isLoading: true,
 });
 
@@ -61,50 +61,50 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // ĐÂY LÀ HÀM loginUser ĐÃ CẬP NHẬT
   const loginUser = async (data: { email: string; password: string }) => {
-    try {
-      const response = await authApi.login(data);
-      const fullUserResponse = await getUserByEmail(data.email);
+  try {
+    const response = await authApi.login(data);
+    const fullUserResponse = await getUserByEmail(data.email);
 
-      if (!fullUserResponse || !fullUserResponse.userID) {
-        throw new Error("User details not found or UserID is missing.");
-      }
-
-      const userData: User = {
-        userId: fullUserResponse.userID,
-        username: fullUserResponse.username,
-        email: fullUserResponse.email,
-        avatar: fullUserResponse.avatar,
-        fullName: fullUserResponse.fullName,
-      };
-
-      setUser(userData);
-      setToken(response.data.token);
-
-      await AsyncStorage.setItem('user', JSON.stringify(userData));
-      await AsyncStorage.setItem('token', response.data.token ?? '');
-
-      if (fullUserResponse.isEmailVerified === false) {
-        // Kiểm tra thời gian tạo tài khoản để xác định xem có vừa đăng ký
-        const createdAt = new Date(fullUserResponse.createdAt);
-        const now = new Date();
-        const timeDiff = (now.getTime() - createdAt.getTime()) / 1000; // Thời gian chênh lệch (giây)
-
-        if (timeDiff > 60) { // Chỉ gửi OTP nếu tài khoản được tạo cách đây hơn 60 giây
-          console.log(`[AuthContext] User ${userData.email} is not verified. Backend should send OTP. Navigating to OTP screen.`);
-          // await sendOtp(userData.email); // COMMENTED OUT
-          // console.log(`[AuthContext] OTP sent to ${userData.email}. Navigating to OTP screen.`);
-        } else {
-          console.log(`[AuthContext] User ${userData.email} likely just registered. Backend should handle OTP if needed, or user was just navigated from registration. Skipping explicit OTP send from frontend.`);
-        }
-        router.replace({ pathname: '/(auth)/otp', params: { email: userData.email } });
-      } else {
-        router.replace('/(tabs)/explore');
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
+    if (!fullUserResponse || !fullUserResponse.userID) {
+      throw new Error("User details not found or UserID is missing.");
     }
-  };
+
+    const userData: User = {
+      userId: fullUserResponse.userID,
+      username: fullUserResponse.username,
+      email: fullUserResponse.email,
+      avatar: fullUserResponse.avatar,
+      fullName: fullUserResponse.fullName,
+    };
+
+    setUser(userData);
+    setToken(response.data.token);
+
+    await AsyncStorage.setItem('user', JSON.stringify(userData));
+    await AsyncStorage.setItem('token', response.data.token ?? '');
+
+    if (fullUserResponse.isEmailVerified === false) {
+      // Kiểm tra thời gian tạo tài khoản để xác định xem có vừa đăng ký
+      const createdAt = new Date(fullUserResponse.createdAt);
+      const now = new Date();
+      const timeDiff = (now.getTime() - createdAt.getTime()) / 1000; // Thời gian chênh lệch (giây)
+
+      if (timeDiff > 60) { // Chỉ gửi OTP nếu tài khoản được tạo cách đây hơn 60 giây
+        console.log(`[AuthContext] User ${userData.email} is not verified. Backend should send OTP. Navigating to OTP screen.`);
+        // await sendOtp(userData.email); // COMMENTED OUT
+        // console.log(`[AuthContext] OTP sent to ${userData.email}. Navigating to OTP screen.`);
+      } else {
+        console.log(`[AuthContext] User ${userData.email} likely just registered. Backend should handle OTP if needed, or user was just navigated from registration. Skipping explicit OTP send from frontend.`);
+      }
+      router.replace({ pathname: '/(auth)/otp', params: { email: userData.email } });
+    } else {
+      router.replace('/(tabs)/explore');
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    throw error;
+  }
+};
 
   // ĐÂY LÀ HÀM register ĐÃ CẬP NHẬT
   const register = async (data: { username: string; email: string; password: string }) => {
@@ -123,7 +123,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         avatar: fullUserResponse.avatar, // << LẤY AVATAR
         fullName: fullUserResponse.fullName, // << LẤY FULLNAME (NẾU CÓ)
       };
-
+      
       setUser(userData); // Có thể set user ở đây hoặc không, tùy thuộc vào luồng bạn muốn
       await AsyncStorage.setItem('user', JSON.stringify(userData)); // Lưu user vào storage
 

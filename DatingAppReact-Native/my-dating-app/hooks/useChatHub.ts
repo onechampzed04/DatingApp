@@ -2,7 +2,7 @@
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_BASE_URL, MessageDTO, MessageTypeEnum } from '../utils/api'; // Adjust path to your api.ts
+import { API_BASE_URL, MessageDTO, MessageTypeEnum, AppNotification, AppNotificationTypeEnum  } from '../utils/api'; // Adjust path to your api.ts
 
 export interface ChatHubEvents  {
   onReceiveMessage?: (message: MessageDTO) => void;
@@ -10,6 +10,8 @@ export interface ChatHubEvents  {
   onNotifyTyping?: (matchId: number, typingUserId: number, userName: string) => void;
   onNotifyStoppedTyping?: (matchId: number, typingUserId: number) => void;
     onUserStatusChanged?: (userId: number, isOnline: boolean, lastSeen: string | null) => void; // << THÊM MỚI
+      onReceiveAppNotification?: (notification: AppNotification) => void; // <<< THÊM DÒNG NÀY
+
 }
 
 export const useChatHub = () => {
@@ -61,6 +63,14 @@ export const useChatHub = () => {
         console.log('ChatHub: UserStatusChanged', { userId, isOnline, lastSeen });
         eventHandlersRef.current.onUserStatusChanged?.(userId, isOnline, lastSeen);
       });
+      
+      // Đăng ký lắng nghe sự kiện thông báo mới từ backend
+      newConnection.on('ReceiveAppNotification', (notification: AppNotification) => { // <<< THÊM HANDLER NÀY
+        console.log('ChatHub: ReceiveAppNotification', notification);
+        eventHandlersRef.current.onReceiveAppNotification?.(notification);
+      });
+
+
       await newConnection.start();
       console.log('ChatHub: Connection started.');
       setConnection(newConnection);

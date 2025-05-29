@@ -71,6 +71,18 @@ postsApi.interceptors.request.use(async (config: InternalAxiosRequestConfig) => 
   return config;
 });
 
+const notificationsApi = axios.create({
+  baseURL: `${API_BASE_URL}/api/Notification`,
+});
+notificationsApi.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+  const token = await AsyncStorage.getItem('token');
+  if (token) {
+    config.headers = config.headers || {};
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 export const updateUserProfileWithFetch = async (
   userId: number,
   updates: UserProfileModificationData,
@@ -400,6 +412,28 @@ export interface ReactionSummaryResponse { // Phản hồi từ API reaction
     totalReactions: number;
     reactionCounts: Record<ReactionType, number>;
     currentUserReaction?: ReactionType | null;
+}
+
+// --- NOTIFICATION TYPES ---
+export enum AppNotificationTypeEnum { // Đồng bộ với NotificationTypeEnum DTO ở backend
+  NewMatch = 1,
+  PostReaction = 2,
+  PostComment = 3,
+  CommentReply = 4,
+  NewMessage = 5,
+}
+
+export interface AppNotification { // Đồng bộ với AppNotificationDTO ở backend
+  id: string; // NotificationID từ backend (đã là string trong DTO)
+  recipientUserID: number;
+  notificationType: AppNotificationTypeEnum;
+  messageText: string;
+  referenceID?: string | null; // PostId, MatchId, CommentId (string vì referenceId trong DTO là string)
+  senderUserID?: number | null;
+  senderUsername?: string | null;
+  senderAvatar?: string | null;
+  isRead: boolean;
+  createdAt: string; // ISO date string
 }
 
 // --- USER FUNCTIONS ---
@@ -858,5 +892,38 @@ export const uploadPostMedia = async (file: ExpoImageFile): Promise<UploadedMedi
     throw error;
   }
 };
+
+// --- NOTIFICATION FUNCTIONS ---
+export const getAppNotifications = async (pageNumber: number = 1, pageSize: number = 20): Promise<AppNotification[]> => {
+  try {
+    const response = await notificationsApi.get<AppNotification[]>('/', {
+      params: { pageNumber, pageSize },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('[API] Error fetching app notifications:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const markAppNotificationAsRead = async (notificationId: string): Promise<void> => {
+  try {
+    await notificationsApi.post(`/${notificationId}/read`);
+  } catch (error: any) {
+    console.error(`[API] Error marking app notification ${notificationId} as read:`, error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const markAllAppNotificationsAsRead = async (): Promise<{ message: string }> => {
+  try {
+    const response = await notificationsApi.post<{ message: string }>('/read-all');
+    return response.data;
+  } catch (error: any) {
+    console.error('[API] Error marking all app notifications as read:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
 
 export default authApi;
