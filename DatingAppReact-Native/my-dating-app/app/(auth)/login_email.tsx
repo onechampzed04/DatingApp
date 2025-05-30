@@ -46,6 +46,7 @@ export default function LoginWithEmail() {
   };
 
   // ĐÂY LÀ HÀM handleLogin ĐÃ CẬP NHẬT
+  // ĐÂY LÀ HÀM handleLogin ĐÃ CẬP NHẬT
   const handleLogin = async () => {
     if (!password) {
       Alert.alert('Lỗi', 'Vui lòng nhập mật khẩu');
@@ -73,6 +74,7 @@ export default function LoginWithEmail() {
     }
   };
 
+  // ĐÂY LÀ HÀM handleRegister ĐÃ CẬP NHẬT
   // ĐÂY LÀ HÀM handleRegister ĐÃ CẬP NHẬT
   const handleRegister = async () => {
     if (!username) {
@@ -174,7 +176,10 @@ export default function LoginWithEmail() {
         >
           {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Đăng nhập</Text>}
         </TouchableOpacity>
-        <TouchableOpacity style={styles.forgotButton}>
+        <TouchableOpacity 
+          style={styles.forgotButton}
+          onPress={() => router.push({ pathname: '/(auth)/reset-password-otp', params: { email }})}
+        >
           <Text style={styles.forgotText}>Quên mật khẩu?</Text>
         </TouchableOpacity>
         <TouchableOpacity 

@@ -17,6 +17,22 @@ authApi.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   }
   return config;
 });
+export interface ChangePasswordData {
+  oldPassword: string;
+  newPassword: string;
+  // confirmNewPassword?: string; // Uncomment if your DTO has this
+}
+
+export const changePassword = async (data: ChangePasswordData): Promise<{ message: string }> => {
+  try {
+    const response = await authApi.post<{ message: string }>('/change-password', data);
+    return response.data;
+  } catch (error: any) {
+    console.error('[changePassword] API call failed:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
 
 const userApi = axios.create({
   baseURL: `${API_BASE_URL}/api/Users`,
@@ -54,6 +70,31 @@ userApi.interceptors.response.use(
   }
 );
 
+
+export interface InterestDTO { // Thêm nếu chưa có, dựa trên UserDetailDTO.cs
+  interestId: number;
+  interestName: string;
+}
+
+export interface UserDetailDTO {
+  userID: number;
+  username?: string | null;
+  fullName?: string | null;
+  gender?: string | null;
+  age?: number | null;
+  birthdate?: string | null; // DateTimeOffset sẽ được serialize thành string (ISO 8601)
+  bio?: string | null;
+  avatar?: string | null;
+  address?: string | null;
+  distanceKm?: number | null; // Tính toán ở client hoặc nếu backend có logic riêng
+  accountStatus?: string | null; // "Online", "Offline", etc.
+  lastLoginDate?: string | null; // DateTimeOffset as string
+  interests: InterestDTO[];
+  commonInterestsCount?: number; // Sẽ được tính ở backend hoặc client
+  createdAt: string; // DateTimeOffset as string
+  // education?: string | null;
+  // work?: string | null;
+}
 const postsApi = axios.create({
   baseURL: `${API_BASE_URL}/api/Posts`, // Trỏ đến PostsController
 });
@@ -224,10 +265,16 @@ interface AuthResponse {
     userId?: number;
   };
 }
+
 interface LoginData { email: string; password: string; }
 interface RegisterData { username: string; email: string; password: string; }
 interface EmailCheckResponse { message: string; data: { exists: boolean; }; }
 
+export interface ResetPasswordData {
+  email: string;
+  otpCode: string;
+  newPassword: string;
+}
 // (Giữ nguyên các hàm auth này - bạn nói không cần sửa sendOtp/checkEmail thì tôi giữ lại cách gửi string)
 export const register = async (data: RegisterData): Promise<AuthResponse> => {
   const response = await authApi.post('/register', data);
@@ -244,9 +291,21 @@ export const login = async (data: LoginData): Promise<AuthResponse> => {
   return response.data;
 };
 export const sendOtp = async (email: string) => {
-  const response = await authApi.post('/send-otp', email ); // Giữ nguyên theo yêu cầu
+  // Backend đang mong đợi một string JSON, không phải string thô
+  // Axios sẽ gửi `email` như một string thô nếu không có headers Content-Type: application/json
+  // Nếu backend của bạn được cấu hình để chấp nhận string thô cho [FromBody] string email,
+  // thì việc này có thể hoạt động. Tuy nhiên, thông thường, [FromBody] mong đợi JSON.
+  // Nếu bạn gặp lỗi 415 (Unsupported Media Type), bạn cần gửi nó dưới dạng JSON object:
+  // const response = await authApi.post('/send-otp', JSON.stringify(email), { headers: { 'Content-Type': 'application/json' } });
+  // Hoặc tốt hơn, backend chấp nhận một DTO nhỏ: { "email": "user@example.com" }
+  // Hiện tại, giữ nguyên theo yêu cầu:
+  const response = await authApi.post('/send-otp', email, {
+    headers: { 'Content-Type': 'application/json' } // Thử thêm header này nếu backend mong đợi JSON
+  });
   return response.data;
 };
+
+
 export const verifyOtp = async (email: string, otpCode: string): Promise<{
   message: string;
   data?: { user: { userId: number; username: string; email: string; }; token: string; };
@@ -263,6 +322,32 @@ export const checkEmail = async (email: string): Promise<EmailCheckResponse> => 
   return response.data;
 };
 
+
+// --- NEW FORGOT PASSWORD FUNCTIONS ---
+export const sendForgotPasswordOtp = async (email: string): Promise<{ message: string }> => {
+  try {
+    // Backend endpoint `/api/Auth/forgot-password/send-otp` mong đợi [FromBody] string email
+    // Axios với `authApi` (đã có `Content-Type: application/json` mặc định)
+    // sẽ tự động wrap string `email` thành một JSON string: `"user@example.com"`
+    // Điều này tương thích với `[FromBody] string email` ở backend.
+    const response = await authApi.post<{ message: string }>('/forgot-password/send-otp', email);
+    return response.data;
+  } catch (error: any) {
+    console.error('[sendForgotPasswordOtp] API call failed:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const resetPasswordWithOtp = async (data: ResetPasswordData): Promise<{ message: string }> => {
+  try {
+    // Backend endpoint `/api/Auth/forgot-password/reset` mong đợi `ResetPasswordDto`
+    const response = await authApi.post<{ message: string }>('/forgot-password/reset', data);
+    return response.data;
+  } catch (error: any) {
+    console.error('[resetPasswordWithOtp] API call failed:', error.response?.data || error.message);
+    throw error;
+  }
+};
 
 // --- USER TYPES --- (ĐẢM BẢO CÁC INTERFACE NÀY ĐƯỢC ĐỊNH NGHĨA Ở ĐÂY)
 export interface ApiUser {
@@ -293,6 +378,8 @@ export interface ApiUserCard {
   fullName: string | null;
   avatar: string | null;
   age: number | null;
+  city?: string | null;
+  distance?: number | null; // Distance in km, calculated by backend or frontend
 }
 
 export interface MatchedUserDetails {
@@ -331,6 +418,28 @@ export interface UserProfileModificationData {
   profileVisibility?: number | null;
   latitude?: number | null;
   longitude?: number | null;
+}
+
+// Renaming UserSwipeFilters to UserFilters for clarity and consistency
+export interface UserFilters {
+  pageNumber?: number; // Make optional as it's for pagination control within the function
+  pageSize?: number;   // Make optional as it's for pagination control within the function
+  minAge?: number | null;
+  maxAge?: number | null;
+  // currentLatitude?: number | null; // Usually taken from logged-in user's profile or device
+  // currentLongitude?: number | null; // Usually taken from logged-in user's profile or device
+  distance?: number | null; // Renamed from maxDistanceKm for consistency with filters.tsx
+  showOnlineOnly?: boolean | null;
+  // sortByCommonInterests?: boolean; // Can be added later if backend supports
+  // genderPreference?: string | null; // Example for future extension
+  // interests?: number[]; // Example for future extension
+}
+
+// This can be a more specific type for the getUsersForSwiping function parameters
+export interface GetUsersParams {
+  pageNumber: number;
+  pageSize: number;
+  filters?: UserFilters | null; // The actual filter values
 }
 
 // --- POST TYPES --- (Đảm bảo đồng bộ với DTOs ở backend)
@@ -457,14 +566,40 @@ export const getUserById = async (userId: number): Promise<ApiUser | null> => {
   }
 };
 
-export const getUsersForSwiping = async (params: { pageNumber: number; pageSize: number }): Promise<ApiUserCard[]> => {
+export const getUserDetailsById = async (userId: number): Promise<UserDetailDTO | null> => {
   try {
-    const queryString = `?pageNumber=${params.pageNumber}&pageSize=${params.pageSize}`;
-    console.log(`[getUsersForSwiping] Requesting: ${userApi.defaults.baseURL}${queryString}`); // Log URL
-    const response = await userApi.get<ApiUserCard[]>(queryString); // Gửi query string
+    const response = await userApi.get<UserDetailDTO>(`/${userId}/details`); // Gọi endpoint mới
     return response.data;
   } catch (error: any) {
-    console.error(`[ERROR getUsersForSwiping] Failed to fetch users for page ${params.pageNumber}. Status: ${error.response?.status}`, error.response?.data || error.message);
+    if (error.response?.status === 404) return null;
+    console.error(`[getUserDetailsById] Error fetching user details for ${userId}:`, error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const getUsersForSwiping = async (params: GetUsersParams): Promise<ApiUserCard[]> => {
+  try {
+    const queryParams: Record<string, string | number | boolean | undefined> = {
+        pageNumber: params.pageNumber,
+        pageSize: params.pageSize,
+    };
+
+    if (params.filters) {
+      if (params.filters.minAge !== undefined && params.filters.minAge !== null) queryParams.minAge = params.filters.minAge;
+      if (params.filters.maxAge !== undefined && params.filters.maxAge !== null) queryParams.maxAge = params.filters.maxAge;
+      if (params.filters.distance !== undefined && params.filters.distance !== null) queryParams.maxDistanceKm = params.filters.distance; // Map to maxDistanceKm for backend
+      if (params.filters.showOnlineOnly !== undefined && params.filters.showOnlineOnly !== null) queryParams.showOnlineOnly = params.filters.showOnlineOnly;
+      // Add other filters from params.filters to queryParams as needed
+      // e.g., queryParams.genderPreference = params.filters.genderPreference;
+    }
+    
+    console.log(`[getUsersForSwiping] Requesting with params:`, queryParams);
+    // Reverted to use the base userApi URL, as '/for-swiping' was causing an error.
+    // The backend should handle filtering based on query parameters at the root GET endpoint for users.
+    const response = await userApi.get<ApiUserCard[]>('', { params: queryParams });
+    return response.data;
+  } catch (error: any) {
+    console.error(`[ERROR getUsersForSwiping] Failed to fetch users. Params: ${JSON.stringify(params)}. Status: ${error.response?.status}, Data: ${JSON.stringify(error.response?.data) || error.message}`);
     throw error;
   }
 };
@@ -473,16 +608,16 @@ export const updateUserProfile = async (
   userId: number,
   updates: UserProfileModificationData,
   avatarFile?: ExpoImageFile | null
-): Promise<void> => {
+): Promise<UserDetailDTO> => { // Backend của bạn đang trả về UserDetailDTO (hoặc 1 object tương tự)
   const formData = new FormData();
   (Object.keys(updates) as Array<keyof UserProfileModificationData>).forEach(key => {
     const value = updates[key];
     if (value !== undefined && value !== null) {
-        if (key === 'birthdate' && value) {
-            formData.append(key, new Date(value as string).toISOString());
-        } else {
-            formData.append(key, String(value));
-        }
+      if (key === 'birthdate' && value) {
+        formData.append(key, new Date(value as string).toISOString());
+      } else {
+        formData.append(key, String(value));
+      }
     }
   });
   if (avatarFile) {
@@ -493,19 +628,18 @@ export const updateUserProfile = async (
     } as any);
   }
   try {
-    const response = await userApi.put(`/${userId}`, formData);
-    if (response.status !== 204) {
-      console.warn(`updateUserProfile: Expected 204, got ${response.status}`);
-    }
-  } catch (error) {
+    const response = await userApi.put<UserDetailDTO>(`/${userId}`, formData); // Mong đợi UserDetailDTO
+    return response.data;
+  } catch (error: any) {
+    console.error(`[updateUserProfile] Error updating profile for user ${userId}:`, error.response?.data || error.message);
     throw error;
   }
 };
 
-export const createUserWithProfileDetails = async ( // Đã bỏ comment nếu bạn dùng
+export const createUserWithProfileDetails = async (
   userData: UserProfileCreationData,
   avatarFile?: ExpoImageFile | null
-): Promise<ApiUser> => { // Sửa kiểu trả về
+): Promise<UserDetailDTO> => { // Backend trả về UserDetailDTO
   const formData = new FormData();
   (Object.keys(userData) as Array<keyof UserProfileCreationData>).forEach(key => {
     const value = userData[key];
@@ -527,9 +661,10 @@ export const createUserWithProfileDetails = async ( // Đã bỏ comment nếu b
   }
 
   try {
-    const response = await userApi.post<ApiUser>('/', formData); // Thêm kiểu generic
+    const response = await userApi.post<UserDetailDTO>('/', formData); // Mong đợi UserDetailDTO
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
+    console.error(`[createUserWithProfileDetails] Error creating user:`, error.response?.data || error.message);
     throw error;
   }
 };

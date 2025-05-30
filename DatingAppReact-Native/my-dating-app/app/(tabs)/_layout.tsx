@@ -1,10 +1,11 @@
-import { Redirect, Slot, usePathname } from 'expo-router';
+import { Redirect, Slot, usePathname, useRouter } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
 import { useEffect, useState } from 'react';
+import { useChat } from '../context/ChatContext'; // Import useChat
 import { View, TouchableOpacity, StyleSheet, Text, Platform } from 'react-native'; // Thêm Platform
 import { Ionicons } from '@expo/vector-icons';
 import { getUserByEmail } from '../../utils/api'; // Đảm bảo đường dẫn này chính xác
-import { useRouter } from 'expo-router';
+// useRouter is already imported above
 
 type TabConfig = {
     readonly name: 'posts' | 'messages' | 'explore' | 'notifications' | 'profile';
@@ -43,6 +44,25 @@ export default function TabsLayout() {
     const pathname = usePathname();
     const [isVerified, setIsVerified] = useState<boolean | null>(null);
     const router = useRouter();
+    const { 
+        hasUnreadMessages: contextHasUnreadMessages, 
+        hasUnreadNotifications: contextHasUnreadNotifications,
+        resetUnreadMessages,
+        resetUnreadNotifications
+    } = useChat(); // Get unread status and reset functions from ChatContext
+
+    // Local state to drive the UI, updated from context
+    const [hasNewMessages, setHasNewMessages] = useState(contextHasUnreadMessages);
+    const [hasNewNotifications, setHasNewNotifications] = useState(contextHasUnreadNotifications);
+
+    useEffect(() => {
+        setHasNewMessages(contextHasUnreadMessages);
+    }, [contextHasUnreadMessages]);
+
+    useEffect(() => {
+        setHasNewNotifications(contextHasUnreadNotifications);
+    }, [contextHasUnreadNotifications]);
+
     // Thêm thông tin label cho từng tab
     const tabs: readonly TabConfig[] = [
         { name: 'posts', label: 'Bài viết', iconSet: { active: 'document-text', inactive: 'document-text-outline'} },
@@ -51,6 +71,15 @@ export default function TabsLayout() {
         { name: 'notifications', label: 'Thông báo', iconSet: { active: 'notifications', inactive: 'notifications-outline'} },
         { name: 'profile', label: 'Cá nhân', iconSet: { active: 'person', inactive: 'person-outline'} },
     ];
+
+    const handleTabPress = (tabName: TabConfig['name']) => {
+        if (tabName === 'messages') {
+            resetUnreadMessages();
+        } else if (tabName === 'notifications') {
+            resetUnreadNotifications();
+        }
+        router.replace(`/(tabs)/${tabName}` as any);
+    };
 
     useEffect(() => {
         const checkVerify = async () => {
@@ -95,7 +124,7 @@ export default function TabsLayout() {
                     return (
                         <TouchableOpacity
                             key={tabInfo.name}
-                            onPress={() => router.replace(`/(tabs)/${tabInfo.name}` as any)}
+                            onPress={() => handleTabPress(tabInfo.name)} // Use handleTabPress
                             style={[
                                 styles.tabItem,
                                 tabInfo.isSpecial && styles.exploreTabWrapper, // Style cho wrapper của explore tab
@@ -110,9 +139,17 @@ export default function TabsLayout() {
                                     name={isActive ? tabInfo.iconSet.active : tabInfo.iconSet.inactive}
                                     size={iconSize}
                                     // === THAY ĐỔI Ở ĐÂY ===
-                                    color={tabInfo.isSpecial ? BACKGROUND_COLOR : iconColorForNonSpecial} 
+                                    color={tabInfo.isSpecial ? BACKGROUND_COLOR : iconColorForNonSpecial}
                                     // =======================
                                 />
+                                {/* Badge for new messages */}
+                                {tabInfo.name === 'messages' && hasNewMessages && (
+                                    <View style={styles.badgeStyle} />
+                                )}
+                                {/* Badge for new notifications */}
+                                {tabInfo.name === 'notifications' && hasNewNotifications && (
+                                    <View style={styles.badgeStyle} />
+                                )}
                             </View>
                             {(!tabInfo.isSpecial || (tabInfo.isSpecial && isActive)) && (
                                <Text style={[
@@ -213,5 +250,15 @@ const styles = StyleSheet.create({
         marginTop: 5, // Label của explore tab sẽ cách icon một khoảng lớn hơn một chút do icon được nâng lên
         fontSize: 11,
         // color: PRIMARY_COLOR, // Màu của label explore khi active đã được activeTabLabel xử lý
-    }
+    },
+    badgeStyle: {
+        position: 'absolute',
+        right: -6, // Adjust position to be on the top-right of the icon
+        top: -3,   // Adjust position
+        backgroundColor: 'red',
+        borderRadius: 7, // Make it a circle
+        width: 10,       // Size of the dot
+        height: 10,      // Size of the dot
+        zIndex: 101, // Ensure badge is above icon
+    },
 });

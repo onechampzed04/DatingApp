@@ -327,14 +327,6 @@ const PostCard: React.FC<PostCardProps> = ({ post, onCommentPress, onSharePress,
           <Text style={styles.actionText}>Comment</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => onSharePress && post?.postID && onSharePress(post.postID)}
-        >
-          <Ionicons name="share-social-outline" size={24} color="#555" />
-          <Text style={styles.actionText}>Share</Text>
-        </TouchableOpacity>
-
         {showReactionPicker && (
           <View style={styles.reactionPickerOverlay}>
             <TouchableOpacity

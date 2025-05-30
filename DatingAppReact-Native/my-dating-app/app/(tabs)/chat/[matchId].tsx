@@ -69,10 +69,10 @@ const ChatHeaderTitle = ({ userName, avatarUrl, isOnline, lastSeen }: { userName
       const nowInVietnam = toZonedTime(new Date(), VIETNAM_TIME_ZONE);
 
       if (isTodayFn(dateInVietnam)) {
-        return `Active today at ${formatInTimeZone(dateUtc, VIETNAM_TIME_ZONE, 'HH:mm')}`;
+        return `Hoạt động hôm nay lúc ${formatInTimeZone(dateUtc, VIETNAM_TIME_ZONE, 'HH:mm')}`;
       }
       if (isYesterdayFn(dateInVietnam)) {
-        return `Active yesterday at ${formatInTimeZone(dateUtc, VIETNAM_TIME_ZONE, 'HH:mm')}`;
+        return `Hoạt động hôm nay lúc ${formatInTimeZone(dateUtc, VIETNAM_TIME_ZONE, 'HH:mm')}`;
       }
       return `Active ${formatInTimeZone(dateUtc, VIETNAM_TIME_ZONE, 'd MMM')}`;
     } catch {
@@ -628,7 +628,7 @@ export default function ChatScreen() {
         />
         {otherUserTyping && (
           <View style={styles.typingIndicatorContainer}>
-            <Text style={styles.typingIndicatorText}>{otherUserTyping} is typing...</Text>
+            <Text style={styles.typingIndicatorText}>{otherUserTyping} đang nhập...</Text>
           </View>
         )}
         <FlatList

@@ -6,15 +6,13 @@ import { getConversationPreviews, ConversationPreviewDTO, MessageDTO } from '../
 import { useAuth } from '../context/AuthContext';
 import { useChat } from '../context/ChatContext';
 import { ChatHubEvents } from '../../hooks/useChatHub';
-
-// Import các hàm cần thiết từ date-fns và date-fns-tz
 import { parseISO, isToday as isTodayFn, isYesterday as isYesterdayFn } from 'date-fns';
-import { formatInTimeZone, toZonedTime } from 'date-fns-tz'; // << SỬA Ở ĐÂY
+import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
 
 import { API_BASE_URL } from '../../utils/api';
 
 const DEFAULT_AVATAR = 'https://via.placeholder.com/50';
-const VIETNAM_TIME_ZONE = 'Asia/Ho_Chi_Minh'; // Định nghĩa múi giờ Việt Nam
+const VIETNAM_TIME_ZONE = 'Asia/Ho_Chi_Minh';
 
 export default function MessagesScreen() {
   const router = useRouter();
@@ -42,16 +40,17 @@ export default function MessagesScreen() {
       });
       setConversations(previews);
     } catch (error) {
-      console.error('Failed to fetch conversations:', error);
+      console.error('Failed"\
+to fetch conversations:', error);
     } finally {
       setLoading(false);
     }
   }, [currentUserId]);
 
   useFocusEffect(
-     useCallback(() => {
-       fetchConversations();
-     }, [fetchConversations])
+    useCallback(() => {
+      fetchConversations();
+    }, [fetchConversations])
   );
 
   useEffect(() => {
@@ -98,9 +97,9 @@ export default function MessagesScreen() {
       },
       onMessagesRead: (matchId: number, readerUserId: number) => {
         if (readerUserId === currentUserId) {
-            setConversations(prev => prev.map(c =>
-                c.matchID === matchId ? { ...c, unreadCount: 0 } : c
-            ));
+          setConversations(prev => prev.map(c =>
+            c.matchID === matchId ? { ...c, unreadCount: 0 } : c
+          ));
         }
       },
       onUserStatusChanged: (changedUserId: number, isOnline: boolean, lastSeen: string | null) => {
@@ -128,75 +127,56 @@ export default function MessagesScreen() {
     return () => unregisterEventHandlers();
   }, [isConnected, registerEventHandlers, unregisterEventHandlers, currentUserId]);
 
-
-  // --- HÀM FORMAT THỜI GIAN "LAST SEEN" THEO MÚI GIỜ VIỆT NAM ---
   const formatLastSeenInVietnam = (lastSeenIsoString: string | null | undefined): string => {
     if (!lastSeenIsoString) return 'Offline';
-
     try {
-      // 1. Parse chuỗi ISO thành đối tượng Date (thời điểm này là UTC hoặc có offset từ chuỗi)
       const dateUtc = parseISO(lastSeenIsoString);
-
-      // 2. Chuyển đổi thời điểm đó sang múi giờ Việt Nam để so sánh "ngày"
       const dateInVietnam = toZonedTime(dateUtc, VIETNAM_TIME_ZONE);
       const nowInVietnam = toZonedTime(new Date(), VIETNAM_TIME_ZONE);
-
-      // 3. Kiểm tra xem có phải "hôm nay" hoặc "hôm qua" theo lịch Việt Nam không
-      if (isTodayFn(dateInVietnam)) { // isTodayFn kiểm tra ngày của dateInVietnam
+      if (isTodayFn(dateInVietnam)) {
         return `Active today at ${formatInTimeZone(dateUtc, VIETNAM_TIME_ZONE, 'HH:mm')}`;
       }
-      if (isYesterdayFn(dateInVietnam)) { // isYesterdayFn kiểm tra ngày của dateInVietnam
+      if (isYesterdayFn(dateInVietnam)) {
         return `Active yesterday at ${formatInTimeZone(dateUtc, VIETNAM_TIME_ZONE, 'HH:mm')}`;
       }
-
-      // 4. Nếu không phải hôm nay hoặc hôm qua
-      // So sánh năm để quyết định có hiển thị năm hay không
       if (dateInVietnam.getFullYear() === nowInVietnam.getFullYear()) {
-        // Cùng năm, hiển thị "d MMM, HH:mm" (ví dụ: 20 Nov, 10:30)
         return `Seen ${formatInTimeZone(dateUtc, VIETNAM_TIME_ZONE, 'd MMM, HH:mm')}`;
-      } else {
-        // Khác năm, hiển thị "d MMM yyyy, HH:mm" (ví dụ: 20 Nov 2022, 10:30)
-        return `Seen ${formatInTimeZone(dateUtc, VIETNAM_TIME_ZONE, 'd MMM yyyy, HH:mm')}`;
       }
+      return `Seen ${formatInTimeZone(dateUtc, VIETNAM_TIME_ZONE, 'd MMM yyyy, HH:mm')}`;
     } catch (error) {
       console.error("Error formatting lastSeen date:", error, lastSeenIsoString);
-      return "Recently"; // Giá trị mặc định nếu có lỗi
+      return "Recently";
     }
   };
 
-  // --- HÀM FORMAT TIMESTAMP CỦA TIN NHẮN CUỐI CÙNG THEO MÚI GIỜ VIỆT NAM ---
   const formatLastMessageTimestampInVietnam = (timestampIso: string | null | undefined): string => {
     if (!timestampIso) return '';
     try {
-        const dateUtc = parseISO(timestampIso);
-        // Hiển thị thời gian ngắn gọn, ví dụ: HH:mm nếu hôm nay, d MMM nếu khác
-        const dateInVietnam = toZonedTime(dateUtc, VIETNAM_TIME_ZONE);
-        const nowInVietnam = toZonedTime(new Date(), VIETNAM_TIME_ZONE);
-
-        if (isTodayFn(dateInVietnam)) {
-            return formatInTimeZone(dateUtc, VIETNAM_TIME_ZONE, 'HH:mm'); // Ví dụ: 17:30
-        }
-        if (isYesterdayFn(dateInVietnam)) {
-            return 'Yesterday'; // Hoặc 'Yesterday, HH:mm' tùy bạn
-            // return `Yesterday, ${formatInTimeZone(dateUtc, VIETNAM_TIME_ZONE, 'HH:mm')}`;
-        }
-        if (dateInVietnam.getFullYear() === nowInVietnam.getFullYear()) {
-            return formatInTimeZone(dateUtc, VIETNAM_TIME_ZONE, 'd MMM'); // Ví dụ: 20 Nov
-        }
-        return formatInTimeZone(dateUtc, VIETNAM_TIME_ZONE, 'd MMM yy'); // Ví dụ: 20 Nov 22
+      const dateUtc = parseISO(timestampIso);
+      const dateInVietnam = toZonedTime(dateUtc, VIETNAM_TIME_ZONE);
+      const nowInVietnam = toZonedTime(new Date(), VIETNAM_TIME_ZONE);
+      if (isTodayFn(dateInVietnam)) {
+        return formatInTimeZone(dateUtc, VIETNAM_TIME_ZONE, 'HH:mm');
+      }
+      if (isYesterdayFn(dateInVietnam)) {
+        return 'Yesterday';
+      }
+      if (dateInVietnam.getFullYear() === nowInVietnam.getFullYear()) {
+        return formatInTimeZone(dateUtc, VIETNAM_TIME_ZONE, 'd MMM');
+      }
+      return formatInTimeZone(dateUtc, VIETNAM_TIME_ZONE, 'd MMM yy');
     } catch (error) {
-        console.error("Error formatting last message timestamp:", error, timestampIso);
-        return "Invalid date";
+      console.error("Error formatting last message timestamp:", error, timestampIso);
+      return "Invalid date";
     }
   };
 
-
   if (loading) {
-    return <View style={styles.centered}><ActivityIndicator size="large" /></View>;
+    return <View style={styles.centered}><ActivityIndicator size="large" color="#E5435A" /></View>;
   }
 
   if (!conversations.length && !loading) {
-    return <View style={styles.centered}><Text>No conversations yet.</Text></View>;
+    return <View style={styles.centered}><Text style={styles.emptyText}>No conversations yet.</Text></View>;
   }
 
   const renderItem = ({ item }: { item: ConversationPreviewDTO }) => {
@@ -211,43 +191,41 @@ export default function MessagesScreen() {
     return (
       <TouchableOpacity
         style={styles.conversationItem}
-    onPress={() => {
-       router.push(`/chat/${item.matchID}?matchedUserName=${encodeURIComponent(item.matchedUsername || 'Chat')}&matchedUserAvatar=${encodeURIComponent(encodedAvatarForNav)}&matchedUserID=${item.matchedUserID}&isMatchedUserOnline=${item.isMatchedUserOnline}&matchedUserLastSeen=${item.matchedUserLastSeen || ''}`);
-    }}
-  >
+        onPress={() => {
+          router.push(`/chat/${item.matchID}?matchedUserName=${encodeURIComponent(item.matchedUsername || 'Chat')}&matchedUserAvatar=${encodeURIComponent(encodedAvatarForNav)}&matchedUserID=${item.matchedUserID}&isMatchedUserOnline=${item.isMatchedUserOnline}&matchedUserLastSeen=${item.matchedUserLastSeen || ''}`);
+        }}
+        activeOpacity={0.7}
+      >
         <View style={styles.avatarContainer}>
-            <Image source={{ uri: avatarUrl }} style={styles.avatar} />
-            {item.isMatchedUserOnline && <View style={styles.onlineIndicator} />}
+          <Image source={{ uri: avatarUrl }} style={styles.avatar} />
+          {item.isMatchedUserOnline && <View style={styles.onlineIndicator} />}
         </View>
-
         <View style={styles.conversationDetails}>
-           <Text style={styles.username}>{item.matchedUsername || 'Unknown User'}</Text>
-           <Text style={styles.lastMessage} numberOfLines={1}>
-             {item.isLastMessageFromMe ? 'You: ' : ''}{item.lastMessageContent || 'No messages yet'}
-           </Text>
-           {!item.isMatchedUserOnline && item.matchedUserLastSeen && (
-             <Text style={styles.statusText}>
-               {formatLastSeenInVietnam(item.matchedUserLastSeen)}
-             </Text>
-           )}
-           {item.isMatchedUserOnline && (
-             <Text style={[styles.statusText, styles.onlineText]}>Online</Text>
-           )}
-         </View>
-
-         <View style={styles.metaInfo}>
-           {item.lastMessageTimestamp && (
-             <Text style={styles.timestamp}>
-               {/* Sử dụng hàm format mới cho timestamp của tin nhắn cuối cùng */}
-               {formatLastMessageTimestampInVietnam(item.lastMessageTimestamp)}
-             </Text>
-           )}
-           {item.unreadCount > 0 && (
-             <View style={styles.unreadBadge}>
-               <Text style={styles.unreadText}>{item.unreadCount}</Text>
-             </View>
-           )}
-         </View>
+          <Text style={styles.username}>{item.matchedUsername || 'Unknown User'}</Text>
+          <Text style={styles.lastMessage} numberOfLines={1}>
+            {item.isLastMessageFromMe ? 'You: ' : ''}{item.lastMessageContent || 'No messages yet'}
+          </Text>
+          {!item.isMatchedUserOnline && item.matchedUserLastSeen && (
+            <Text style={styles.statusText}>
+              {formatLastSeenInVietnam(item.matchedUserLastSeen)}
+            </Text>
+          )}
+          {item.isMatchedUserOnline && (
+            <Text style={[styles.statusText, styles.onlineText]}>Online</Text>
+          )}
+        </View>
+        <View style={styles.metaInfo}>
+          {item.lastMessageTimestamp && (
+            <Text style={styles.timestamp}>
+              {formatLastMessageTimestampInVietnam(item.lastMessageTimestamp)}
+            </Text>
+          )}
+          {item.unreadCount > 0 && (
+            <View style={styles.unreadBadge}>
+              <Text style={styles.unreadText}>{item.unreadCount}</Text>
+            </View>
+          )}
+        </View>
       </TouchableOpacity>
     );
   };
@@ -258,96 +236,119 @@ export default function MessagesScreen() {
       renderItem={renderItem}
       keyExtractor={(item) => item.matchID.toString()}
       style={styles.container}
-      ListEmptyComponent={!loading ? <View style={styles.centered}><Text>No conversations yet.</Text></View> : null}
+      ListEmptyComponent={!loading ? <View style={styles.centered}><Text style={styles.emptyText}>No conversations yet.</Text></View> : null}
     />
   );
 }
 
-// Styles giữ nguyên như trước
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#F5F6F8', // Soft gray background for consistency with PostsScreen
   },
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 40,
+    backgroundColor: '#F5F6F8',
+  },
+  emptyText: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
+    marginTop: 20,
   },
   conversationItem: {
     flexDirection: 'row',
-    paddingVertical: 12, // Tăng padding dọc một chút
+    paddingVertical: 12,
     paddingHorizontal: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0', // Màu border nhạt hơn
+    marginHorizontal: 12,
+    marginVertical: 6,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E5435A11', // Subtle primary color border
   },
   avatarContainer: {
     marginRight: 15,
     position: 'relative',
   },
   avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 2,
+    borderColor: '#E5435A',
+    backgroundColor: '#F5F6F8', // Fallback background
   },
   onlineIndicator: {
-    width: 14, // Tăng kích thước một chút
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: '#4CAF50',
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#E5435A', // Use primary color for online indicator
     position: 'absolute',
     bottom: 0,
     right: 0,
     borderWidth: 2,
-    borderColor: '#fff',
+    borderColor: '#FFFFFF',
   },
   conversationDetails: {
     flex: 1,
-    justifyContent: 'center', // Căn giữa các text nếu chiều cao khác nhau
+    justifyContent: 'center',
   },
   username: {
-    fontWeight: '600', // Đậm hơn một chút
-    fontSize: 16,
-    marginBottom: 2, // Khoảng cách với tin nhắn/status
+    fontWeight: '700',
+    fontSize: 17,
+    color: '#333',
+    marginBottom: 4,
   },
   lastMessage: {
-    color: '#555', // Màu đậm hơn cho dễ đọc
-    fontSize: 14,
+    color: '#555',
+    fontSize: 15,
+    fontWeight: '400',
+    lineHeight: 20,
   },
   statusText: {
-    fontSize: 12,
-    color: '#757575',
-    marginTop: 3,
+    fontSize: 13,
+    color: '#777',
+    marginTop: 4,
+    fontWeight: '400',
   },
   onlineText: {
-    color: '#4CAF50',
-    fontWeight: '500',
+    color: '#E5435A', // Match primary color
+    fontWeight: '600',
   },
   metaInfo: {
     alignItems: 'flex-end',
     marginLeft: 10,
-    justifyContent: 'space-between', // Phân bố timestamp và unread badge
-    height: '100%', // Để unreadBadge có thể căn dưới nếu timestamp ngắn
+    justifyContent: 'center',
   },
   timestamp: {
-    color: '#888', // Màu nhạt hơn cho timestamp
-    fontSize: 12,
-    marginBottom: 6, // Khoảng cách với unread badge
+    color: '#888',
+    fontSize: 13,
+    fontWeight: '400',
+    marginBottom: 8,
   },
   unreadBadge: {
-    backgroundColor: '#EB3C58',
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
+    backgroundColor: '#E5435A',
+    borderRadius: 12,
+    minWidth: 24,
+    height: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 6, // Điều chỉnh padding
+    paddingHorizontal: 8,
   },
   unreadText: {
-    color: 'white',
-    fontSize: 10,
-    fontWeight: 'bold',
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
   },
 });

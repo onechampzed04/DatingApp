@@ -27,9 +27,9 @@ export default function AuthOptions() {
         <Text style={styles.emailButtonText}>Continue with email</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.phoneButton} onPress={handlePhoneSignup}>
+      {/* <TouchableOpacity style={styles.phoneButton} onPress={handlePhoneSignup}>
         <Text style={styles.phoneButtonText}>Use phone number</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       <View style={styles.dividerContainer}>
         <View style={styles.dividerLine} />

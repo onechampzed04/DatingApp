@@ -65,9 +65,15 @@ export const useChatHub = () => {
       });
       
       // Đăng ký lắng nghe sự kiện thông báo mới từ backend
-      newConnection.on('ReceiveAppNotification', (notification: AppNotification) => { // <<< THÊM HANDLER NÀY
-        console.log('ChatHub: ReceiveAppNotification', notification);
-        eventHandlersRef.current.onReceiveAppNotification?.(notification);
+      // Server is invoking 'receivenotification' (lowercase) based on console warning
+      newConnection.on('receivenotification', (notification: AppNotification) => {
+        console.log('ChatHub: receivenotification event received. Notification:', notification);
+        if (eventHandlersRef.current.onReceiveAppNotification) {
+          console.log('ChatHub: Found onReceiveAppNotification handler in ref, attempting to call it.');
+          eventHandlersRef.current.onReceiveAppNotification(notification);
+        } else {
+          console.log('ChatHub: WARNING - onReceiveAppNotification handler is UNDEFINED in ref when event was received.');
+        }
       });
 
 
@@ -127,10 +133,12 @@ export const useChatHub = () => {
   }, [connection, isConnected]);
 
   const registerEventHandlers = useCallback((handlers: ChatHubEvents) => {
+    console.log('ChatHub: registerEventHandlers called. Registering:', handlers);
     eventHandlersRef.current = handlers;
   }, []);
   
   const unregisterEventHandlers = useCallback(() => {
+    console.log('ChatHub: unregisterEventHandlers called. Clearing handlers from ref.');
     eventHandlersRef.current = {};
   }, []);
 

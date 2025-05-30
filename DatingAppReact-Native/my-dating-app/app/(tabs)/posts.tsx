@@ -1,41 +1,39 @@
 // app/(tabs)/posts.tsx
-import React, { useState, useEffect, useCallback, useRef } from 'react'; // Thêm useRef
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, RefreshControl, TouchableOpacity, TextInput, Image } from 'react-native'; // Thêm TextInput, Image
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, RefreshControl, TouchableOpacity, TextInput, Image } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
-import { Post, getPosts, API_BASE_URL } from '../../utils/api'; // Điều chỉnh đường dẫn
-import PostCard from '../../components/posts/PostCard'; // Điều chỉnh đường dẫn
-import { useAuth } from '../context/AuthContext'; // Điều chỉnh đường dẫn
+import { Post, getPosts, API_BASE_URL } from '../../utils/api';
+import PostCard from '../../components/posts/PostCard';
+import { useAuth } from '../context/AuthContext';
 
-const FALLBACK_AVATAR = require('../../assets/images/dating-app.png'); // Đường dẫn đến avatar mặc định
+const FALLBACK_AVATAR = require('../../assets/images/dating-app.png');
 
 export default function PostsScreen() {
-  
   const router = useRouter();
   const { user } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
-  const [isLoading, setIsLoading] = useState(false); // Khởi tạo là false, sẽ set true khi focus
+  const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const PAGE_SIZE = 5;
-  const isMounted = useRef(false); // Để kiểm tra component đã mount chưa, tránh set state không cần thiết
-  const initialLoadDone = useRef(false); 
-  // Log để theo dõi
+  const isMounted = useRef(false);
+  const initialLoadDone = useRef(false);
+
   useEffect(() => {
     console.log('[PostsScreen State Update] isLoading:', isLoading, 'page:', page, 'posts.length:', posts.length, 'hasMore:', hasMore, 'isRefreshing:', isRefreshing, 'isLoadingMore:', isLoadingMore);
   }, [isLoading, page, posts.length, hasMore, isRefreshing, isLoadingMore]);
-
 
   const fetchPostsData = useCallback(async (pageNum: number, isRefreshAction = false) => {
     console.log(`[fetchPostsData] Called. Page: ${pageNum}, Refresh: ${isRefreshAction}, HasMore: ${hasMore}, IsLoadingMore: ${isLoadingMore}`);
 
     if (!isRefreshAction && ((isLoadingMore && pageNum > 1) || (!hasMore && pageNum > 1))) {
       console.log(`[fetchPostsData] Bailing: isLoadingMore=${isLoadingMore}, hasMore=${hasMore}`);
-      if (pageNum === 1) setIsLoading(false); // Nếu là lần tải đầu mà bị bail
+      if (pageNum === 1) setIsLoading(false);
       return;
     }
 
@@ -71,27 +69,23 @@ export default function PostsScreen() {
       if (!isMounted.current) return;
       if (isRefreshAction) setIsRefreshing(false);
       if (pageNum === 1) {
-          setIsLoading(false);
-          initialLoadDone.current = true; // Đánh dấu lần tải đầu đã xong
+        setIsLoading(false);
+        initialLoadDone.current = true;
       }
       if (!isRefreshAction && pageNum > 1) setIsLoadingMore(false);
     }
-  }, [hasMore, isLoadingMore]); // Các dependencies này nên ổn định
-
+  }, [hasMore, isLoadingMore]);
 
   useFocusEffect(
     useCallback(() => {
       isMounted.current = true;
       console.log("PostsScreen focused.");
 
-      // Chỉ fetch dữ liệu nếu chưa có posts hoặc chưa thực hiện initial load
-      // Hoặc nếu bạn muốn luôn fetch lại khi focus, thì bỏ điều kiện initialLoadDone
       if (posts.length === 0 || !initialLoadDone.current) {
         console.log("Initiating data fetch on focus (posts empty or initial load not done).");
         setPage(1);
         setHasMore(true);
-        // setPosts([]); // Không cần setPosts([]) ở đây nếu fetchPostsData(1,...) sẽ ghi đè
-        setIsLoading(true); // Quan trọng: set loading trước khi fetch
+        setIsLoading(true);
         fetchPostsData(1, false);
       } else {
         console.log("Data already loaded, skipping fetch on focus.");
@@ -100,10 +94,8 @@ export default function PostsScreen() {
       return () => {
         console.log("PostsScreen unfocused/unmounted.");
         isMounted.current = false;
-        // Không reset initialLoadDone.current ở đây, vì nó đánh dấu trạng thái của màn hình này
       };
-    }, [fetchPostsData]) // fetchPostsData giờ đây là dependency.
-                         // Hãy đảm bảo dependencies của fetchPostsData ([hasMore, isLoadingMore]) không thay đổi một cách không cần thiết
+    }, [fetchPostsData])
   );
 
   const handleRefresh = () => {
@@ -111,7 +103,6 @@ export default function PostsScreen() {
     console.log("handleRefresh triggered");
     setPage(1);
     setHasMore(true);
-    // setPosts([]); // Không cần thiết vì fetchPostsData với isRefreshAction=true sẽ ghi đè
     fetchPostsData(1, true);
   };
 
@@ -121,25 +112,24 @@ export default function PostsScreen() {
       fetchPostsData(page);
     }
   };
-  
+
   const handleUpdatePostInList = (updatedPost: Post) => {
     setPosts(prevPosts =>
       prevPosts.map(p => (p.postID === updatedPost.postID ? updatedPost : p))
     );
   };
-  
+
   const navigateToCreatePost = () => {
-    router.push('../post-detail/createpost'); // Điều chỉnh nếu đường dẫn của bạn khác
+    router.push('../post-detail/createpost');
   };
 
   const navigateToPostDetail = (postId: number) => {
-    router.push({pathname: `/(tabs)/post-detail/[postId]`, params: {postId: postId.toString()}});
+    router.push({ pathname: '/(tabs)/post-detail/[postId]', params: { postId: postId.toString() } });
   };
 
   const userAvatarUrl = user?.avatar
     ? (user.avatar.startsWith('http') ? user.avatar : `${API_BASE_URL}${user.avatar}`)
     : undefined;
-
 
   const renderHeader = () => (
     <View style={styles.createPostHeader}>
@@ -153,7 +143,7 @@ export default function PostsScreen() {
         <Text style={styles.headerInputPlaceholder}>What's on your mind, {user?.fullName || user?.username}?</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={navigateToCreatePost} style={styles.headerMediaButton}>
-        <Ionicons name="images-outline" size={24} color="#4CAF50" />
+        <Ionicons name="images-outline" size={24} color="#E5435A" />
       </TouchableOpacity>
     </View>
   );
@@ -162,67 +152,59 @@ export default function PostsScreen() {
     if (!isLoadingMore) return null;
     return (
       <View style={styles.loadingMoreContainer}>
-        <ActivityIndicator size="small" color="#888" />
+        <ActivityIndicator size="small" color="#E5435A" />
       </View>
     );
   };
 
-  // --- Hiển thị Loading Indicator toàn màn hình cho lần tải đầu tiên ---
   if (isLoading && posts.length === 0) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#EB3C58" />
+        <ActivityIndicator size="large" color="#E5435A" />
       </View>
     );
   }
 
   return (
-    
     <View style={styles.container}>
       <FlatList
         data={posts}
         renderItem={({ item }) => {
-  // Log để xem dữ liệu gốc của từng post
-  console.log(
-    `[PostsScreen] Data for PostID ${item.postID}:`,
-    JSON.stringify(item.reactionCounts, null, 2),
-    "TotalReactions:",
-    item.totalReactions
-  );
+          console.log(
+            `[PostsScreen] Data for PostID ${item.postID}:`,
+            JSON.stringify(item.reactionCounts, null, 2),
+            "TotalReactions:",
+            item.totalReactions
+          );
 
-  return (
-    <PostCard
-      post={item}
-      onCommentPress={() => navigateToPostDetail(item.postID)}
-      onSharePress={(postId) => console.log("Share post:", postId)}
-      onUpdatePost={handleUpdatePostInList}
-    />
-  );
-}}
-
+          return (
+            <PostCard
+              post={item}
+              onCommentPress={() => navigateToPostDetail(item.postID)}
+              onSharePress={(postId) => console.log("Share post:", postId)}
+              onUpdatePost={handleUpdatePostInList}
+            />
+          );
+        }}
         keyExtractor={(item) => item.postID.toString()}
-        ListHeaderComponent={renderHeader} // << THÊM HEADER Ở ĐÂY
+        ListHeaderComponent={renderHeader}
         contentContainerStyle={styles.listContentContainer}
-        ListEmptyComponent={ // Chỉ hiển thị khi posts rỗng VÀ không còn loading/refreshing
+        ListEmptyComponent={
           !isLoading && !isRefreshing && !isLoadingMore ? (
             <View style={styles.emptyListContainer}>
-              <Ionicons name="cafe-outline" size={60} color="#ccc" />
+              <Ionicons name="cafe-outline" size={60} color="#A1A1A1" />
               <Text style={styles.emptyListText}>No posts to show right now.</Text>
               <Text style={styles.emptyListSubText}>Be the first to share something or check back later!</Text>
             </View>
           ) : null
         }
         refreshControl={
-          <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={["#EB3C58"]} />
+          <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} colors={["#E5435A"]} />
         }
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
         ListFooterComponent={renderListFooter}
       />
-      {/* Bạn có thể bỏ FAB nếu đã có ô tạo bài viết ở header */}
-      {/* <TouchableOpacity style={styles.fabCreatePost} onPress={navigateToCreatePost}>
-            <Ionicons name="add" size={30} color="#fff" />
-       </TouchableOpacity> */}
     </View>
   );
 }
@@ -230,96 +212,113 @@ export default function PostsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f2f5',
+    backgroundColor: '#F5F6F8', // Softer gray for modern look
   },
   listContentContainer: {
-    paddingHorizontal: 0, // Cho Card tự cách lề nếu cần
-    paddingVertical: 5,
-    // paddingBottom: 80, // Không cần nếu không có FAB
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    paddingBottom: 20,
   },
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#f0f2f5',
+    backgroundColor: '#F5F6F8',
   },
-  // Styles cho Header tạo bài viết
+  // Enhanced Header Styles
   createPostHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    paddingVertical: 10,
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 12,
     paddingHorizontal: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-    marginBottom: 8, // Khoảng cách với post đầu tiên
+    borderRadius: 12,
+    marginHorizontal: 10,
+    marginBottom: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  headerAvatarContainer:{
-    marginRight: 10,
+  headerAvatarContainer: {
+    marginRight: 12,
   },
   headerAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#eee',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 2,
+    borderColor: '#E5435A',
   },
   headerInputContainer: {
     flex: 1,
-    height: 40,
+    height: 44,
     justifyContent: 'center',
-    borderColor: '#e0e0e0',
+    borderColor: '#E5435A',
     borderWidth: 1,
-    borderRadius: 20,
+    borderRadius: 22,
     paddingHorizontal: 15,
-    backgroundColor: '#f7f7f7'
+    backgroundColor: '#FFF5F6',
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
   },
   headerInputPlaceholder: {
-    color: '#888',
-    fontSize: 15,
+    color: '#666',
+    fontSize: 16,
+    fontWeight: '500',
   },
   headerMediaButton: {
-    marginLeft: 10,
-    padding: 5,
+    marginLeft: 12,
+    padding: 8,
+    backgroundColor: '#FFF5F6',
+    borderRadius: 12,
   },
-  // Styles cho khi list rỗng
+  // Enhanced Empty List Styles
   emptyListContainer: {
-    flex: 1, // Để chiếm không gian nếu không có post
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 30,
-    marginTop: 50, // Để không bị header che khuất quá nhiều
+    padding: 40,
+    marginTop: 60,
   },
   emptyListText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '600',
-    color: '#555',
-    marginTop: 15,
+    color: '#333',
+    marginTop: 20,
     textAlign: 'center',
   },
   emptyListSubText: {
-    fontSize: 14,
-    color: '#777',
+    fontSize: 15,
+    color: '#666',
     textAlign: 'center',
-    marginTop: 8,
+    marginTop: 10,
+    lineHeight: 22,
   },
+  // Loading More
   loadingMoreContainer: {
-    paddingVertical: 20,
+    paddingVertical: 25,
+    alignItems: 'center',
   },
+  // FAB (Commented out, but keeping enhanced styles if needed)
   fabCreatePost: {
     position: 'absolute',
-    bottom: 25,
-    right: 25,
-    backgroundColor: '#EB3C58',
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    bottom: 30,
+    right: 20,
+    backgroundColor: '#E5435A',
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 8,
+    elevation: 6,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
   },
 });

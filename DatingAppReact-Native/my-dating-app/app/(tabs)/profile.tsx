@@ -1,15 +1,14 @@
+// app/(tabs)/profile.tsx
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
   Image,
   TouchableOpacity,
-  ScrollView,
+  FlatList,
   ActivityIndicator,
-  Button,
   StyleSheet,
   Alert,
-  FlatList,
   RefreshControl,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
@@ -42,25 +41,25 @@ const calculateAge = (birthdateString?: string | null): number | null => {
   return age;
 };
 
-const ProfileHeader = ({ avatarSource, onEdit, onFriends }: { avatarSource: any; onEdit: () => void; onFriends: () => void }) => (
-  <>
+const ProfileHeader = ({ avatarSource, onEdit, onSettings, onMatches }: { avatarSource: any; onEdit: () => void; onSettings: () => void; onMatches: () => void; }) => (
+  <View style={styles.headerContainer}>
     <Image source={avatarSource} style={styles.headerImage} />
     <View style={styles.actionRow}>
-      <TouchableOpacity style={styles.actionButton} onPress={onEdit}>
-        <Text style={styles.icon}>✖️</Text>
+      <TouchableOpacity style={styles.actionButton} onPress={onEdit} activeOpacity={0.7}>
+        <Ionicons name="pencil-outline" size={24} color="#E5435A" />
       </TouchableOpacity>
-      <TouchableOpacity style={styles.actionButtonCenter}>
-        <Text style={styles.iconCenter}>❤️</Text>
+      <TouchableOpacity style={styles.actionButtonCenter} onPress={onMatches} activeOpacity={0.7}>
+        <Ionicons name="heart-outline" size={28} color="#FFFFFF" />
       </TouchableOpacity>
-      <TouchableOpacity style={styles.actionButton} onPress={onFriends}>
-        <Text style={styles.icon}>⭐</Text>
+      <TouchableOpacity style={styles.actionButton} onPress={onSettings} activeOpacity={0.7}>
+        <Ionicons name="settings-outline" size={24} color="#E5435A" />
       </TouchableOpacity>
     </View>
-  </>
+  </View>
 );
 
 const ProfileSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <View>
+  <View style={styles.sectionContainer}>
     <Text style={styles.sectionTitle}>{title}</Text>
     {children}
   </View>
@@ -119,69 +118,54 @@ const UserProfileScreen = () => {
   }, [logout]);
 
   const fetchUserPostsData = useCallback(async (userIdToFetchPosts: number, pageNum: number, isRefreshAction = false) => {
-  if (!userIdToFetchPosts) return;
-  console.log(`[UserProfileScreen] Fetching posts for userID: ${userIdToFetchPosts}, Page: ${pageNum}, Refresh: ${isRefreshAction}`);
+    if (!userIdToFetchPosts) return;
+    console.log(`[UserProfileScreen] Fetching posts for userID: ${userIdToFetchPosts}, Page: ${pageNum}, Refresh: ${isRefreshAction}`);
 
-  // Sử dụng trực tiếp giá trị state hiện tại thay vì đưa vào dependency của useCallback
-  // if (!isRefreshAction && ((isLoadingMorePosts && pageNum > 1) || (!hasMorePosts && pageNum > 1))) {
-  //   return;
-  // }
-  // -> Logic này có thể không cần thiết nếu các cờ loading được quản lý tốt
-
-  if (isRefreshAction) {
-    // Chỉ set refreshing nếu thực sự là hành động refresh từ người dùng hoặc focus
-    // Nếu chỉ là load lần đầu (pageNum === 1 và không phải isRefreshAction), thì isLoadingPosts sẽ xử lý
-    if (pageNum === 1) setIsRefreshingPosts(true);
-  } else if (pageNum === 1) {
-    setIsLoadingPosts(true);
-  } else {
-    // Chỉ set isLoadingMorePosts nếu thực sự đang load thêm và chưa có request nào đang chạy
-    if (!isLoadingMorePosts && hasMorePosts) { // Thêm kiểm tra hasMorePosts
-        setIsLoadingMorePosts(true);
+    if (isRefreshAction) {
+      if (pageNum === 1) setIsRefreshingPosts(true);
+    } else if (pageNum === 1) {
+      setIsLoadingPosts(true);
     } else {
-        // Nếu đang loading hoặc không còn gì để load, không làm gì cả
+      if (!isLoadingMorePosts && hasMorePosts) {
+        setIsLoadingMorePosts(true);
+      } else {
         if (isLoadingMorePosts) console.log("[fetchUserPostsData] Already loading more, bailing.");
         if (!hasMorePosts) console.log("[fetchUserPostsData] No more posts, bailing.");
         return;
-    }
-  }
-
-  try {
-    const newPosts = await getPosts(pageNum, POSTS_PAGE_SIZE, userIdToFetchPosts);
-    if (!postsIsMounted.current) return;
-
-    if (newPosts.length < POSTS_PAGE_SIZE) {
-      setHasMorePosts(false);
-    } else {
-      // Nếu fetch thành công và có dữ liệu = PAGE_SIZE, giả định là còn nữa
-      // (trừ khi API trả về thông tin đã hết)
-      setHasMorePosts(true);
+      }
     }
 
-    setUserPosts(prevPosts => {
-      const finalPosts = (pageNum === 1 || isRefreshAction) ? newPosts : [...prevPosts, ...newPosts];
-      const uniquePosts = Array.from(new Map(finalPosts.map(p => [p.postID, p])).values());
-      return uniquePosts;
-    });
+    try {
+      const newPosts = await getPosts(pageNum, POSTS_PAGE_SIZE, userIdToFetchPosts);
+      if (!postsIsMounted.current) return;
 
-    if (newPosts.length > 0 && !isRefreshAction) { // Chỉ tăng page nếu không phải refresh và có post mới
-      setPostsPage(pageNum + 1);
-    } else if (isRefreshAction) {
-      setPostsPage(2); // Sau khi refresh, trang tiếp theo sẽ là 2
+      if (newPosts.length < POSTS_PAGE_SIZE) {
+        setHasMorePosts(false);
+      } else {
+        setHasMorePosts(true);
+      }
+
+      setUserPosts(prevPosts => {
+        const finalPosts = (pageNum === 1 || isRefreshAction) ? newPosts : [...prevPosts, ...newPosts];
+        const uniquePosts = Array.from(new Map(finalPosts.map(p => [p.postID, p])).values());
+        return uniquePosts;
+      });
+
+      if (newPosts.length > 0 && !isRefreshAction) {
+        setPostsPage(pageNum + 1);
+      } else if (isRefreshAction) {
+        setPostsPage(2);
+      }
+    } catch (error) {
+      console.error(`Failed to fetch posts for user ${userIdToFetchPosts}:`, error);
+      if (postsIsMounted.current) setHasMorePosts(false);
+    } finally {
+      if (!postsIsMounted.current) return;
+      if (isRefreshAction && pageNum === 1) setIsRefreshingPosts(false);
+      if (pageNum === 1 && !isRefreshAction) setIsLoadingPosts(false);
+      if (!isRefreshAction && pageNum > 1) setIsLoadingMorePosts(false);
     }
-  } catch (error) {
-    console.error(`Failed to fetch posts for user ${userIdToFetchPosts}:`, error);
-    if (postsIsMounted.current) setHasMorePosts(false); // An toàn khi có lỗi
-  } finally {
-    if (!postsIsMounted.current) return;
-    if (isRefreshAction && pageNum === 1) setIsRefreshingPosts(false);
-    if (pageNum === 1 && !isRefreshAction) setIsLoadingPosts(false);
-    // Luôn reset isLoadingMorePosts sau khi hoàn tất, bất kể thành công hay thất bại
-    if (!isRefreshAction && pageNum > 1) setIsLoadingMorePosts(false);
-  }
-  // Bỏ hasMorePosts, isLoadingMorePosts khỏi dependencies
-  // POSTS_PAGE_SIZE là hằng số, không cần đưa vào
-}, [POSTS_PAGE_SIZE]); // Dependency array có thể chỉ cần các hằng số hoặc props ổn định
+  }, [POSTS_PAGE_SIZE]);
 
   useEffect(() => {
     const fetchInitialUserId = async () => {
@@ -231,6 +215,14 @@ const UserProfileScreen = () => {
 
   const navigateToEditProfile = () => router.push('/(setup)/edit-profile');
   const navigateToFriendList = () => router.push('/(tabs)/interaction/friend-list');
+  const navigateToSettings = () => router.push('/(tabs)/settings');
+  const navigateToUserMatches = () => {
+    if (userId) {
+      router.push(`../(tabs)/user-matches/${userId}`);
+    } else {
+      Alert.alert("Error", "User ID not found to view matches.");
+    }
+  };
   const navigateToCreatePost = () => router.push('../post-detail/createpost');
   const navigateToPostDetailFromProfile = (postId: number) => {
     router.push({ pathname: '/(tabs)/post-detail/[postId]', params: { postId: postId.toString() } });
@@ -261,7 +253,7 @@ const UserProfileScreen = () => {
   if (loading && !userData) {
     return (
       <View style={styles.centeredLoader}>
-        <ActivityIndicator size="large" color="#eb3c58" />
+        <ActivityIndicator size="large" color="#E5435A" />
       </View>
     );
   }
@@ -269,7 +261,10 @@ const UserProfileScreen = () => {
   if (!userData || !userId) {
     return (
       <View style={styles.centeredLoader}>
-        <Text>Could not load user profile. Please try again or log in.</Text>
+        <Text style={styles.errorText}>Could not load user profile. Please try again or log in.</Text>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.7}>
+          <Text style={styles.logoutButtonText}>Log In</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -285,19 +280,21 @@ const UserProfileScreen = () => {
 
   const renderCreatePostHeader = () => (
     <View style={styles.createPostSection}>
-      <Image source={avatarSource} style={styles.createPostAvatar} />
-      <TouchableOpacity style={styles.createPostInputContainer} onPress={navigateToCreatePost}>
+      <TouchableOpacity onPress={navigateToEditProfile} style={styles.createPostAvatarContainer} activeOpacity={0.7}>
+        <Image source={avatarSource} style={styles.createPostAvatar} />
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.createPostInputContainer} onPress={navigateToCreatePost} activeOpacity={0.7}>
         <Text style={styles.createPostInputPlaceholder}>What's on your mind?</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={navigateToCreatePost} style={styles.createPostMediaButton}>
-        <Ionicons name="images-outline" size={24} color="#4CAF50" />
+      <TouchableOpacity onPress={navigateToCreatePost} style={styles.createPostMediaButton} activeOpacity={0.7}>
+        <Ionicons name="images-outline" size={26} color="#E5435A" />
       </TouchableOpacity>
     </View>
   );
 
   const ListHeader = () => (
     <>
-      <ProfileHeader avatarSource={avatarSource} onEdit={navigateToEditProfile} onFriends={navigateToFriendList} />
+      <ProfileHeader avatarSource={avatarSource} onEdit={navigateToEditProfile} onSettings={navigateToSettings} onMatches={navigateToUserMatches} />
       <View style={styles.profileDetails}>
         <Text style={styles.name}>{displayNameAndAge}</Text>
         <Text style={styles.subtitle}>{userData.bio || 'Chưa có giới thiệu bản thân.'}</Text>
@@ -324,7 +321,7 @@ const UserProfileScreen = () => {
       ListHeaderComponent={ListHeader}
       data={userPosts}
       renderItem={({ item }) => (
-        <View style={{ paddingHorizontal: 10 }}>
+        <View style={styles.postContainer}>
           <PostCard
             post={item}
             onCommentPress={() => navigateToPostDetailFromProfile(item.postID)}
@@ -337,8 +334,8 @@ const UserProfileScreen = () => {
       ListEmptyComponent={
         !isLoadingPosts && !isRefreshingPosts && userPosts.length === 0 ? (
           <View style={styles.noPostsContainerList}>
-            <Ionicons name="newspaper-outline" size={50} color="#ccc" />
-            <Text style={styles.noPostsText}>This user hasn't posted anything yet.</Text>
+            <Ionicons name="newspaper-outline" size={60} color="#A1A1A1" />
+            <Text style={styles.noPostsText}>You haven't posted anything yet.</Text>
           </View>
         ) : null
       }
@@ -346,14 +343,14 @@ const UserProfileScreen = () => {
         <RefreshControl
           refreshing={isRefreshingPosts || (loading && !!userData)}
           onRefresh={handleRefreshPosts}
-          colors={['#eb3c58']}
+          colors={['#E5435A']}
         />
       }
       onEndReached={handleLoadMorePosts}
       onEndReachedThreshold={0.7}
       ListFooterComponent={
         isLoadingMorePosts ? (
-          <ActivityIndicator style={{ marginVertical: 20 }} />
+          <ActivityIndicator style={{ marginVertical: 20 }} color="#E5435A" />
         ) : !hasMorePosts && userPosts.length > 0 ? (
           <Text style={styles.noMorePostsText}>No more posts</Text>
         ) : null
@@ -368,79 +365,101 @@ export default UserProfileScreen;
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#F5F6F8',
     paddingBottom: 20,
   },
   centeredLoader: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#F5F6F8',
+  },
+  errorText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
+    padding: 20,
+  },
+  headerContainer: {
+    backgroundColor: '#FFFFFF',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    overflow: 'hidden',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   headerImage: {
     width: '100%',
-    height: 350,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    backgroundColor: '#e0e0e0',
+    height: 280,
+    backgroundColor: '#E5E5E5',
   },
   actionRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    marginTop: -35,
+    marginTop: -40,
     paddingHorizontal: 20,
-    marginBottom: 25,
+    marginBottom: 20,
   },
   actionButton: {
-    backgroundColor: '#fff',
-    padding: 16,
+    backgroundColor: '#FFFFFF',
+    padding: 14,
+    borderRadius: 28,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    borderWidth: 1,
+    borderColor: '#E5435A22',
+  },
+  actionButtonCenter: {
+    backgroundColor: '#E5435A',
+    padding: 18,
     borderRadius: 30,
     elevation: 6,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.27,
-    shadowRadius: 4.65,
-  },
-  actionButtonCenter: {
-    backgroundColor: '#eb3c58',
-    padding: 24,
-    borderRadius: 35,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.30,
-    shadowRadius: 4.65,
-  },
-  icon: {
-    fontSize: 22,
-  },
-  iconCenter: {
-    fontSize: 26,
-    color: '#fff',
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
   },
   profileDetails: {
-    paddingHorizontal: 20,
-    paddingTop: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
   },
   name: {
-    fontSize: 26,
-    fontWeight: 'bold',
+    fontSize: 28,
+    fontWeight: '700',
     color: '#333',
     textAlign: 'center',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: 'gray',
+    color: '#666',
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
+    lineHeight: 22,
+  },
+  sectionContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 15,
+    marginVertical: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#444',
-    marginTop: 24,
+    color: '#333',
     marginBottom: 12,
   },
   about: {
@@ -451,60 +470,85 @@ const styles = StyleSheet.create({
   interestsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginBottom: 20,
-  },
-  interest: {
-    backgroundColor: '#f0f0f0',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 18,
-    marginRight: 10,
     marginBottom: 10,
   },
+  interest: {
+    backgroundColor: '#FFF5F6',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    marginRight: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#E5435A33',
+  },
   interestText: {
-    color: '#333',
+    color: '#E5435A',
     fontSize: 15,
+    fontWeight: '500',
   },
   noInterestsText: {
     color: '#777',
+    fontSize: 15,
     fontStyle: 'italic',
   },
   createPostSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    paddingVertical: 10,
-    paddingHorizontal: 0,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: '#e0e0e0',
-    marginTop: 20,
-    marginBottom: 10,
+    backgroundColor: '#FFFFFF',
+    padding: 12,
+    borderRadius: 12,
+    marginHorizontal: 15,
+    marginVertical: 15,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    borderWidth: 1,
+    borderColor: '#E5435A11',
+  },
+  createPostAvatarContainer: {
+    marginRight: 12,
   },
   createPostAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 10,
-    backgroundColor: '#eee',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 2,
+    borderColor: '#E5435A',
+    backgroundColor: '#F5F6F8',
   },
   createPostInputContainer: {
     flex: 1,
-    height: 40,
+    height: 44,
     justifyContent: 'center',
-    borderColor: '#e0e0e0',
-    borderWidth: 1,
-    borderRadius: 20,
+    backgroundColor: '#FFF5F6',
+    borderRadius: 22,
     paddingHorizontal: 15,
-    backgroundColor: '#f7f7f7',
+    borderWidth: 1,
+    borderColor: '#E5435A44',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
   },
   createPostInputPlaceholder: {
-    color: '#888',
-    fontSize: 15,
+    color: '#4A4A4A',
+    fontSize: 16,
+    fontWeight: '600',
   },
   createPostMediaButton: {
-    marginLeft: 10,
-    padding: 5,
+    marginLeft: 12,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#E5435A15',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E5435A33',
   },
   noPostsContainerList: {
     alignItems: 'center',
@@ -512,14 +556,40 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   noPostsText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#777',
+    marginTop: 15,
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
   },
   noMorePostsText: {
     textAlign: 'center',
-    color: '#888',
+    color: '#666',
     paddingVertical: 20,
-    fontSize: 14,
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  logoutButton: {
+    backgroundColor: '#E5435A',
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 25,
+    marginVertical: 20,
+    marginHorizontal: 15,
+    alignItems: 'center',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+  },
+  logoutButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  postContainer: {
+    paddingHorizontal: 15,
+    marginVertical: 8,
   },
 });

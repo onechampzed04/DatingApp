@@ -155,12 +155,6 @@ export default function ChatSettingsScreen() {
             </View>
             <Text style={styles.quickActionText}>Trang cá nhân</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.quickActionButton} onPress={() => Alert.alert("Thông báo", "Tắt thông báo TBD")}>
-             <View style={styles.quickActionIconCircle}>
-                <Ionicons name="notifications-off-outline" size={20} color="#000" />
-            </View>
-            <Text style={styles.quickActionText}>Tắt thông báo</Text>
-          </TouchableOpacity>
         </View>
       </View>
 
@@ -198,36 +192,6 @@ export default function ChatSettingsScreen() {
             </TouchableOpacity>
           ))}
         </ScrollView>
-         {/* Other customization options from image - for brevity, only one more example */}
-        <TouchableOpacity style={styles.optionRowButton} onPress={() => Alert.alert("Cảm xúc nhanh", "Tính năng TBD")}>
-            <Ionicons name="thumbs-up-outline" size={24} color="#555" style={styles.optionIconLeading} />
-            <Text style={styles.optionLabel}>Cảm xúc nhanh</Text>
-            {/* <Ionicons name="chevron-forward" size={20} color="#C7C7CC" /> */}
-        </TouchableOpacity>
-         <TouchableOpacity style={styles.optionRowButton} onPress={() => Alert.alert("Biệt danh", "Tính năng TBD")}>
-            <Ionicons name="text-outline" size={24} color="#555" style={styles.optionIconLeading} />
-            <Text style={styles.optionLabel}>Biệt danh</Text>
-            <Ionicons name="chevron-forward" size={20} color="#C7C7CC" />
-        </TouchableOpacity>
-         <TouchableOpacity style={styles.optionRowButton} onPress={() => Alert.alert("Hiệu ứng từ ngữ", "Tính năng TBD")}>
-            <Ionicons name="sparkles-outline" size={24} color="#555" style={styles.optionIconLeading} />
-            <Text style={styles.optionLabel}>Hiệu ứng từ ngữ</Text>
-             {/* <Ionicons name="chevron-forward" size={20} color="#C7C7CC" /> */}
-        </TouchableOpacity>
-      </View>
-
-      {/* Other Actions Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Hành động khác</Text>
-        <TouchableOpacity style={styles.optionRowButton} onPress={() => Alert.alert("Tạo nhóm", `Tạo nhóm chat với ${currentUserName} TBD`)}>
-            <Ionicons name="people-outline" size={24} color="#555" style={styles.optionIconLeading} />
-            <Text style={styles.optionLabel}>Tạo nhóm chat với {currentUserName.split(' ')[0]}</Text>
-        </TouchableOpacity>
-         <TouchableOpacity style={styles.optionRowButton} onPress={() => Alert.alert("Xem file", "Tính năng TBD")}>
-            <Ionicons name="folder-open-outline" size={24} color="#555" style={styles.optionIconLeading} />
-            <Text style={styles.optionLabel}>Xem file phương tiện, file và liên kết</Text>
-            <Ionicons name="chevron-forward" size={20} color="#C7C7CC" />
-        </TouchableOpacity>
       </View>
 
     </ScrollView>
