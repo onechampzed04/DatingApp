@@ -17,13 +17,20 @@ namespace DatingAppAPI.Services
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
         private readonly IHubContext<ChatHub, IChatClient> _chatHubContext; // << THÊM TRƯỜNG NÀY
+        private readonly ILogger<AuthService> _logger; // << THÊM TRƯỜNG ILogger
 
-        public AuthService(DatingAppDbContext context, IConfiguration configuration, IEmailService emailService, IHubContext<ChatHub, IChatClient> chatHubContext )
+        public AuthService(
+             DatingAppDbContext context,
+             IConfiguration configuration,
+             IEmailService emailService,
+             ILogger<AuthService> logger, // Inject ILogger
+             IHubContext<ChatHub, IChatClient>? chatHubContext = null) // chatHubContext có thể là optional
         {
             _context = context;
             _configuration = configuration;
             _emailService = emailService;
-            _chatHubContext = chatHubContext; // << GÁN
+            _logger = logger; // Gán logger
+            _chatHubContext = chatHubContext;
         }
 
         // DatingAppAPI.Services/AuthService.cs
@@ -268,6 +275,67 @@ namespace DatingAppAPI.Services
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
         }
+        // TRIỂN KHAI PHƯƠ_NG THỨC ĐỔI MẬT KHẨU
+        public async Task<bool> ChangePasswordAsync(int userId, ChangePasswordDTO changePasswordDto)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserID == userId);
+            if (user == null)
+            {
+                _logger.LogWarning("[ChangePasswordAsync] User with ID {UserId} not found.", userId);
+                throw new Exception("User not found."); // Hoặc một exception cụ thể hơn
+            }
 
+            // Kiểm tra mật khẩu cũ
+            if (!BCrypt.Net.BCrypt.Verify(changePasswordDto.OldPassword, user.PasswordHash))
+            {
+                _logger.LogWarning("[ChangePasswordAsync] Invalid old password for user ID {UserId}.", userId);
+                throw new Exception("Invalid old password.");
+            }
+
+            // Hash mật khẩu mới và cập nhật
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(changePasswordDto.NewPassword);
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("[ChangePasswordAsync] Password changed successfully for user ID {UserId}.", userId);
+            return true;
+        }
+        public async Task<bool> ResetPasswordAfterOtpAsync(ResetPasswordDto resetPasswordDto)
+        {
+            _logger.LogInformation("[ResetPasswordAfterOtpAsync] Attempting to reset password for email {Email}", resetPasswordDto.Email);
+
+            var now = DateTimeOffset.UtcNow; // Consistent DateTimeOffset
+            var otpEntry = await _context.EmailOtps
+                .FirstOrDefaultAsync(o => o.Email == resetPasswordDto.Email
+                                        && o.OtpCode == resetPasswordDto.OtpCode
+                                        && !o.IsUsed
+                                        && o.ExpirationTime > now);
+
+            if (otpEntry == null)
+            {
+                _logger.LogWarning("[ResetPasswordAfterOtpAsync] Invalid, expired, or used OTP for email {Email}. OTP: {OtpCode}", resetPasswordDto.Email, resetPasswordDto.OtpCode);
+                return false;
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == resetPasswordDto.Email);
+            if (user == null)
+            {
+                _logger.LogWarning("[ResetPasswordAfterOtpAsync] User not found for email {Email} after OTP validation. This should not happen if OTP was for a valid user.", resetPasswordDto.Email);
+                // Mark OTP as used to prevent reuse, even if user is somehow not found.
+                otpEntry.IsUsed = true;
+                await _context.SaveChangesAsync();
+                return false;
+            }
+
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(resetPasswordDto.NewPassword);
+            _context.Users.Update(user);
+
+            otpEntry.IsUsed = true;
+            // No need to _context.EmailOtps.Update(otpEntry) if it's tracked by EF Core
+
+            await _context.SaveChangesAsync();
+            _logger.LogInformation("[ResetPasswordAfterOtpAsync] Password reset successfully for email {Email}, User ID {UserId}.", resetPasswordDto.Email, user.UserID);
+            return true;
+        }
     }
 }

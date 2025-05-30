@@ -1,4 +1,5 @@
-﻿using DatingAppAPI.Models;
+﻿using DatingAppAPI.DTO;
+using DatingAppAPI.Models;
 
 namespace DatingAppAPI.Services
 {
@@ -13,5 +14,7 @@ namespace DatingAppAPI.Services
         Task<User> CheckEmailAsync(string email);
         Task SendOtpToEmailAsync(string email);
         string GenerateJwtToken(User user);
+        Task<bool> ChangePasswordAsync(int userId, ChangePasswordDTO changePasswordDto);
+        Task<bool> ResetPasswordAfterOtpAsync(ResetPasswordDto resetPasswordDto);
     }
 }
